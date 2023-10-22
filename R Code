@@ -89,9 +89,6 @@ rm(NameDiscrepancies, NameDiscrepancy_Table)
 table(plays$passResult)
 # C means complete, R means scramble
 
-table(plays$offenseFormation)
-# XXX perhaps later, make simplified version, e.g. shotgun vs. under center
-
 # Arrange plays so they are sorted chronologically
 plays <- plays %>% arrange(gameId, playId)
 
