@@ -1,0 +1,142 @@
+gc(reset = TRUE)
+Sys.setenv('R_MAX_VSIZE'=64000000000)
+
+library(vctrs)
+library(readxl)
+library(tidyselect)
+library(naniar)
+library(tidyr)
+library(plyr)
+library(statsr)
+library(reactable)
+library(plotly)
+library(ggplot2)
+library(survey)
+library(rafalib)
+library(modelr)
+library(na.tools)
+library(ggimage)
+library(ggrepel)
+library(remotes)
+library(reshape2)
+library(glue)
+library(readr)
+library(car)
+library(caret)
+library(rsample)      
+library(ggthemes)
+library(scales)
+library(Metrics)
+library(here)
+library(gbm)
+library(devtools)
+library(nflfastR)
+library(teamcolors)
+library(slider)
+library(xgboost)
+library(pROC)
+library(patchwork)
+library(tictoc)
+library(data.table)
+library(nflreadr)
+library(nflplotR)
+library(nflverse)
+library(tidyverse)
+library(dplyr)
+library(rsvg)
+
+games <- fread("games.csv")
+players <- fread("players.csv")
+plays <- fread("plays.csv")
+tackles <- fread("tackles.csv")
+tracking_week_1 <- fread("tracking_week_1.csv")
+tracking_week_2 <- fread("tracking_week_2.csv")
+tracking_week_3 <- fread("tracking_week_3.csv")
+tracking_week_4 <- fread("tracking_week_4.csv")
+tracking_week_5 <- fread("tracking_week_5.csv")
+tracking_week_6 <- fread("tracking_week_6.csv")
+tracking_week_7 <- fread("tracking_week_7.csv")
+tracking_week_8 <- fread("tracking_week_8.csv")
+tracking_week_9 <- fread("tracking_week_9.csv")
+
+tracking_combined <- rbind(tracking_week_1, tracking_week_2, tracking_week_3,
+                           tracking_week_4, tracking_week_5, tracking_week_6,
+                           tracking_week_7, tracking_week_8, tracking_week_9)
+
+# To clear memory, now get rid of the individual weeks
+rm(tracking_week_1, tracking_week_2, tracking_week_3,
+      tracking_week_4, tracking_week_5, tracking_week_6,
+      tracking_week_7, tracking_week_8, tracking_week_9)
+
+nflverse_pbp <- nflfastR::load_pbp(2022)
+nflverse_pbp <- nflverse_pbp %>% filter(week %in% 1:9)
+
+# General data cleansing/checking for errors
+sort(table(players$nflId)) # no duplicates
+sort(table(players$displayName)) # no duplicates
+
+# Find any instances of one "ballCarrierId" having more than one name
+# E.G. Kenneth Walker III and Kenneth Walker
+NameDiscrepancies <- plays %>% 
+  group_by(ballCarrierId, ballCarrierDisplayName) %>%
+  summarize(n = n())
+NameRankings <- sort(table(NameDiscrepancies$ballCarrierId), decreasing = TRUE)
+NameDiscrepancy_Table <- as.data.frame(NameRankings)
+NameDiscrepancy_Table <- NameDiscrepancy_Table %>% filter(Freq > 1) 
+# This is empty, therefore there are no name repeats
+rm(NameDiscrepancies, NameDiscrepancy_Table)
+
+table(plays$passResult)
+# C means complete, R means scramble
+
+table(plays$offenseFormation)
+# XXX perhaps later, make simplified version, e.g. shotgun vs. under center
+
+# Arrange plays so they are sorted chronologically
+plays <- plays %>% arrange(gameId, playId)
+
+# We should adjust the absoluteYardlineNumber to make it match real football
+# E.G., currently what should be 1 is 109, what should be 30 is 80, etc.
+# yardlineNumber doesn't give full field picture, e.g. -35 and +35 both say 35
+plays <- plays %>% mutate(yardline_100 = 110 - absoluteYardlineNumber)
+plays <- plays %>% select(-"absoluteYardlineNumber")
+
+# Fix one column that is spelled wrong
+plays <- plays %>% rename(visitorTeamWinProbabilityAdded = `visitorTeamWinProbilityAdded`)
+
+# View(plays %>% filter(is.na(passProbability))) - these are all penalties
+# View(plays %>% filter(is.na(passProbability) & is.na(penaltyYards))) - empty
+# View(plays %>% filter(is.na(preSnapHomeTeamWinProbability))) - empty
+# View(plays %>% filter(is.na(preSnapVisitorTeamWinProbability))) - empty
+# View(plays %>% filter(is.na(homeTeamWinProbabilityAdded))) - empty
+# View(plays %>% filter(is.na(visitorTeamWinProbabilityAdded))) - empty
+# View(plays %>% filter(is.na(expectedPoints))) - empty
+
+# View(plays %>% filter(is.na(expectedPointsAdded)))
+# One play to fix here, a David Montgomery run on 10/09/22
+# Since it's only one play, just find the right answer from nflverse
+# View(nflverse_pbp %>% filter(old_game_id == 2022100904, qtr == 2) %>% select(1:35, 73, 74))
+plays <- plays %>% mutate(expectedPointsAdded =
+        ifelse(is.na(expectedPointsAdded), -0.29447450, expectedPointsAdded))             
+
+# Then, next obligation is to properly merge everything
+# Must change the class of nflverse_pbp to make it compatible with the rest
+class(nflverse_pbp) <- c("data.table", "data.frame")
+
+# Also must coerce old_game_id in nflverse into a numeric variable
+nflverse_pbp$old_game_id <- as.numeric(nflverse_pbp$old_game_id)
+
+PlaysAndGames <- merge(x = games, y = plays, by = "gameId") 
+PlaysAndGames_NFLVerse <- merge(x = PlaysAndGames, y = nflverse_pbp, 
+                    by.x = c("gameId", "playId"), by.y = c("old_game_id", "play_id")) 
+rm(games, plays, nflverse_pbp, PlaysAndGames)
+
+PlayersAndTackles <- merge(x = players, y = tackles, by = "nflId")
+# For this one, use all.y = TRUE, since we also want players who didn't make tackles
+PlayersAndTackles_WithTracking <- 
+  merge(x = PlayersAndTackles, y = tracking_combined, 
+        by = c("gameId", "playId", "nflId"), all.y = TRUE)
+rm(players, tackles, PlayersAndTackles, tracking_combined)
+
+FullMergedData <- merge(x = PlaysAndGames_NFLVerse, y = PlayersAndTackles_WithTracking,
+                        by = c("gameId", "playId"))
