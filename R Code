@@ -134,7 +134,7 @@ PlayersAndTackles <- merge(x = players, y = tackles, by = "nflId")
 # For this one, use all.y = TRUE, since we also want players who didn't make tackles
 PlayersAndTackles_WithTracking <- 
   merge(x = PlayersAndTackles, y = tracking_combined, 
-        by = c("gameId", "playId", "nflId"), all.y = TRUE)
+        by = c("gameId", "playId", "nflId", "displayName"), all.y = TRUE)
 rm(players, tackles, PlayersAndTackles, tracking_combined)
 
 FullMergedData <- merge(x = PlaysAndGames_NFLVerse, y = PlayersAndTackles_WithTracking,
