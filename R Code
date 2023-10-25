@@ -92,7 +92,7 @@ table(plays$passResult)
 # Arrange plays so they are sorted chronologically
 plays <- plays %>% arrange(gameId, playId)
 
-# The absoluteYardlineNumber sucks, don't rely on it
+# The absoluteYardlineNumber is not accurate, don't rely on it
 # Just account for this by merging with nflverse later
 # And yardlineNumber doesn't give full field picture, e.g. -35 and +35 both say 35
 View(plays %>% filter(possessionTeam == yardlineSide & yardlineNumber < 20))
