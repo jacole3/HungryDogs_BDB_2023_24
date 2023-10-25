@@ -126,7 +126,8 @@ nflverse_pbp$old_game_id <- as.numeric(nflverse_pbp$old_game_id)
 
 PlaysAndGames <- merge(x = games, y = plays, by = "gameId") 
 PlaysAndGames_NFLVerse <- merge(x = PlaysAndGames, y = nflverse_pbp, 
-                    by.x = c("gameId", "playId"), by.y = c("old_game_id", "play_id")) 
+                    by.x = c("gameId", "playId", "season", "week", "down"), 
+                    by.y = c("old_game_id", "play_id",  "season", "week", "down")) 
 rm(games, plays, nflverse_pbp, PlaysAndGames)
 
 PlayersAndTackles <- merge(x = players, y = tackles, by = "nflId")
