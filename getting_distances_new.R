@@ -49,6 +49,41 @@ for (i in 1:length(unique(test_play$game_play_frame_comb))) {
 ## checking output:
 test_output <- cbind(game_play_frame_comb,player, dist)
 colnames(test_output) <- c("game_play_frame_comb", "nflid", "distance")
+##from the test output, we can join to the original dataset on the game play frame comb and nflid
+
+
+
+######################################################
+##run on the full file:
+player <- c() # player of interest
+other_players <- c() # other players in frame
+names <- c()
+dist <- c()
+t1 <- Sys.time()
+for (i in 1:length(unique(tracking_w1$game_play_frame_comb))) {
+  print(i)
+  frame_i <- test_play[which(test_play$number==i), c("game_play_frame_comb","nflId", "displayName", "frameId", "x", "y")]
+  #other_players_i <- rep(frame_i$nflId, 23)
+  game_play_frame_comb <- rep(frame_i$game_play_frame_comb, 23)
+  for (j in 1:23) { ##looping through each player in the frame
+    player_i <- rep(frame_i$nflId[j], 23)
+    x_coord <- frame_i$x[j]
+    y_coord <- frame_i$y[j]
+    player <- c(player, player_i)
+    #other_players <- c(other_players, other_players_i)
+    dist_i <- calc_distance(x = x_coord, y = y_coord, x_baseline = frame_i$x, y_baseline = frame_i$y)
+    dist <- c(dist, dist_i)
+  }
+}
+t2 <- Sys.time()
+t2-t1
+
+## checking output:
+test_output <- cbind(game_play_frame_comb,player, dist)
+colnames(test_output) <- c("game_play_frame_comb", "nflid", "distance")
+
+
+
 
 
 ## This was the original code that I used (feel free to test)
