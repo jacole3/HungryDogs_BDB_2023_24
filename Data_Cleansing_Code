@@ -1,3 +1,5 @@
+# Note: some miscellaneous cleansing code, including but not limited to checking for discrepancies in names (DK Metcalf vs. D.K. Metcalf) and tricodes (e.g. JAX vs. JAC) was omitted here, as they didn't result in any changes to the data set
+
 gc(reset = TRUE)
 Sys.setenv('R_MAX_VSIZE'=64000000000)
 
@@ -145,6 +147,29 @@ NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>%
             378:383, 385, 387:398, 400))
 
 rm(PlaysAndGames_NFLVerse)
-FullMergedData <- merge(x = NFLVerse_Reduced, y = PlayersAndTackles_WithTracking,
+MergedData <- merge(x = NFLVerse_Reduced, y = PlayersAndTackles_WithTracking,
                         by = c("gameId", "playId"))
 rm(PlayersAndTackles_WithTracking, NFLVerse_Reduced)
+
+# Arrange it by game ID and play ID first
+MergedData <- MergedData %>% arrange(gameId, playId)
+
+MergedData <- MergedData %>% mutate(posteam_win = 
+                        case_when(
+                          (result > 0 & possessionTeam == homeTeamAbbr) | (result < 0 & possessionTeam == visitorTeamAbbr) ~ 1,
+                          (result < 0 & possessionTeam == homeTeamAbbr) | ( result > 0 & possessionTeam == visitorTeamAbbr) ~ 0,
+                          result == 0 ~ 0.5))
+
+MergedData <- MergedData %>%
+  mutate(EndGamePtDiff = ifelse(possessionTeam == homeTeamAbbr, result, (-1 * result)))
+# Good way to test effectiveness:
+# View(MergedData %>% filter(posteam_win == 1 & EndGamePtDiff < 0))
+
+# Add a WP success column
+MergedData <- MergedData %>% 
+  mutate(WPSuccess = ifelse(wpa > 0, 1, 0))
+# Check for NAs: View(MergedData %>% filter(is.na(WPSuccess)))
+
+# Find other ways to filter down data, e.g. excluding garbage time
+MergedData <- MergedData %>%
+  filter(wp >= 0.05 & wp <= 0.95)
