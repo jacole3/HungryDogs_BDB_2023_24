@@ -187,7 +187,7 @@ NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>%
             378:383, 385, 387:398, 400))
 
 rm(PlaysAndGames_NFLVerse)
-MergedData <- merge(x = NFLVerse_Reduced, y = PlayersAndTackles_WithTracking,
+MergedData <- merge(x = NFLVerse_Reduced, y = TrackingWithTackles_PlayerNames,
                         by = c("gameId", "playId"))
 rm(TrackingWithTackles_PlayerNames, NFLVerse_Reduced)
 
