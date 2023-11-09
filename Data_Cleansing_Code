@@ -1,4 +1,5 @@
-# Note: some miscellaneous cleansing code, including but not limited to checking for discrepancies in names (DK Metcalf vs. D.K. Metcalf) and tricodes (e.g. JAX vs. JAC) was omitted here, as they didn't result in any changes to the data set
+# Note: some miscellaneous cleansing code, including but not limited to checking for discrepancies in names (DK Metcalf vs. D.K. Metcalf) and tricodes (e.g. JAX vs. JAC) was omitted here
+# This is because certain lines of code didn't result in any changes to the data set
 
 gc(reset = TRUE)
 Sys.setenv('R_MAX_VSIZE'=64000000000)
