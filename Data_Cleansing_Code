@@ -105,6 +105,7 @@ tracking_combined <- tracking_combined %>%
 
 tracking_combined <- tracking_combined %>% 
   mutate(TotDistFromBall = sqrt((x - ball_x) ^ 2 + (y - ball_y) ^ 2))
+rm(ball_df, line_of_scrimmage)
 
 nflverse_pbp <- nflfastR::load_pbp(2022)
 nflverse_pbp <- nflverse_pbp %>% filter(week %in% 1:9)
