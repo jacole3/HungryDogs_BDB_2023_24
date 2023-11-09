@@ -170,17 +170,14 @@ PlaysAndGames_NFLVerse <- merge(x = PlaysAndGames, y = nflverse_pbp,
                     by.y = c("old_game_id", "play_id",  "season", "week", "down")) 
 rm(games, plays, nflverse_pbp, PlaysAndGames)
 
-# Use all.x or all.y = TRUE, since we also want players who didn't make tackles
-PlayersAndTackles <- merge(x = players, y = tackles, by = "nflId", all.x = TRUE)
-PlayersAndTackles_WithTracking <- 
-  merge(x = PlayersAndTackles, y = tracking_combined, 
-        by = c("gameId", "playId", "nflId", "displayName"), all.x = TRUE, all.y = TRUE)
+# Use all.y = TRUE, since we also want players who didn't make tackles
+TrackingWithTackles <- merge(x = tackles, y = tracking_combined,
+                   by = c("gameId", "playId", "nflId"), all.y = TRUE)
 
-# However, we also don't want players who didn't appear in a given play
-# Use the "club" column to account for that
-PlayersAndTackles_WithTracking <- PlayersAndTackles_WithTracking %>%
-  filter(!is.na(club))
-rm(players, tackles, PlayersAndTackles, tracking_combined)
+TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
+                              by = c("nflId", "displayName"))
+# View(TrackingWithTackles_PlayerNames %>% filter(is.na(club)))
+rm(players, tackles, tracking_combined, TrackingWithTackles)
 
 NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>% 
   select(-c(7, 42:46, 48:49, 51, 55:57, 59, 61:62, 64, 66:68, 70:74, 80:87, 
