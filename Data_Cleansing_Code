@@ -175,6 +175,11 @@ PlayersAndTackles <- merge(x = players, y = tackles, by = "nflId", all.x = TRUE)
 PlayersAndTackles_WithTracking <- 
   merge(x = PlayersAndTackles, y = tracking_combined, 
         by = c("gameId", "playId", "nflId", "displayName"), all.x = TRUE, all.y = TRUE)
+
+# However, we also don't want players who didn't appear in a given play
+# Use the "club" column to account for that
+PlayersAndTackles_WithTracking <- PlayersAndTackles_WithTracking %>%
+  filter(!is.na(club))
 rm(players, tackles, PlayersAndTackles, tracking_combined)
 
 NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>% 
