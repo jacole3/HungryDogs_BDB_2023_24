@@ -194,7 +194,7 @@ MergedData <- merge(x = NFLVerse_Reduced, y = PlayersAndTackles_WithTracking,
                         by = c("gameId", "playId"))
 rm(PlayersAndTackles_WithTracking, NFLVerse_Reduced)
 
-# Arrange it by game ID and play ID first
+# Arrange it by game ID and play ID
 MergedData <- MergedData %>% arrange(gameId, playId)
 
 MergedData <- MergedData %>% mutate(posteam_win = 
