@@ -173,7 +173,7 @@ rm(games, plays, nflverse_pbp, PlaysAndGames)
 PlayersAndTackles <- merge(x = players, y = tackles, by = "nflId", all.x = TRUE)
 PlayersAndTackles_WithTracking <- 
   merge(x = PlayersAndTackles, y = tracking_combined, 
-        by = c("gameId", "playId", "nflId", "displayName"), all.y = TRUE)
+        by = c("gameId", "playId", "nflId", "displayName"), all.x = TRUE, all.y = TRUE)
 rm(players, tackles, PlayersAndTackles, tracking_combined)
 
 NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>% 
