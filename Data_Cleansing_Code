@@ -79,6 +79,33 @@ rm(tracking_week_1, tracking_week_2, tracking_week_3,
       tracking_week_4, tracking_week_5, tracking_week_6,
       tracking_week_7, tracking_week_8, tracking_week_9)
 
+# Code that will eventually help w/ gap classification and pre-snap alignment
+# To start, create line of scrimmage for each play using ball data
+line_of_scrimmage <- tracking_combined %>%
+  filter(club == "football", frameId == 1) %>%
+  select(gameId, playId, x) %>%
+  rename(los = x)
+
+tracking_combined <- tracking_combined %>%
+  left_join(line_of_scrimmage, by = c("playId", "gameId"))
+
+tracking_combined <- tracking_combined %>%
+  mutate(distFromLOS = x - los,
+         distFromMOF = y - 26.65)
+
+# Similar idea to create ball instead of line of scrimmage
+ball_df <- tracking_combined %>% 
+  filter(club == "football") %>% 
+  select(gameId, playId, frameId, x, y) %>% 
+  rename(ball_x = x,
+         ball_y = y)
+
+tracking_combined <- tracking_combined %>% 
+  left_join(ball_df, by = c("playId", "gameId", "frameId"))
+
+tracking_combined <- tracking_combined %>% 
+  mutate(TotDistFromBall = sqrt((x - ball_x) ^ 2 + (y - ball_y) ^ 2))
+
 nflverse_pbp <- nflfastR::load_pbp(2022)
 nflverse_pbp <- nflverse_pbp %>% filter(week %in% 1:9)
 
