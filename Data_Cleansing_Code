@@ -189,7 +189,7 @@ NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>%
 rm(PlaysAndGames_NFLVerse)
 MergedData <- merge(x = NFLVerse_Reduced, y = PlayersAndTackles_WithTracking,
                         by = c("gameId", "playId"))
-rm(PlayersAndTackles_WithTracking, NFLVerse_Reduced)
+rm(TrackingWithTackles_PlayerNames, NFLVerse_Reduced)
 
 # Arrange it by game ID and play ID
 MergedData <- MergedData %>% arrange(gameId, playId)
