@@ -70,6 +70,10 @@ tracking_combined <- rbind(tracking_week_1, tracking_week_2, tracking_week_3,
                            tracking_week_4, tracking_week_5, tracking_week_6,
                            tracking_week_7, tracking_week_8, tracking_week_9)
 
+# Note that o means orientation, and dir means direction, both scaled 0-360
+# In both cases, 0 is facing the top sideline (i.e. where Y = 53.3)
+# Thus, both 0 and 180 are parallel to the LOS when discussing o and dir
+
 # To clear memory, now get rid of the individual weeks
 rm(tracking_week_1, tracking_week_2, tracking_week_3,
       tracking_week_4, tracking_week_5, tracking_week_6,
