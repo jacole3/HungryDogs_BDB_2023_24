@@ -169,8 +169,8 @@ PlaysAndGames_NFLVerse <- merge(x = PlaysAndGames, y = nflverse_pbp,
                     by.y = c("old_game_id", "play_id",  "season", "week", "down")) 
 rm(games, plays, nflverse_pbp, PlaysAndGames)
 
-PlayersAndTackles <- merge(x = players, y = tackles, by = "nflId")
-# For this one, use all.y = TRUE, since we also want players who didn't make tackles
+# Use all.x or all.y = TRUE, since we also want players who didn't make tackles
+PlayersAndTackles <- merge(x = players, y = tackles, by = "nflId", all.x = TRUE)
 PlayersAndTackles_WithTracking <- 
   merge(x = PlayersAndTackles, y = tracking_combined, 
         by = c("gameId", "playId", "nflId", "displayName"), all.y = TRUE)
