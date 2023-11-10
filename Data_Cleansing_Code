@@ -90,6 +90,7 @@ tracking_combined <- tracking_combined %>%
   mutate(y = ifelse(playDirection == "right", y, (53.3 - y)))
 
 # Likewise, adjust "o" and "dir" in same manner, make 0 always be offense's left
+# So 90 is always toward the EZ offense is aiming at, 180 is to offense's right, etc.
 tracking_combined <- tracking_combined %>%
   mutate(o = ifelse(playDirection == "right", o, 
                     ifelse((playDirection == "left" & o < 180), o + 180, o - 180)))
