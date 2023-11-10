@@ -130,7 +130,7 @@ NameDiscrepancy_Table <- NameDiscrepancy_Table %>% filter(Freq > 1)
 rm(NameDiscrepancies, NameDiscrepancy_Table)
 
 table(plays$passResult)
-# C means complete, R means scramble
+# C means complete, R means scramble, S means sack
 
 # Arrange plays so they are sorted chronologically
 plays <- plays %>% arrange(gameId, playId)
