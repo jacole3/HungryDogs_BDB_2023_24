@@ -84,7 +84,20 @@ rm(tracking_week_1, tracking_week_2, tracking_week_3,
       tracking_week_7, tracking_week_8, tracking_week_9)
 
 # Code that will eventually help w/ gap classification and pre-snap alignment
-# To start, create line of scrimmage for each play using ball data
+# To start, standardize so that the highest "y" is always to offense's left
+# I.e., make it so that it doesn't matter which end zone the offense is aiming at
+tracking_combined <- tracking_combined %>%
+  mutate(y = ifelse(playDirection == "right", y, (53.3 - y)))
+
+# Likewise, adjust "o" and "dir" in same manner, make 0 always be offense's left
+tracking_combined <- tracking_combined %>%
+  mutate(o = ifelse(playDirection == "right", o, 
+                    ifelse((playDirection == "left" & o < 180), o + 180, o - 180)))
+tracking_combined <- tracking_combined %>%
+  mutate(dir = ifelse(playDirection == "right", dir, 
+                    ifelse((playDirection == "left" & dir < 180), dir + 180, dir - 180)))
+
+# Now create line of scrimmage for each play using ball data
 line_of_scrimmage <- tracking_combined %>%
   filter(club == "football", frameId == 1) %>%
   select(gameId, playId, x) %>%
