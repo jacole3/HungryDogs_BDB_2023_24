@@ -98,7 +98,7 @@ tracking_combined <- tracking_combined %>%
   mutate(dir = ifelse(playDirection == "right", dir, 
                     ifelse((playDirection == "left" & dir < 180), dir + 180, dir - 180)))
 
-# Same adjustment for "x" 
+# Same adjustment for "x" - make high "x" always be where offense is aiming at
 tracking_combined <- tracking_combined %>%
   mutate(x = ifelse(playDirection == "right", x, (120 - x)))
 
