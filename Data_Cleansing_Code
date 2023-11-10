@@ -98,6 +98,10 @@ tracking_combined <- tracking_combined %>%
   mutate(dir = ifelse(playDirection == "right", dir, 
                     ifelse((playDirection == "left" & dir < 180), dir + 180, dir - 180)))
 
+# Same adjustment for "x" 
+tracking_combined <- tracking_combined %>%
+  mutate(x = ifelse(playDirection == "right", x, (120 - x)))
+
 # Now create line of scrimmage for each play using ball data
 line_of_scrimmage <- tracking_combined %>%
   filter(club == "football", frameId == 1) %>%
