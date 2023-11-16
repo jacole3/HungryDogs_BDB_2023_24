@@ -51,6 +51,7 @@ library(nflverse)
 library(tidyverse)
 library(dplyr)
 library(rsvg)
+library(reticulate)
 
 games <- fread("games.csv")
 players <- fread("players.csv")
