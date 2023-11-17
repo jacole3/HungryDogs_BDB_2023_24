@@ -104,6 +104,7 @@ tracking_combined <- tracking_combined %>%
   mutate(x = ifelse(playDirection == "right", x, (120 - x)))
 
 # Now create line of scrimmage for each play using ball data
+# This link explains when the frames start: https://www.kaggle.com/competitions/nfl-big-data-bowl-2024/discussion/447639
 line_of_scrimmage <- tracking_combined %>%
   filter(club == "football", frameId == 1) %>%
   select(gameId, playId, x) %>%
