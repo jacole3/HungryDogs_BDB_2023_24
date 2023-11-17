@@ -1,0 +1,29 @@
+# Recall that "MergedData" was originally created in the "Data Cleansing Code" document
+
+# Make sure we have both offensive and defensive players
+table(MergedData$position)
+
+# Make broader "PosGroup" label from there
+MergedData <- MergedData %>% mutate(PosGroup = ifelse(position %in% c("C", "G", "T"), "OL",
+      ifelse(position %in% c("CB", "DB", "FS", "SS"), "DB",
+          ifelse(position %in% c("DE", "DT", "NT"), "DL",
+             ifelse(position %in% c("FB", "RB"), "RB",
+                ifelse(position %in% c("ILB", "MLB", "OLB"), "LB",
+                       ifelse(position == "QB", "QB",
+                              ifelse(position == "TE", "TE", "WR"))))))))
+table(MergedData$PosGroup)
+
+MergedData <- MergedData %>%
+  mutate(PlayerSideOfBall = ifelse(((club == homeTeamAbbr) &
+                                (possessionTeam == homeTeamAbbr)) |
+    ((club == visitorTeamAbbr) &
+       (possessionTeam == visitorTeamAbbr)),
+  "offense",
+  "defense"))
+
+# First, test out a generic play to see that the X coordinates make sense
+# I.e., all 11 defensive players should have higher X at start of snap than all 11 offensive players
+View(MergedData %>% filter(gameId == 2022090800, playId == 56, frameId == 1))
+# This does not make sense
+# DB Nick Scott has x = 54.80, DL Leonard Floyd has 28.01, S. Diggs has 39.40, for example
+# Shouldn't be possible for an offensive player's x to lie in between two defensive players
