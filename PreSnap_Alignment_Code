@@ -29,7 +29,7 @@ FirstFrameOfPlay_DesignedRuns <- DesignedRuns_Merged %>%
   filter(frameId == 1) %>% mutate(X_PreSnap_Rank = rank(-x, ties.method = "first")) %>%
   ungroup() %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, X_PreSnap_Rank, 
-         PreSnap_x = x, PreSnap_y = y, PreSnap_o = o, PreSnap_dir = dir)
+         PreSnap_x = x, PreSnap_y = y)
 # table(FirstFrameOfPlay_DesignedRuns$X_PreSnap_Rank); rank is never higher than 11
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
