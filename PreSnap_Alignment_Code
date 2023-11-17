@@ -55,3 +55,12 @@ DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = AlignedOnLOS_DesignedR
       all.x = TRUE)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 8:179, "position", "PreSnap_OnLOS", "PlayerSideOfBall")
+
+# From here, we know that spots 2-6 in terms of the Y rank are the ineligible OL
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
+    ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 2, "LT",
+           ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 3, "LG",
+                  ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 4, "C",
+                         ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 5, "RG",
+                                ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 6, "RT", position))))))
+
