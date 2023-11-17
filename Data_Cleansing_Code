@@ -136,7 +136,12 @@ NameDiscrepancy_Table <- NameDiscrepancy_Table %>% filter(Freq > 1)
 rm(NameDiscrepancies, NameDiscrepancy_Table)
 
 table(plays$passResult)
-# C means complete, R means scramble, S means sack
+# C means complete, R means scramble
+
+# View(plays %>% filter(!passResult %in% c("C", "R") & str_detect(playDescription, "(sack)")))
+# This is empty, therefore every play that doesn't have "C" or "R" is a designed run
+plays <- plays %>% mutate(passResult = 
+              ifelse(passResult %in% c("C", "R"), passResult, NA))
 
 # Arrange plays so they are sorted chronologically
 plays <- plays %>% arrange(gameId, playId)
