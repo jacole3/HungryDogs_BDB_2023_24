@@ -35,8 +35,23 @@ FirstFrameOfPlay_DesignedRuns <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   merge(FirstFrameOfPlay_DesignedRuns, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:177, "PlayerSideOfBall")
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(PreSnap_OnLOS =
       ifelse(PlayerSideOfBall == "offense" & X_PreSnap_Rank %in% 1:7, "Offense_LOS",
              ifelse(PlayerSideOfBall == "offense" & !X_PreSnap_Rank %in% 1:7, "Offense_Backfield", "Defense")))
 table(DesignedRuns_Merged$PreSnap_OnLOS)
+
+# Now define the 5 OL
+AlignedOnLOS_DesignedRuns <- DesignedRuns_Merged %>%
+  group_by(gameId, playId, PreSnap_OnLOS) %>%
+  filter(frameId == 1) %>% 
+  mutate(Y_PreSnap_Rank = rank(-y, ties.method = "first")) %>%
+  ungroup() %>%
+  select(gameId, playId, nflId, displayName, PlayerSideOfBall, position, PreSnap_OnLOS, Y_PreSnap_Rank)
+
+DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = AlignedOnLOS_DesignedRuns, 
+      by = c("gameId", "playId", "nflId", "displayName", "position", "PreSnap_OnLOS", "PlayerSideOfBall"),
+      all.x = TRUE)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 8:179, "position", "PreSnap_OnLOS", "PlayerSideOfBall")
