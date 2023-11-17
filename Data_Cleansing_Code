@@ -203,6 +203,14 @@ rm(TrackingWithTackles_PlayerNames, NFLVerse_Reduced)
 # Arrange it by game ID and play ID
 MergedData <- MergedData %>% arrange(gameId, playId)
 
+# Now we create a variable for where the ball was at the time of the snap
+MergedData <- MergedData %>%
+  mutate(X_LOS = 110 - yardline_100)
+
+MergedData <- MergedData %>%
+  mutate(X_distFromLOS = x - X_LOS,
+         Y_distFromMOF = y - 26.65)
+
 MergedData <- MergedData %>% mutate(posteam_win = 
                         case_when(
                           (result > 0 & possessionTeam == homeTeamAbbr) | (result < 0 & possessionTeam == visitorTeamAbbr) ~ 1,
