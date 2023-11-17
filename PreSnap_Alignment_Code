@@ -37,6 +37,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(PreSnap_OnLOS =
-      ifelse(PlayerSideOfBall == "offense" & X_PreSnap_Rank %in% 1:7, "Offense On LOS",
-             ifelse(PlayerSideOfBall == "offense" & !X_PreSnap_Rank %in% 1:7, "Offense Off LOS", "Defense")))
+      ifelse(PlayerSideOfBall == "offense" & X_PreSnap_Rank %in% 1:7, "Offense_LOS",
+             ifelse(PlayerSideOfBall == "offense" & !X_PreSnap_Rank %in% 1:7, "Offense_Backfield", "Defense")))
 table(DesignedRuns_Merged$PreSnap_OnLOS)
