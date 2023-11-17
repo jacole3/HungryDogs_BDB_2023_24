@@ -103,21 +103,7 @@ tracking_combined <- tracking_combined %>%
 tracking_combined <- tracking_combined %>%
   mutate(x = ifelse(playDirection == "right", x, (120 - x)))
 
-# Now create line of scrimmage for each play using ball data
-# This link explains when the frames start: https://www.kaggle.com/competitions/nfl-big-data-bowl-2024/discussion/447639
-line_of_scrimmage <- tracking_combined %>%
-  filter(club == "football", frameId == 1) %>%
-  select(gameId, playId, x) %>%
-  rename(los = x)
-
-tracking_combined <- tracking_combined %>%
-  left_join(line_of_scrimmage, by = c("playId", "gameId"))
-
-tracking_combined <- tracking_combined %>%
-  mutate(distFromLOS = x - los,
-         distFromMOF = y - 26.65)
-
-# Similar idea to create ball instead of line of scrimmage
+# Code for where the ball is at any given point, and each player's distance from it
 ball_df <- tracking_combined %>% 
   filter(club == "football") %>% 
   select(gameId, playId, frameId, x, y) %>% 
@@ -129,7 +115,7 @@ tracking_combined <- tracking_combined %>%
 
 tracking_combined <- tracking_combined %>% 
   mutate(TotDistFromBall = sqrt((x - ball_x) ^ 2 + (y - ball_y) ^ 2))
-rm(ball_df, line_of_scrimmage)
+rm(ball_df)
 
 nflverse_pbp <- nflfastR::load_pbp(2022)
 nflverse_pbp <- nflverse_pbp %>% filter(week %in% 1:9)
