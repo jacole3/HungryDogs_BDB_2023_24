@@ -21,26 +21,22 @@ MergedData <- MergedData %>%
   "offense",
   "defense"))
 
-# First, test out a generic play to see that the X coordinates make sense
-# I.e., all 11 defensive players should have higher X at start of snap than all 11 offensive players
-View(MergedData %>% filter(gameId == 2022090800, playId == 56, frameId == 1))
-# This does not make sense
-# DB Nick Scott has x = 54.80, DL Leonard Floyd has 28.01, S. Diggs has 39.40, for example
-# Shouldn't be possible for an offensive player's x to lie in between two defensive players
+# Run the following code for designed runs separately
+DesignedRuns_Merged <- MergedData %>% filter(pass == 0)
 
-FirstFrameOfPlay_Info <- MergedData %>%
+FirstFrameOfPlay_DesignedRuns <- DesignedRuns_Merged %>%
   group_by(gameId, playId, PlayerSideOfBall) %>%
   filter(frameId == 1) %>% mutate(X_PreSnap_Rank = rank(-x, ties.method = "first")) %>%
   ungroup() %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, X_PreSnap_Rank, 
          PreSnap_x = x, PreSnap_y = y, PreSnap_o = o, PreSnap_dir = dir)
-# table(FirstFrameOfPlay_Info$X_PreSnap_Rank); rank is never higher than 11
+# table(FirstFrameOfPlay_DesignedRuns$X_PreSnap_Rank); rank is never higher than 11
 
-MergedData <- MergedData %>%
-  merge(FirstFrameOfPlay_Info, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-MergedData <- MergedData %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  merge(FirstFrameOfPlay_DesignedRuns, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 
-MergedData <- MergedData %>% mutate(PreSnap_OnLOS =
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(PreSnap_OnLOS =
       ifelse(PlayerSideOfBall == "offense" & X_PreSnap_Rank %in% 1:7, "Offense On LOS",
-             ifelse(PlayerSideOfBall == "offense" & X_PreSnap_Rank >= 8, "Offense Off LOS", "Defense")))
-table(MergedData$PreSnap_OnLOS)
+             ifelse(PlayerSideOfBall == "offense" & !X_PreSnap_Rank %in% 1:7, "Offense Off LOS", "Defense")))
+table(DesignedRuns_Merged$PreSnap_OnLOS)
