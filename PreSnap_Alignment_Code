@@ -24,19 +24,6 @@ MergedData <- MergedData %>%
 # Run the following code for designed runs separately
 DesignedRuns_Merged <- MergedData %>% filter(pass == 0)
 
-# Update X_LOS so it's more accurate than the NFLVerse yardline_100
-line_of_scrimmage <- DesignedRuns_Merged %>%
- filter(club == "football", frameId == 1) %>%
- select(gameId, playId, x, y) %>%
- rename(X_LOS = x, Y_LOS = y)
-
-DesignedRuns_Merged <- DesignedRuns_Merged %>%
- left_join(line_of_scrimmage, by = c("playId", "gameId"))
-
-DesignedRuns_Merged <- DesignedRuns_Merged %>%
- mutate(X_distFromLOS = x - X_LOS, Y_distFromMOF = y - 26.65,
- Y_distFromOrigSpot = y - Y_LOS)
-
 FirstFrameOfPlay_DesignedRuns <- DesignedRuns_Merged %>%
   group_by(gameId, playId, PlayerSideOfBall) %>%
   filter(frameId == 1) %>% mutate(X_PreSnap_Rank = rank(-x, ties.method = "first")) %>%
@@ -49,6 +36,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   merge(FirstFrameOfPlay_DesignedRuns, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:181, "PlayerSideOfBall")
+rm(FirstFrameOfPlay_DesignedRuns)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(PreSnap_OnLOS =
       ifelse(PlayerSideOfBall == "offense" & X_PreSnap_Rank %in% 1:7, "Offense_LOS",
@@ -69,6 +57,7 @@ DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_ByLOSAlig
       all.x = TRUE)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 8:183, "position", "PreSnap_OnLOS", "PlayerSideOfBall")
+rm(DesignedRuns_ByLOSAlignment)
 
 # From here, we know that spots 2-6 in terms of the Y rank are the ineligible OL
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
@@ -136,5 +125,3 @@ DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_TEL1_Iden
                              all.x = TRUE)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:195, "PlayerSideOfBall")
-
-
