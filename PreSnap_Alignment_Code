@@ -48,8 +48,7 @@ DesignedRuns_ByLOSAlignment <- DesignedRuns_Merged %>%
   filter(frameId == 1) %>% 
   mutate(Y_PreSnap_Rank = rank(-y, ties.method = "first")) %>%
   ungroup() %>%
-  select(gameId, playId, nflId, displayName, PlayerSideOfBall, position, PreSnap_OnLOS, Y_PreSnap_Rank, 
-         PreSnap_x = x, PreSnap_y = y)
+  select(gameId, playId, nflId, displayName, PlayerSideOfBall, position, PreSnap_OnLOS, Y_PreSnap_Rank)
 
 DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_ByLOSAlignment, 
       by = c("gameId", "playId", "nflId", "displayName", "position", "PreSnap_OnLOS", "PlayerSideOfBall"),
@@ -64,5 +63,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
                   ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 4, "C",
                          ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 5, "RG",
                                 ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 6, "RT", position))))))
+
 
 
