@@ -55,7 +55,8 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(PreSnap_OnLOS =
              ifelse(PlayerSideOfBall == "offense" & !X_PreSnap_Rank %in% 1:7, "Offense_Backfield", "Defense")))
 table(DesignedRuns_Merged$PreSnap_OnLOS)
 
-# Now define the 5 OL
+# Now define the 5 OL by ranking the "y" column
+# This helps us adjust for two players being listed as C (e.g. BUF Mitch Morse, Ryan Bates)
 DesignedRuns_ByLOSAlignment <- DesignedRuns_Merged %>%
   group_by(gameId, playId, PreSnap_OnLOS) %>%
   filter(frameId == 1) %>% 
@@ -67,7 +68,7 @@ DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_ByLOSAlig
       by = c("gameId", "playId", "nflId", "displayName", "position", "PreSnap_OnLOS", "PlayerSideOfBall"),
       all.x = TRUE)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 8:179, "position", "PreSnap_OnLOS", "PlayerSideOfBall")
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 8:183, "position", "PreSnap_OnLOS", "PlayerSideOfBall")
 
 # From here, we know that spots 2-6 in terms of the Y rank are the ineligible OL
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
