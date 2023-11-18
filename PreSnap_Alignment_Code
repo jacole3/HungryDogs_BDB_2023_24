@@ -125,3 +125,18 @@ DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_TEL1_Iden
                              all.x = TRUE)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:195, "PlayerSideOfBall")
+DesignedRuns_Merged <- DesignedRuns_Merged %>% 
+  mutate(Is_TEL1 = ifelse(!is.na(Is_TEL1), TRUE, FALSE))
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
+          ifelse(Is_TEL1 == TRUE, "TEL1", AlignedPos))
+
+# create a distance from TEL1 column
+TEL1_coordinates <- DesignedRuns_Merged %>%
+  filter(AlignedPos == "TEL1") %>%
+  select(gameId, playId, x, y, frameId) %>%
+  rename(xTEL1 = x,
+         yTEL1 = y)
+
+# Repeat that cycle to define TEL2, TER1, etc.
+
