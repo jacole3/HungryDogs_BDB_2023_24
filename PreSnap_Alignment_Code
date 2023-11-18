@@ -43,14 +43,15 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(PreSnap_OnLOS =
 table(DesignedRuns_Merged$PreSnap_OnLOS)
 
 # Now define the 5 OL
-AlignedOnLOS_DesignedRuns <- DesignedRuns_Merged %>%
+DesignedRuns_ByLOSAlignment <- DesignedRuns_Merged %>%
   group_by(gameId, playId, PreSnap_OnLOS) %>%
   filter(frameId == 1) %>% 
   mutate(Y_PreSnap_Rank = rank(-y, ties.method = "first")) %>%
   ungroup() %>%
-  select(gameId, playId, nflId, displayName, PlayerSideOfBall, position, PreSnap_OnLOS, Y_PreSnap_Rank)
+  select(gameId, playId, nflId, displayName, PlayerSideOfBall, position, PreSnap_OnLOS, Y_PreSnap_Rank, 
+         PreSnap_x = x, PreSnap_y = y)
 
-DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = AlignedOnLOS_DesignedRuns, 
+DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_ByLOSAlignment, 
       by = c("gameId", "playId", "nflId", "displayName", "position", "PreSnap_OnLOS", "PlayerSideOfBall"),
       all.x = TRUE)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
@@ -63,4 +64,5 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
                   ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 4, "C",
                          ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 5, "RG",
                                 ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 6, "RT", position))))))
+
 
