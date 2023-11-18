@@ -78,6 +78,63 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
                          ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 5, "RG",
                                 ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 6, "RT", position))))))
 
+# create a distance from LT column
+LT_coordinates <- DesignedRuns_Merged %>%
+  filter(AlignedPos == "LT") %>%
+  select(gameId, playId, x, y, frameId) %>%
+  rename(xLT = x,
+         yLT = y)
 
+# create a distance from LG column
+LG_coordinates <- DesignedRuns_Merged %>%
+  filter(AlignedPos == "LG") %>%
+  select(gameId, playId, x, y, frameId) %>%
+  rename(xLG = x,
+         yLG = y)
+
+# create a distance from RT column
+RT_coordinates <- DesignedRuns_Merged %>%
+  filter(AlignedPos == "RT") %>%
+  select(gameId, playId, x, y, frameId) %>%
+  rename(xRT = x,
+         yRT = y)
+
+# create a distance from RG column
+RG_coordinates <- DesignedRuns_Merged %>%
+  filter(AlignedPos == "RG") %>%
+  select(gameId, playId, x, y, frameId) %>%
+  rename(xRG = x,
+         yRG = y)
+
+# create a distance from Center column
+C_coordinates <- DesignedRuns_Merged %>%
+  filter(AlignedPos == "C") %>%
+  select(gameId, playId, x, y, frameId) %>%
+  rename(xCenter = x,
+         yCenter = y)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  left_join(LT_coordinates, by = c("playId", "gameId", "frameId")) %>%
+  left_join(RT_coordinates, by = c("playId", "gameId", "frameId")) %>%
+  left_join(RG_coordinates, by = c("playId", "gameId", "frameId")) %>%
+  left_join(LG_coordinates, by = c("playId", "gameId", "frameId")) %>%
+  left_join(C_coordinates, by = c("playId", "gameId", "frameId"))
+
+# clean up environment
+rm(C_coordinates, LT_coordinates, LG_coordinates, RT_coordinates, RG_coordinates)
+
+# Define TEs using Y and X coordinates; 2.5 yds seems reasonable for Y, 1 for X
+# Recall that for designed runs, Ball_X_Frame1 & Ball_Y_Frame1 do correlate with LOS
+DesignedRuns_TEL1_Identify_Frame1 <- DesignedRuns_Merged %>%
+  filter(PlayerSideOfBall == "offense", !AlignedPos %in% c("LT", "LG", "C", "RG", "RT"),
+  frameId == 1, y > yLT, y <= 2.5 + yLT, x >= xLT - 1) %>%
+  mutate(Is_TEL1 = TRUE) %>%
+  select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL1)
+
+DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_TEL1_Identify_Frame1, 
+                             by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"),
+                             all.x = TRUE)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:195, "PlayerSideOfBall")
 
 
