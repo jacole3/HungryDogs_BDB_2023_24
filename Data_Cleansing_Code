@@ -225,11 +225,13 @@ rm(TrackingWithTackles_PlayerNames, NFLVerse_Reduced)
 MergedData <- MergedData %>% arrange(gameId, playId)
 
 # Now we create a variable for where the ball was at the time of the snap
+# But this is only approximate, since NFLVerse doesn't round to decimals of yards
+# For designed runs, we already have the precise ball location at LOS (see above)
 MergedData <- MergedData %>%
-  mutate(X_LOS = 110 - yardline_100)
+  mutate(X_LOS_Approx = 110 - yardline_100)
 
 MergedData <- MergedData %>%
-  mutate(X_distFromLOS = x - X_LOS)
+  mutate(X_distFromLOS_Approx = x - X_LOS_Approx)
 
 MergedData <- MergedData %>% mutate(posteam_win = 
                         case_when(
