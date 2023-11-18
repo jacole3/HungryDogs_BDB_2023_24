@@ -103,6 +103,22 @@ tracking_combined <- tracking_combined %>%
 tracking_combined <- tracking_combined %>%
   mutate(x = ifelse(playDirection == "right", x, (120 - x)))
 
+# Now create line of scrimmage for each play using ball data
+# This link explains when the frames start: https://www.kaggle.com/competitions/nfl-big-data-bowl-2024/discussion/447639
+
+# Recall that Frame 1 doesn't always mean the original LOS
+Frame1_Ball_Location <- tracking_combined %>%
+  filter(club == "football", frameId == 1) %>%
+  select(gameId, playId, x, y) %>%
+  rename(Ball_X_Frame1 = x, Ball_Y_Frame1 = y)
+
+tracking_combined <- tracking_combined %>%
+  left_join(line_of_scrimmage, by = c("playId", "gameId"))
+
+tracking_combined <- tracking_combined %>%
+  mutate(X_dist_FromBallFrame1 = x - Ball_X_Frame1, Y_distFromMOF = y - 26.65,
+  Y_dist_FromBallFrame1 = y - Ball_Y_Frame1)
+
 # Code for where the ball is at any given point, and each player's distance from it
 ball_df <- tracking_combined %>% 
   filter(club == "football") %>% 
@@ -213,8 +229,7 @@ MergedData <- MergedData %>%
   mutate(X_LOS = 110 - yardline_100)
 
 MergedData <- MergedData %>%
-  mutate(X_distFromLOS = x - X_LOS,
-         Y_distFromMOF = y - 26.65)
+  mutate(X_distFromLOS = x - X_LOS)
 
 MergedData <- MergedData %>% mutate(posteam_win = 
                         case_when(
