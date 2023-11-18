@@ -48,7 +48,7 @@ FirstFrameOfPlay_DesignedRuns <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   merge(FirstFrameOfPlay_DesignedRuns, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:177, "PlayerSideOfBall")
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:181, "PlayerSideOfBall")
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(PreSnap_OnLOS =
       ifelse(PlayerSideOfBall == "offense" & X_PreSnap_Rank %in% 1:7, "Offense_LOS",
