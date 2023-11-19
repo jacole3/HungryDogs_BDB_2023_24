@@ -139,5 +139,8 @@ TEL1_coordinates <- DesignedRuns_Merged %>%
   rename(xTEL1 = x,
          yTEL1 = y)
 
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  left_join(TEL1_coordinates, by = c("playId", "gameId", "frameId")) 
+
 # Repeat that cycle to define TEL2, TER1, etc.
 
