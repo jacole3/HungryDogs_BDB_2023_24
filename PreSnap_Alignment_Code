@@ -120,17 +120,14 @@ DesignedRuns_TEL1_Identify_Frame1 <- DesignedRuns_Merged %>%
   mutate(Is_TEL1 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL1)
 
-DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_TEL1_Identify_Frame1, 
-                             by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"),
-                             all.x = TRUE)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL1_Identify_Frame1, 
+          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:195, "PlayerSideOfBall")
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TEL1 = ifelse(!is.na(Is_TEL1), TRUE, FALSE))
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
           ifelse(Is_TEL1 == TRUE, "TEL1", AlignedPos))
-table(DesignedRuns_Merged$AlignedPos)
 
 # create a distance from TEL1 column
 TEL1_coordinates <- DesignedRuns_Merged %>%
@@ -141,6 +138,7 @@ TEL1_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL1_coordinates, by = c("playId", "gameId", "frameId")) 
+rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Frame1)
 
 # Now define TEL2
 DesignedRuns_TEL2_Identify_Frame1 <- DesignedRuns_Merged %>%
@@ -149,11 +147,9 @@ DesignedRuns_TEL2_Identify_Frame1 <- DesignedRuns_Merged %>%
   mutate(Is_TEL2 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL2)
 
-DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_TEL2_Identify_Frame1, 
-                             by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"),
-                             all.x = TRUE)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL2_Identify_Frame1, 
+                    by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:196, "PlayerSideOfBall")
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TEL2 = ifelse(!is.na(Is_TEL2), TRUE, FALSE))
 
@@ -169,6 +165,7 @@ TEL2_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL2_coordinates, by = c("playId", "gameId", "frameId")) 
+rm(TEL2_coordinates, DesignedRuns_TEL2_Identify_Frame1)
 
 # Now define TEL3
 DesignedRuns_TEL3_Identify_Frame1 <- DesignedRuns_Merged %>%
@@ -177,11 +174,9 @@ DesignedRuns_TEL3_Identify_Frame1 <- DesignedRuns_Merged %>%
   mutate(Is_TEL3 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL3)
 
-DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_TEL3_Identify_Frame1, 
-                             by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"),
-                             all.x = TRUE)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL3_Identify_Frame1, 
+                by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:197, "PlayerSideOfBall")
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TEL3 = ifelse(!is.na(Is_TEL3), TRUE, FALSE))
 
@@ -197,6 +192,7 @@ TEL3_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL3_coordinates, by = c("playId", "gameId", "frameId")) 
+rm(TEL3_coordinates, DesignedRuns_TEL3_Identify_Frame1)
 
 # Now define TER1
 DesignedRuns_TER1_Identify_Frame1 <- DesignedRuns_Merged %>%
@@ -205,11 +201,9 @@ DesignedRuns_TER1_Identify_Frame1 <- DesignedRuns_Merged %>%
   mutate(Is_TER1 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TER1)
 
-DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_TER1_Identify_Frame1, 
-                             by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"),
-                             all.x = TRUE)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER1_Identify_Frame1, 
+               by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:198, "PlayerSideOfBall")
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TER1 = ifelse(!is.na(Is_TER1), TRUE, FALSE))
 
@@ -225,6 +219,7 @@ TER1_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER1_coordinates, by = c("playId", "gameId", "frameId")) 
+rm(TER1_coordinates, DesignedRuns_TER1_Identify_Frame1)
 
 # Now define TER2
 DesignedRuns_TER2_Identify_Frame1 <- DesignedRuns_Merged %>%
@@ -233,11 +228,9 @@ DesignedRuns_TER2_Identify_Frame1 <- DesignedRuns_Merged %>%
   mutate(Is_TER2 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TER2)
 
-DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_TER2_Identify_Frame1, 
-                             by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"),
-                             all.x = TRUE)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER2_Identify_Frame1, 
+         by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:199, "PlayerSideOfBall")
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TER2 = ifelse(!is.na(Is_TER2), TRUE, FALSE))
 
@@ -253,6 +246,7 @@ TER2_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER2_coordinates, by = c("playId", "gameId", "frameId")) 
+rm(TER2_coordinates, DesignedRuns_TER2_Identify_Frame1)
 
 # Now define TER3
 DesignedRuns_TER3_Identify_Frame1 <- DesignedRuns_Merged %>%
@@ -261,11 +255,9 @@ DesignedRuns_TER3_Identify_Frame1 <- DesignedRuns_Merged %>%
   mutate(Is_TER3 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TER3)
 
-DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_TER3_Identify_Frame1, 
-                             by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"),
-                             all.x = TRUE)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER3_Identify_Frame1, 
+            by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:200, "PlayerSideOfBall")
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TER3 = ifelse(!is.na(Is_TER3), TRUE, FALSE))
 
@@ -281,4 +273,5 @@ TER3_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER3_coordinates, by = c("playId", "gameId", "frameId")) 
+rm(TER3_coordinates, DesignedRuns_TER3_Identify_Frame1)
 
