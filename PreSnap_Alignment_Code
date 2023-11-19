@@ -112,7 +112,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 # clean up environment
 rm(C_coordinates, LT_coordinates, LG_coordinates, RT_coordinates, RG_coordinates)
 
-# Define TEs using Y and X coordinates; 2.5 yds seems reasonable for Y, 1 for X
+# Define TEs using Y and X coordinates
 # Recall that for designed runs, Ball_X_Frame1 & Ball_Y_Frame1 do correlate with LOS
 DesignedRuns_TEL1_Identify_Frame1 <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
