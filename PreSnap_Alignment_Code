@@ -65,7 +65,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
            ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 3, "LG",
                   ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 4, "C",
                          ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 5, "RG",
-                                ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 6, "RT", position))))))
+                                ifelse(PreSnap_OnLOS == "Offense_LOS" & Y_PreSnap_Rank == 6, "RT", NA))))))
 
 # create a distance from LT column
 LT_coordinates <- DesignedRuns_Merged %>%
@@ -115,7 +115,7 @@ rm(C_coordinates, LT_coordinates, LG_coordinates, RT_coordinates, RG_coordinates
 # Define TEs using Y and X coordinates; 2.5 yds seems reasonable for Y, 1 for X
 # Recall that for designed runs, Ball_X_Frame1 & Ball_Y_Frame1 do correlate with LOS
 DesignedRuns_TEL1_Identify_Frame1 <- DesignedRuns_Merged %>%
-  filter(PlayerSideOfBall == "offense", !AlignedPos %in% c("LT", "LG", "C", "RG", "RT"),
+  filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
   frameId == 1, y > yLT, y <= 2.5 + yLT, x >= xLT - 1) %>%
   mutate(Is_TEL1 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL1)
@@ -130,6 +130,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
           ifelse(Is_TEL1 == TRUE, "TEL1", AlignedPos))
+table(DesignedRuns_Merged$AlignedPos)
 
 # create a distance from TEL1 column
 TEL1_coordinates <- DesignedRuns_Merged %>%
