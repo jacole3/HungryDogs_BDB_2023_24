@@ -70,44 +70,44 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
 # create a distance from LT column
 LT_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "LT") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xLT = x,
          yLT = y)
 
 # create a distance from LG column
 LG_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "LG") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xLG = x,
          yLG = y)
 
 # create a distance from RT column
 RT_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "RT") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xRT = x,
          yRT = y)
 
 # create a distance from RG column
 RG_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "RG") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xRG = x,
          yRG = y)
 
 # create a distance from Center column
 C_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "C") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xCenter = x,
          yCenter = y)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  left_join(LT_coordinates, by = c("playId", "gameId", "frameId")) %>%
-  left_join(RT_coordinates, by = c("playId", "gameId", "frameId")) %>%
-  left_join(RG_coordinates, by = c("playId", "gameId", "frameId")) %>%
-  left_join(LG_coordinates, by = c("playId", "gameId", "frameId")) %>%
-  left_join(C_coordinates, by = c("playId", "gameId", "frameId"))
+  left_join(LT_coordinates, by = c("playId", "gameId", "nflId", "frameId")) %>%
+  left_join(RT_coordinates, by = c("playId", "gameId", "nflId", "frameId")) %>%
+  left_join(RG_coordinates, by = c("playId", "gameId", "nflId", "frameId")) %>%
+  left_join(LG_coordinates, by = c("playId", "gameId", "nflId", "frameId")) %>%
+  left_join(C_coordinates, by = c("playId", "gameId", "nflId", "frameId"))
 
 # clean up environment
 rm(C_coordinates, LT_coordinates, LG_coordinates, RT_coordinates, RG_coordinates)
@@ -132,12 +132,12 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
 # create a distance from TEL1 column
 TEL1_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "TEL1") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xTEL1 = x,
          yTEL1 = y)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  left_join(TEL1_coordinates, by = c("playId", "gameId", "frameId")) 
+  left_join(TEL1_coordinates, by = c("playId", "gameId", "nflId", "frameId")) 
 rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Frame1)
 
 # Now define TEL2
@@ -159,12 +159,12 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
 # create a distance from TEL2 column
 TEL2_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "TEL2") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xTEL2 = x,
          yTEL2 = y)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  left_join(TEL2_coordinates, by = c("playId", "gameId", "frameId")) 
+  left_join(TEL2_coordinates, by = c("playId", "gameId", "nflId", "frameId")) 
 rm(TEL2_coordinates, DesignedRuns_TEL2_Identify_Frame1)
 
 # Now define TEL3
@@ -186,12 +186,12 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
 # create a distance from TEL3 column
 TEL3_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "TEL3") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xTEL3 = x,
          yTEL3 = y)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  left_join(TEL3_coordinates, by = c("playId", "gameId", "frameId")) 
+  left_join(TEL3_coordinates, by = c("playId", "gameId", "nflId", "frameId")) 
 rm(TEL3_coordinates, DesignedRuns_TEL3_Identify_Frame1)
 
 # Now define TER1
@@ -213,12 +213,12 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
 # create a distance from TER1 column
 TER1_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "TER1") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xTER1 = x,
          yTER1 = y)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  left_join(TER1_coordinates, by = c("playId", "gameId", "frameId")) 
+  left_join(TER1_coordinates, by = c("playId", "gameId", "nflId", "frameId")) 
 rm(TER1_coordinates, DesignedRuns_TER1_Identify_Frame1)
 
 # Now define TER2
@@ -240,12 +240,12 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
 # create a distance from TER2 column
 TER2_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "TER2") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xTER2 = x,
          yTER2 = y)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  left_join(TER2_coordinates, by = c("playId", "gameId", "frameId")) 
+  left_join(TER2_coordinates, by = c("playId", "gameId", "nflId", "frameId")) 
 rm(TER2_coordinates, DesignedRuns_TER2_Identify_Frame1)
 
 # Now define TER3
@@ -267,11 +267,11 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
 # create a distance from TER3 column
 TER3_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "TER3") %>%
-  select(gameId, playId, x, y, frameId) %>%
+  select(gameId, playId, nflId, x, y, frameId) %>%
   rename(xTER3 = x,
          yTER3 = y)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  left_join(TER3_coordinates, by = c("playId", "gameId", "frameId")) 
+  left_join(TER3_coordinates, by = c("playId", "gameId", "nflId", "frameId")) 
 rm(TER3_coordinates, DesignedRuns_TER3_Identify_Frame1)
 
