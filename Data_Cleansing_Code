@@ -135,6 +135,7 @@ rm(ball_df, Frame1_Ball_Location)
 
 nflverse_pbp <- nflfastR::load_pbp(2022)
 nflverse_pbp <- nflverse_pbp %>% filter(week %in% 1:9)
+# This gives descriptions of NFLVerse columns: View(field_descriptions)
 
 # General data cleansing/checking for errors
 sort(table(players$nflId)) # no duplicates
