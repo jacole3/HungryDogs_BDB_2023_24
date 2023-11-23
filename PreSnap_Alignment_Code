@@ -276,13 +276,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 rm(TER3_coordinates, DesignedRuns_TER3_Identify_Frame1)
 
 # View(DesignedRuns_Merged %>% filter(is.na(nflId))); this is empty
-
-# Now, check for incorrect copies/duplicates in all original data sets (i.e. player season shows up twice)
-# Now, check for incorrect copies/duplicates in all original data sets (i.e. player season shows up twice)
-Duplicates_DesignedRuns <- DesignedRuns_Merged %>% 
-  group_by(nflId, playId, gameId, frameId) %>%
-  summarize(Copies = n()) %>% filter(Copies > 1)
-
 # Use unique() to get rid of any duplicates
 DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 rm(Duplicates_DesignedRuns)
