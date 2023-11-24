@@ -137,6 +137,11 @@ nflverse_pbp <- nflfastR::load_pbp(2022)
 nflverse_pbp <- nflverse_pbp %>% filter(week %in% 1:9)
 # This gives descriptions of NFLVerse columns: View(field_descriptions)
 
+# View(nflverse_pbp %>% filter(run_location == "middle" & !is.na(run_gap)))
+# This is empty, meaning all "middle" runs have NA for run_gap - adjust this
+nflverse_pbp <- nflverse_pbp %>% mutate(
+  run_gap = ifelse(run_location == "middle", "center", run_gap))
+
 # General data cleansing/checking for errors
 sort(table(players$nflId)) # no duplicates
 sort(table(players$displayName)) # no duplicates
