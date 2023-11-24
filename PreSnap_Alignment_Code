@@ -278,5 +278,4 @@ rm(TER3_coordinates, DesignedRuns_TER3_Identify_Frame1)
 # View(DesignedRuns_Merged %>% filter(is.na(nflId))); this is empty
 # Use unique() to get rid of any duplicates
 DesignedRuns_Merged <- unique(DesignedRuns_Merged)
-rm(Duplicates_DesignedRuns)
 
