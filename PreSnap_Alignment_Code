@@ -116,7 +116,7 @@ rm(C_coordinates, LT_coordinates, LG_coordinates, RT_coordinates, RG_coordinates
 # Recall that for designed runs, Ball_X_Frame1 & Ball_Y_Frame1 do correlate with LOS
 DesignedRuns_TEL1_Identify_Frame1 <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-  frameId == 1, y > yLT, y <= 2.5 + yLT, x >= xLT - 1) %>%
+  frameId == 1, y > yLT, y <= 2 + yLT, x >= xLT - 1.25) %>%
   mutate(Is_TEL1 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL1)
 
@@ -143,7 +143,7 @@ rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Frame1)
 # Now define TEL2
 DesignedRuns_TEL2_Identify_Frame1 <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y > yTEL1, y <= 2.5 + yTEL1, x >= xLT - 1) %>%
+         frameId == 1, y > yTEL1, y <= 2 + yTEL1, x >= xLT - 1.25) %>%
   mutate(Is_TEL2 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL2)
 
@@ -170,7 +170,7 @@ rm(TEL2_coordinates, DesignedRuns_TEL2_Identify_Frame1)
 # Now define TEL3
 DesignedRuns_TEL3_Identify_Frame1 <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y > yTEL2, y <= 2.5 + yTEL2, x >= xLT - 1) %>%
+         frameId == 1, y > yTEL2, y <= 2 + yTEL2, x >= xLT - 1.25) %>%
   mutate(Is_TEL3 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL3)
 
@@ -197,7 +197,7 @@ rm(TEL3_coordinates, DesignedRuns_TEL3_Identify_Frame1)
 # Now define TER1
 DesignedRuns_TER1_Identify_Frame1 <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y < yRT, y >= yRT - 2.5, x >= xRT - 1) %>%
+         frameId == 1, y < yRT, y >= yRT - 2, x >= xRT - 1.25) %>%
   mutate(Is_TER1 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TER1)
 
@@ -224,7 +224,7 @@ rm(TER1_coordinates, DesignedRuns_TER1_Identify_Frame1)
 # Now define TER2
 DesignedRuns_TER2_Identify_Frame1 <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y < yTER1, y >= yTER1 - 2.5, x >= xRT - 1) %>%
+         frameId == 1, y < yTER1, y >= yTER1 - 2, x >= xRT - 1.25) %>%
   mutate(Is_TER2 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TER2)
 
@@ -251,7 +251,7 @@ rm(TER2_coordinates, DesignedRuns_TER2_Identify_Frame1)
 # Now define TER3
 DesignedRuns_TER3_Identify_Frame1 <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y < yTER2, y >= yTER2 - 2.5, x >= xRT - 1) %>%
+         frameId == 1, y < yTER2, y >= yTER2 - 2, x >= xRT - 1.25) %>%
   mutate(Is_TER3 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TER3)
 
