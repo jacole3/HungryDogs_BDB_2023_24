@@ -84,7 +84,7 @@ LG_coordinates <- DesignedRuns_Merged %>%
 # create a distance from RT column
 RT_coordinates <- DesignedRuns_Merged %>%
   filter(AlignedPos == "RT") %>%
-  select(gameId, playId, nflId_C = nflId, x, y, frameId) %>%
+  select(gameId, playId, nflId_RT = nflId, x, y, frameId) %>%
   rename(xRT = x,
          yRT = y)
 
