@@ -21,22 +21,23 @@ MergedData <- MergedData %>%
   "offense",
   "defense"))
 
-# Run the following code for designed runs separately
+# Run the following code for when we want designed runs separately
+# This is because we don't have "start of snap" data for the dropbacks
 DesignedRuns_Merged <- MergedData %>% filter(pass == 0)
 
-FirstFrameOfPlay_DesignedRuns <- DesignedRuns_Merged %>%
+DesignedRuns_AtSnap <- DesignedRuns_Merged %>%
   group_by(gameId, playId, PlayerSideOfBall) %>%
-  filter(frameId == 1) %>% mutate(X_PreSnap_Rank = rank(-x, ties.method = "first")) %>%
+  filter(event == "ball_snap") %>% mutate(X_PreSnap_Rank = rank(-x, ties.method = "first")) %>%
   ungroup() %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, X_PreSnap_Rank, 
          PreSnap_x = x, PreSnap_y = y)
 # table(FirstFrameOfPlay_DesignedRuns$X_PreSnap_Rank); rank is never higher than 11
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  merge(FirstFrameOfPlay_DesignedRuns, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
+  merge(DesignedRuns_AtSnap, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:181, "PlayerSideOfBall")
-rm(FirstFrameOfPlay_DesignedRuns)
+rm(DesignedRuns_AtSnap)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(PreSnap_OnLOS =
       ifelse(PlayerSideOfBall == "offense" & X_PreSnap_Rank %in% 1:7, "Offense_LOS",
@@ -47,7 +48,7 @@ table(DesignedRuns_Merged$PreSnap_OnLOS)
 # This helps us adjust for two players being listed as C (e.g. BUF Mitch Morse, Ryan Bates)
 DesignedRuns_ByLOSAlignment <- DesignedRuns_Merged %>%
   group_by(gameId, playId, PreSnap_OnLOS) %>%
-  filter(frameId == 1) %>% 
+  filter(event == "ball_snap") %>% 
   mutate(Y_PreSnap_Rank = rank(-y, ties.method = "first")) %>%
   ungroup() %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, position, PreSnap_OnLOS, Y_PreSnap_Rank)
@@ -114,13 +115,13 @@ rm(C_coordinates, LT_coordinates, LG_coordinates, RT_coordinates, RG_coordinates
 
 # Define TEs using Y and X coordinates
 # Recall that for designed runs, Ball_X_Frame1 & Ball_Y_Frame1 do correlate with LOS
-DesignedRuns_TEL1_Identify_Frame1 <- DesignedRuns_Merged %>%
+DesignedRuns_TEL1_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-  frameId == 1, y > yLT, y <= 2 + yLT, x >= xLT - 1.25) %>%
+  event == "ball_snap", y > yLT, y <= 2 + yLT, x >= xLT - 1.25) %>%
   mutate(Is_TEL1 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL1)
 
-DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL1_Identify_Frame1, 
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL1_Identify_Snap, 
           by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
@@ -138,23 +139,23 @@ TEL1_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL1_coordinates, by = c("playId", "gameId", "frameId")) 
-rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Frame1)
+rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Snap)
 
 # Now define TEL2
-DesignedRuns_TEL2_Identify_Frame1 <- DesignedRuns_Merged %>%
+DesignedRuns_TEL2_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y > yTEL1, y <= 2 + yTEL1, x >= xLT - 1.25) %>%
+         event == "ball_snap", y > yTEL1, y <= 2 + yTEL1, x >= xLT - 1.25) %>%
   mutate(Is_TEL2 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL2)
 
-DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL2_Identify_Frame1, 
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL2_Identify_Snap, 
                     by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TEL2 = ifelse(!is.na(Is_TEL2), TRUE, FALSE))
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
-                                                        ifelse(Is_TEL2 == TRUE, "TEL2", AlignedPos))
+                                     ifelse(Is_TEL2 == TRUE, "TEL2", AlignedPos))
 
 # create a distance from TEL2 column
 TEL2_coordinates <- DesignedRuns_Merged %>%
@@ -165,23 +166,23 @@ TEL2_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL2_coordinates, by = c("playId", "gameId", "frameId")) 
-rm(TEL2_coordinates, DesignedRuns_TEL2_Identify_Frame1)
+rm(TEL2_coordinates, DesignedRuns_TEL2_Identify_Snap)
 
 # Now define TEL3
-DesignedRuns_TEL3_Identify_Frame1 <- DesignedRuns_Merged %>%
+DesignedRuns_TEL3_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y > yTEL2, y <= 2 + yTEL2, x >= xLT - 1.25) %>%
+         event == "ball_snap", y > yTEL2, y <= 2 + yTEL2, x >= xLT - 1.25) %>%
   mutate(Is_TEL3 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TEL3)
 
-DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL3_Identify_Frame1, 
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL3_Identify_Snap, 
                 by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TEL3 = ifelse(!is.na(Is_TEL3), TRUE, FALSE))
 
-DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
-                                                        ifelse(Is_TEL3 == TRUE, "TEL3", AlignedPos))
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos = 
+                                      ifelse(Is_TEL3 == TRUE, "TEL3", AlignedPos))
 
 # create a distance from TEL3 column
 TEL3_coordinates <- DesignedRuns_Merged %>%
@@ -192,23 +193,23 @@ TEL3_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL3_coordinates, by = c("playId", "gameId", "frameId")) 
-rm(TEL3_coordinates, DesignedRuns_TEL3_Identify_Frame1)
+rm(TEL3_coordinates, DesignedRuns_TEL3_Identify_Snap)
 
 # Now define TER1
-DesignedRuns_TER1_Identify_Frame1 <- DesignedRuns_Merged %>%
+DesignedRuns_TER1_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y < yRT, y >= yRT - 2, x >= xRT - 1.25) %>%
+         event == "ball_snap", y < yRT, y >= yRT - 2, x >= xRT - 1.25) %>%
   mutate(Is_TER1 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TER1)
 
-DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER1_Identify_Frame1, 
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER1_Identify_Snap, 
                by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TER1 = ifelse(!is.na(Is_TER1), TRUE, FALSE))
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
-                                                        ifelse(Is_TER1 == TRUE, "TER1", AlignedPos))
+                                       ifelse(Is_TER1 == TRUE, "TER1", AlignedPos))
 
 # create a distance from TER1 column
 TER1_coordinates <- DesignedRuns_Merged %>%
@@ -219,23 +220,23 @@ TER1_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER1_coordinates, by = c("playId", "gameId", "frameId")) 
-rm(TER1_coordinates, DesignedRuns_TER1_Identify_Frame1)
+rm(TER1_coordinates, DesignedRuns_TER1_Identify_Snap)
 
 # Now define TER2
-DesignedRuns_TER2_Identify_Frame1 <- DesignedRuns_Merged %>%
+DesignedRuns_TER2_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y < yTER1, y >= yTER1 - 2, x >= xRT - 1.25) %>%
+         event == "ball_snap", y < yTER1, y >= yTER1 - 2, x >= xRT - 1.25) %>%
   mutate(Is_TER2 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TER2)
 
-DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER2_Identify_Frame1, 
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER2_Identify_Snap, 
          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TER2 = ifelse(!is.na(Is_TER2), TRUE, FALSE))
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
-                                                        ifelse(Is_TER2 == TRUE, "TER2", AlignedPos))
+                                      ifelse(Is_TER2 == TRUE, "TER2", AlignedPos))
 
 # create a distance from TER2 column
 TER2_coordinates <- DesignedRuns_Merged %>%
@@ -246,23 +247,23 @@ TER2_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER2_coordinates, by = c("playId", "gameId", "frameId")) 
-rm(TER2_coordinates, DesignedRuns_TER2_Identify_Frame1)
+rm(TER2_coordinates, DesignedRuns_TER2_Identify_Snap)
 
 # Now define TER3
-DesignedRuns_TER3_Identify_Frame1 <- DesignedRuns_Merged %>%
+DesignedRuns_TER3_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
-         frameId == 1, y < yTER2, y >= yTER2 - 2, x >= xRT - 1.25) %>%
+         event == "ball_snap", y < yTER2, y >= yTER2 - 2, x >= xRT - 1.25) %>%
   mutate(Is_TER3 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_TER3)
 
-DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER3_Identify_Frame1, 
+DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER3_Identify_Snap, 
             by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TER3 = ifelse(!is.na(Is_TER3), TRUE, FALSE))
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
-                                                        ifelse(Is_TER3 == TRUE, "TER3", AlignedPos))
+                             ifelse(Is_TER3 == TRUE, "TER3", AlignedPos))
 
 # create a distance from TER3 column
 TER3_coordinates <- DesignedRuns_Merged %>%
@@ -273,7 +274,7 @@ TER3_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER3_coordinates, by = c("playId", "gameId", "frameId")) 
-rm(TER3_coordinates, DesignedRuns_TER3_Identify_Frame1)
+rm(TER3_coordinates, DesignedRuns_TER3_Identify_Snap)
 
 # View(DesignedRuns_Merged %>% filter(is.na(nflId))); this is empty
 # Use unique() to get rid of any duplicates
