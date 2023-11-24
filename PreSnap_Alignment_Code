@@ -141,6 +141,9 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL1_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Snap)
 
+# Use unique() to get rid of any duplicates
+DesignedRuns_Merged <- unique(DesignedRuns_Merged)
+
 # Now define TEL2
 DesignedRuns_TEL2_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
@@ -167,6 +170,9 @@ TEL2_coordinates <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL2_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TEL2_coordinates, DesignedRuns_TEL2_Identify_Snap)
+
+# Use unique() to get rid of any duplicates
+DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 
 # Now define TEL3
 DesignedRuns_TEL3_Identify_Snap <- DesignedRuns_Merged %>%
@@ -195,6 +201,9 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL3_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TEL3_coordinates, DesignedRuns_TEL3_Identify_Snap)
 
+# Use unique() to get rid of any duplicates
+DesignedRuns_Merged <- unique(DesignedRuns_Merged)
+
 # Now define TER1
 DesignedRuns_TER1_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
@@ -221,6 +230,9 @@ TER1_coordinates <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER1_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TER1_coordinates, DesignedRuns_TER1_Identify_Snap)
+
+# Use unique() to get rid of any duplicates
+DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 
 # Now define TER2
 DesignedRuns_TER2_Identify_Snap <- DesignedRuns_Merged %>%
@@ -249,6 +261,9 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER2_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TER2_coordinates, DesignedRuns_TER2_Identify_Snap)
 
+# Use unique() to get rid of any duplicates
+DesignedRuns_Merged <- unique(DesignedRuns_Merged)
+
 # Now define TER3
 DesignedRuns_TER3_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos),
@@ -276,7 +291,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER3_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TER3_coordinates, DesignedRuns_TER3_Identify_Snap)
 
-# View(DesignedRuns_Merged %>% filter(is.na(nflId))); this is empty
 # Use unique() to get rid of any duplicates
 DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 
