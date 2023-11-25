@@ -21,6 +21,10 @@ MergedData <- MergedData %>%
   "offense",
   "defense"))
 
+# Reminder from data cleansing: highest Y value is to offense's left
+# Highest X value is end zone offense is aiming at
+# So the offensive players lined up on LOS will have highest X
+
 # Run the following code for when we want designed runs separately
 # This is because we don't have "start of snap" data for the dropbacks
 DesignedRuns_Merged <- MergedData %>% filter(pass == 0)
