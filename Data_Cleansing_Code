@@ -258,3 +258,8 @@ MergedData <- MergedData %>%
 # Find other ways to filter down data, e.g. excluding garbage time
 MergedData <- MergedData %>%
   filter(wp >= 0.05 & wp <= 0.95)
+
+table(MergedData$offenseFormation)
+# Make simplified version for under center vs. not under center
+MergedData <- MergedData %>% mutate(QBAlignment =
+     ifelse(offenseFormation %in% c("EMPTY", "PISTOL", "SHOTGUN", "WILDCAT"), "Gun", "UC"))
