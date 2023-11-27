@@ -668,3 +668,25 @@ TER3Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>%
   filter(AlignedPos == "TER3", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
 rm(TER3Numbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos)
+
+# Now classify how many total TEs there are on each play
+left_tes <- DesignedRuns_Merged %>% 
+  filter(event == "ball_snap",
+         AlignedPos %in% c("TEL1", "TEL2", "TEL3")) %>% 
+  group_by(gameId, playId) %>% 
+  summarize(num_left_tes = n())
+
+right_tes <- DesignedRuns_Merged %>% 
+  filter(event == "ball_snap",
+         AlignedPos %in% c("TER1", "TER2", "TER3")) %>% 
+  group_by(gameId, playId) %>% 
+  summarize(num_right_tes = n())
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% 
+  left_join(left_tes, by = c("gameId","playId")) %>% 
+  left_join(right_tes, by = c("gameId","playId"))
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% 
+  mutate(num_left_tes = ifelse(is.na(num_left_tes), 0, num_left_tes),
+         num_right_tes = ifelse(is.na(num_right_tes), 0, num_right_tes))
+rm(left_tes, right_tes)
