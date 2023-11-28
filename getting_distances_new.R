@@ -40,7 +40,7 @@ for (i in 1:length(unique(test_play$game_play_frame_comb))) {
     x_coord <- frame_i$x[j]
     y_coord <- frame_i$y[j]
     player <- c(player, player_i)
-    other_players <- c(other_players, other_players_i)
+    #other_players <- c(other_players, other_players_i)
     dist_i <- calc_distance(x = x_coord, y = y_coord, x_baseline = frame_i$x, y_baseline = frame_i$y)
     dist <- c(dist, dist_i)
   }
@@ -55,36 +55,83 @@ colnames(test_output) <- c("game_play_frame_comb", "nflid", "distance")
 
 ######################################################
 ##run on the full file:
+# player <- c() # player of interest
+# other_players <- c() # other players in frame
+# names <- c()
+# dist <- c()
+# t1 <- Sys.time()
+# for (i in 1:length(unique(tracking_w1$game_play_frame_comb))) {
+#   print(i)
+#   frame_i <- test_play[which(test_play$number==i), c("game_play_frame_comb","nflId", "displayName", "frameId", "x", "y")]
+#   #other_players_i <- rep(frame_i$nflId, 23)
+#   game_play_frame_comb <- rep(frame_i$game_play_frame_comb, 23)
+#   for (j in 1:23) { ##looping through each player in the frame
+#     player_i <- rep(frame_i$nflId[j], 23)
+#     x_coord <- frame_i$x[j]
+#     y_coord <- frame_i$y[j]
+#     player <- c(player, player_i)
+#     #other_players <- c(other_players, other_players_i)
+#     dist_i <- calc_distance(x = x_coord, y = y_coord, x_baseline = frame_i$x, y_baseline = frame_i$y)
+#     dist <- c(dist, dist_i)
+#   }
+# }
+# t2 <- Sys.time()
+# t2-t1
+
+game_play_frame_comb<-c()                          
 player <- c() # player of interest
-other_players <- c() # other players in frame
-names <- c()
+closest_player <- c() # other players in frame
 dist <- c()
 t1 <- Sys.time()
 for (i in 1:length(unique(tracking_w1$game_play_frame_comb))) {
   print(i)
-  frame_i <- test_play[which(test_play$number==i), c("game_play_frame_comb","nflId", "displayName", "frameId", "x", "y")]
+  frame_i <- tracking_w1[which(tracking_w1$number==i), c("game_play_frame_comb","nflId", "club", "displayName", "frameId", "x", "y")] # removing game_play_frame_comb(go back if)
   #other_players_i <- rep(frame_i$nflId, 23)
-  game_play_frame_comb <- rep(frame_i$game_play_frame_comb, 23)
+  game_play_frame_comb_i <- rep(frame_i$game_play_frame_comb[which(frame_i$club!="football")],3) #not that simple
+  game_play_frame_comb <- c(game_play_frame_comb, game_play_frame_comb_i)
   for (j in 1:23) { ##looping through each player in the frame
-    player_i <- rep(frame_i$nflId[j], 23)
-    x_coord <- frame_i$x[j]
-    y_coord <- frame_i$y[j]
-    player <- c(player, player_i)
-    #other_players <- c(other_players, other_players_i)
-    dist_i <- calc_distance(x = x_coord, y = y_coord, x_baseline = frame_i$x, y_baseline = frame_i$y)
-    dist <- c(dist, dist_i)
+    if (frame_i$club[j]!="football") {
+      club_i <- frame_i$club[j] #player's club
+      player_i <- frame_i$nflId[j] #player
+      x_coord <- frame_i$x[j] #player's x coord
+      y_coord <- frame_i$y[j] #player's y coord
+      player <- c(player, rep(player_i,3)) #player's name repeated three times
+      
+      #calculating distances and grabbing other stats
+      dist_i <- calc_distance(x = x_coord, y = y_coord, x_baseline = frame_i$x, y_baseline = frame_i$y)#player's distance to everyone on the field
+      min_dist_same_team <- min(dist_i[which(frame_i$club==club_i & dist_i>0)])
+      min_dist_diff_team <- min(dist_i[which(frame_i$club!=club_i & frame_i$club!="football" & dist_i>0)])
+      min_dist_football <- min(dist_i[which(frame_i$club=="football" & dist_i>0)])
+      dist <- c(dist, min_dist_same_team, min_dist_diff_team, min_dist_football)
+      closest_player_i <- frame_i$nflId[c(which(dist_i==min_dist_same_team),
+                                          which(dist_i==min_dist_diff_team),
+                                          which(dist_i==min_dist_football))]
+      closest_player <- c(closest_player, closest_player_i)
+    }
+    else if (frame_i$club[j]=="football") {
+      next
+    }
   }
 }
 t2 <- Sys.time()
 t2-t1
 
+
+closest_player
 ## checking output:
-test_output <- cbind(game_play_frame_comb,player, dist)
-colnames(test_output) <- c("game_play_frame_comb", "nflid", "distance")
+test_output <- data.frame(cbind(game_play_frame_comb,player,closest_player, dist))
+colnames(test_output) <- c("game_play_frame_comb", "nflid", "closest_player", "distance")
+write.csv(test_output,"w1_dist.csv")
 
+View(test_output[1:100,])
 
+test_output <- test_output%>%
+  group_by(game_play_frame_comb) %>%
+  mutate(count=n()) %>%
+  ungroup()
 
-
+View(tracking_w1%>% filter(game_play_frame_comb=='2022090800-101-1'))
+View(tracking_w1%>% filter(number==1))
 
 ## This was the original code that I used (feel free to test)
 ##looping through everything
@@ -114,3 +161,24 @@ colnames(test_output) <- c("game_play_frame_comb", "nflid", "distance")
 # }
 # t2 <- Sys.time()
 # t2-t1
+
+tracking_w1 %>%
+  filter(game_play_frame_comb%in% c("2022090800-101-1", "2022090800-101-2")) %>%
+  ggplot(aes(x = x, y = y, color = club)) +
+  geom_point()+
+  facet_wrap(~game_play_frame_comb)
+
+######
+ball_df <- tracking_combined %>% 
+  filter(club == "football") %>% 
+  select(gameId, playId, frameId, x, y) %>% 
+  rename(ball_x = x,
+         ball_y = y)
+
+tracking_combined <- tracking_combined %>% 
+  left_join(ball_df, by = c("playId", "gameId", "frameId"))
+
+tracking_combined <- tracking_combined %>% 
+  mutate(TotDistFromBall = sqrt((x - ball_x) ^ 2 + (y - ball_y) ^ 2))
+rm(ball_df, line_of_scrimmage)
+  
