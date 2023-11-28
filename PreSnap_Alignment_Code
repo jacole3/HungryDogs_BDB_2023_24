@@ -690,3 +690,5 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   mutate(num_left_tes = ifelse(is.na(num_left_tes), 0, num_left_tes),
          num_right_tes = ifelse(is.na(num_right_tes), 0, num_right_tes))
 rm(left_tes, right_tes)
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  mutate(num_total_tes = num_left_tes + num_right_tes)
