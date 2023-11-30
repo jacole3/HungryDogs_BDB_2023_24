@@ -84,7 +84,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos =
 
 # Now, we want it where "if Y rank is one ahead of center's Y rank, then LG"
 # "If Y rank is two ahead of center's Y rank, then LT", etc.
-# Probably will have to group_by() playId to do so
+# Will have to group_by() playId to do so
 DesignedRuns_Center_PreSnap <- DesignedRuns_Merged %>%
   group_by(gameId, playId, OL_Label) %>%
   filter(event == "ball_snap") %>% 
@@ -94,7 +94,7 @@ DesignedRuns_Center_PreSnap <- DesignedRuns_Merged %>%
          C_PreSnap_YRank_AmongOL = Y_PreSnap_Rank_By_OL_Label, AlignedPos) %>%
   filter(AlignedPos == "C")
 
-# Now get rid of the unnecessary before we merge
+# Now get rid of the unnecessary columns before we merge
 DesignedRuns_Center_PreSnap <- DesignedRuns_Center_PreSnap %>%
   select(-c("nflId", "displayName", "PlayerSideOfBall", "AlignedPos"))
 
