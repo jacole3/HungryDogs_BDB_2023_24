@@ -716,4 +716,5 @@ DesignedRuns_BoxEnd_Right <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   merge(DesignedRuns_BoxEnd_Right, by = c("gameId", "playId", "nflId", "displayName", "AlignedPos_Box"))
+rm(DesignedRuns_BoxEnd_Left, DesignedRuns_BoxEnd_Right)
 
