@@ -45,7 +45,7 @@ DesignedRuns_AtSnap <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   merge(DesignedRuns_AtSnap, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:181, "PlayerSideOfBall")
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:182, "PlayerSideOfBall")
 rm(DesignedRuns_AtSnap)
 
 # Now rank the "y" column for OL specifically
