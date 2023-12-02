@@ -692,3 +692,28 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 rm(left_tes, right_tes)
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   mutate(num_total_tes = num_left_tes + num_right_tes)
+
+# Define the outer regions of the "box" by using furthest distance from C
+# Recall that maximum "y" is to the offense's left
+table(DesignedRuns_Merged$AlignedPos_Box)
+
+DesignedRuns_BoxEnd_Left <- DesignedRuns_Merged %>%
+  group_by(gameId, playId) %>%
+  filter(event == "ball_snap" & !is.na(AlignedPos_Box)) %>% 
+  mutate(FarLeft_Box = ifelse(PreSnap_y == max(PreSnap_y), TRUE, FALSE)) %>%
+  ungroup() %>%
+  select(gameId, playId, nflId, displayName, AlignedPos_Box, FarLeft_Box)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  merge(DesignedRuns_BoxEnd_Left, by = c("gameId", "playId", "nflId", "displayName", "AlignedPos_Box"))
+
+DesignedRuns_BoxEnd_Right <- DesignedRuns_Merged %>%
+  group_by(gameId, playId) %>%
+  filter(event == "ball_snap" & !is.na(AlignedPos_Box)) %>% 
+  mutate(FarRight_Box = ifelse(PreSnap_y == min(PreSnap_y), TRUE, FALSE)) %>%
+  ungroup() %>%
+  select(gameId, playId, nflId, displayName, AlignedPos_Box, FarRight_Box)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  merge(DesignedRuns_BoxEnd_Right, by = c("gameId", "playId", "nflId", "displayName", "AlignedPos_Box"))
+
