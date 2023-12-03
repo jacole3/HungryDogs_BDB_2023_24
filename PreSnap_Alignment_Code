@@ -705,7 +705,7 @@ DesignedRuns_BoxEnd_Left <- DesignedRuns_Merged %>%
   select(gameId, playId, nflId, displayName, AlignedPos_Box, FarLeft_Box)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  merge(DesignedRuns_BoxEnd_Left, by = c("gameId", "playId", "nflId", "displayName", "AlignedPos_Box"))
+  left_join(DesignedRuns_BoxEnd_Left, by = c("gameId", "playId", "nflId", "displayName", "AlignedPos_Box"))
 
 DesignedRuns_BoxEnd_Right <- DesignedRuns_Merged %>%
   group_by(gameId, playId) %>%
@@ -715,6 +715,39 @@ DesignedRuns_BoxEnd_Right <- DesignedRuns_Merged %>%
   select(gameId, playId, nflId, displayName, AlignedPos_Box, FarRight_Box)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  merge(DesignedRuns_BoxEnd_Right, by = c("gameId", "playId", "nflId", "displayName", "AlignedPos_Box"))
-rm(DesignedRuns_BoxEnd_Left, DesignedRuns_BoxEnd_Right)
+  left_join(DesignedRuns_BoxEnd_Right, by = c("gameId", "playId", "nflId", "displayName", "AlignedPos_Box"))
 
+# create columns for where the edges of the box are (only y is relevant)
+FarLeft_Box_Location <- DesignedRuns_Merged %>%
+  filter(FarLeft_Box == TRUE, event == "ball_snap") %>%
+  select(gameId, playId, y) %>%
+  rename(FarLeft_Box_Y_Snap = y)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  left_join(FarLeft_Box_Location, by = c("playId", "gameId"))
+
+FarRight_Box_Location <- DesignedRuns_Merged %>%
+  filter(FarRight_Box == TRUE, event == "ball_snap") %>%
+  select(gameId, playId, y) %>%
+  rename(FarRight_Box_Y_Snap = y)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  left_join(FarRight_Box_Location, by = c("playId", "gameId"))
+rm(FarLeft_Box_Location, FarRight_Box_Location, DesignedRuns_BoxEnd_Left, DesignedRuns_BoxEnd_Right)
+
+# Then treat defenders similarly, where "x" within 1.5 yards of LOS means "on the line"
+# And use 6 yards of "x" from the LOS to be "in the box"
+# Likewise, "y" must be within 2.5 yards of edge
+DesignedRuns_Defenders_InBox <- DesignedRuns_Merged %>%
+  group_by(gameId, playId, nflId) %>%
+  filter(event == "ball_snap", PlayerSideOfBall == "defense") %>% 
+  mutate(DefenderInBox = ifelse(x - Ball_X_Frame1 <= 6 & y <= FarLeft_Box_Y_Snap + 2.5 & y >= FarRight_Box_Y_Snap - 2.5, TRUE, FALSE),
+         DefenderInBox_OnLOS = ifelse(x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 2.5 & y >= FarRight_Box_Y_Snap - 2.5, TRUE, FALSE)) %>%
+  ungroup() %>%
+  select(gameId, playId, nflId, displayName, DefenderInBox, DefenderInBox_OnLOS,
+         PreSnap_x = x, PreSnap_y = y, Ball_X_Frame1)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  left_join(DesignedRuns_Defenders_InBox, by = c("gameId", "playId", "nflId", "displayName", "Ball_X_Frame1", "PreSnap_x", "PreSnap_y"))
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+rm(DesignedRuns_Defenders_InBox)
