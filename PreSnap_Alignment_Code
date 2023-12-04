@@ -737,12 +737,13 @@ rm(FarLeft_Box_Location, FarRight_Box_Location, DesignedRuns_BoxEnd_Left, Design
 
 # Then treat defenders similarly, where "x" within 1.5 yards of LOS means "on the line"
 # And use 6 yards of "x" from the LOS to be "in the box"
-# Likewise, "y" must be within 2.5 yards of edge
+# Likewise, "y" must be within 2.5 yards of edge (or 3, if on LOS)
 DesignedRuns_Defenders_InBox <- DesignedRuns_Merged %>%
   group_by(gameId, playId, nflId) %>%
   filter(event == "ball_snap", PlayerSideOfBall == "defense") %>% 
-  mutate(DefenderInBox = ifelse(x - Ball_X_Frame1 <= 6 & y <= FarLeft_Box_Y_Snap + 2.5 & y >= FarRight_Box_Y_Snap - 2.5, TRUE, FALSE),
-         DefenderInBox_OnLOS = ifelse(x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 2.5 & y >= FarRight_Box_Y_Snap - 2.5, TRUE, FALSE)) %>%
+  mutate(DefenderInBox = ifelse((x - Ball_X_Frame1 <= 6 & y <= FarLeft_Box_Y_Snap + 2.5 & y >= FarRight_Box_Y_Snap - 2.5) |
+                                  x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 3 & y >= FarRight_Box_Y_Snap - 3, TRUE, FALSE),
+         DefenderInBox_OnLOS = ifelse(x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 3 & y >= FarRight_Box_Y_Snap - 3, TRUE, FALSE)) %>%
   ungroup() %>%
   select(gameId, playId, nflId, displayName, DefenderInBox, DefenderInBox_OnLOS,
          PreSnap_x = x, PreSnap_y = y, Ball_X_Frame1)
@@ -751,3 +752,46 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(DesignedRuns_Defenders_InBox, by = c("gameId", "playId", "nflId", "displayName", "Ball_X_Frame1", "PreSnap_x", "PreSnap_y"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 rm(DesignedRuns_Defenders_InBox)
+
+# Then gap alignments can proceed from there
+pre_snap_gaps <- DesignedRuns_Merged %>% 
+  filter(event == "ball_snap",
+         PlayerSideOfBall == "defense") %>% 
+  select(gameId, playId, nflId, displayName, position, AlignedPos_Box, DefenderInBox, 
+         DefenderInBox_OnLOS, Ball_X_Frame1, X_dist_FromBallFrame1, Y_distFromMOF, x, y,
+         yLT, yLG, yCenter, yRG, yRT, PlayerSideOfBall, yTEL1, yTER1, yTEL2, yTER2, yTEL3, yTER3,
+         num_right_tes, num_left_tes) %>% 
+  mutate(pre_snap_gap =
+           case_when(y >= yCenter & y <= yLG ~ "L-A",
+                     y >= yLG & y <= yLT ~ "L-B",
+                     num_left_tes == 0 & y >= yLT ~ "L-C",
+                     y < yCenter & y >= yRG ~ "R-A",
+                     y <= yRG & y >= yRT ~ "R-B",
+                     num_right_tes == 0 & y <= yRT ~ "R-C",
+                     num_left_tes == 1 & y >= yLT & y <= yTEL1 ~ "L-C",
+                     num_left_tes == 1 & y >= yTEL1 ~ "L-D",
+                     num_left_tes == 2 & y >= yLT & y <= yTEL1 ~ "L-C",
+                     num_left_tes == 2 & y >= yTEL1 & y <= yTEL2 ~ "L-D",
+                     num_left_tes == 2 & y >= yTEL2 ~ "L-E",
+                     num_left_tes == 3 & y >= yLT & y <= yTEL1 ~ "L-C", 
+                     num_left_tes == 3 & y >= yTEL1 & y <= yTEL2 ~ "L-D",
+                     num_left_tes == 3 & y >= yTEL2 & y <= yTEL3 ~ "L-E",
+                     num_left_tes == 3 & y >= yTEL3 ~ "L-F",
+                     num_right_tes == 1 & y <= yRT & y >= yTER1 ~ "R-C",
+                     num_right_tes == 1 & y <= yTER1 ~ "R-D",
+                     num_right_tes == 2 & y <= yRT & y >= yTER1 ~ "R-C",
+                     num_right_tes == 2 & y <= yTER1 & y >= yTER2 ~ "R-D",
+                     num_right_tes == 2 & y <= yTER2 ~ "R-E",
+                     num_right_tes == 3 & y <= yRT & y >= yTER1 ~ "R-C",
+                     num_right_tes == 3 & y <= yTER1 & y >= yTER2 ~ "R-D",
+                     num_right_tes == 3 & y <= yTER2 & y >= yTER3 ~ "R-E",
+                     num_right_tes == 3 & y <= yTER3 ~ "R-F"))
+
+pre_snap_gaps <- pre_snap_gaps %>% 
+  select(gameId, playId, nflId, displayName, pre_snap_gap) %>% 
+  filter(nflId != "NA")
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  left_join(pre_snap_gaps, by = c("gameId", "playId", "nflId", "displayName"))
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+rm(pre_snap_gaps)
