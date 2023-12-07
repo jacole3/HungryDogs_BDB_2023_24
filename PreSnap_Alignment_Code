@@ -1,4 +1,4 @@
-# Recall that "MergedData" was originally created in the "Data Cleansing Code" document
+# Recall that "MergedData" was originally created in the "Data Cleansing Code" GitHub document
 
 # Make sure we have both offensive and defensive players
 table(MergedData$position)
@@ -45,7 +45,7 @@ DesignedRuns_AtSnap <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   merge(DesignedRuns_AtSnap, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:182, "PlayerSideOfBall")
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 6:183, "PlayerSideOfBall")
 rm(DesignedRuns_AtSnap)
 
 # Now rank the "y" column for OL specifically
@@ -75,7 +75,7 @@ DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_By_OL_Lab
                              by = c("gameId", "playId", "nflId", "displayName", "position", "OL_Label", "PlayerSideOfBall"),
                              all.x = TRUE)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 8:186, "position", "OL_Label", "PlayerSideOfBall")
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(1:4, 8:187, "position", "OL_Label", "PlayerSideOfBall")
 rm(DesignedRuns_By_OL_Label)
 
 # From there, use center to retroactively define other OL spots
