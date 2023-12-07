@@ -281,3 +281,23 @@ MergedData <- MergedData %>% group_by(gameId, playId, nflId) %>%
 
 MergedData <- MergedData %>% filter(Unnecessary_Late == FALSE)
 rm(Frames_EndOfPlay)
+
+# Create set of just designed runs (this data set includes ball being snapped)
+DesignedRuns_Merged <- MergedData %>% filter(pass == 0)
+
+# Getting rid of pre-snap frames for designed runs
+Frames_AtSnap <- DesignedRuns_Merged %>%
+  filter(event %in% c("ball_snap")) %>%
+  select(gameId, playId, frameId) %>%
+  rename(FrameNumber_AtSnap = frameId)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  left_join(Frames_AtSnap, by = c("playId", "gameId"))
+MergedData <- unique(MergedData) # to get rid of duplicates
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% group_by(gameId, playId, nflId) %>% 
+  mutate(Unnecessary_Early = ifelse(frameId < FrameNumber_AtSnap, TRUE, FALSE)) %>% 
+  ungroup()
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% filter(Unnecessary_Early == FALSE)
+rm(Frames_AtSnap)
