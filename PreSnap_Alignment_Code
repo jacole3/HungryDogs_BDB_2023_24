@@ -1,33 +1,11 @@
-# Recall that "MergedData" was originally created in the "Data Cleansing Code" GitHub document
+# Recall that "DesignedRuns_Merged" was originally created in the "Data Cleansing Code" GitHub document
 
-# Make sure we have both offensive and defensive players
-table(MergedData$position)
-
-# Make broader "PosGroup" label from there
-MergedData <- MergedData %>% mutate(PosGroup = ifelse(position %in% c("C", "G", "T"), "OL",
-      ifelse(position %in% c("CB", "DB", "FS", "SS"), "DB",
-          ifelse(position %in% c("DE", "DT", "NT"), "DL",
-             ifelse(position %in% c("FB", "RB"), "RB",
-                ifelse(position %in% c("ILB", "MLB", "OLB"), "LB",
-                       ifelse(position == "QB", "QB",
-                              ifelse(position == "TE", "TE", "WR"))))))))
-table(MergedData$PosGroup)
-
-MergedData <- MergedData %>%
-  mutate(PlayerSideOfBall = ifelse(((club == homeTeamAbbr) &
-                                (possessionTeam == homeTeamAbbr)) |
-    ((club == visitorTeamAbbr) &
-       (possessionTeam == visitorTeamAbbr)),
-  "offense",
-  "defense"))
+# Pre-snap alignment code has to be for designed runs separately
+# This is because we don't have "start of snap" data for the dropbacks
 
 # Reminder from data cleansing: highest Y value is to offense's left
 # Highest X value is end zone offense is aiming at
 # So the offensive players lined up on LOS will have highest X
-
-# Run the following code for when we want designed runs separately
-# This is because we don't have "start of snap" data for the dropbacks
-DesignedRuns_Merged <- MergedData %>% filter(pass == 0)
 
 # Add "x" pre-snap rank for each side of ball (e.g. who is closest to opposing end zone)
 DesignedRuns_AtSnap <- DesignedRuns_Merged %>%
