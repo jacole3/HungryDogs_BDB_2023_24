@@ -216,7 +216,7 @@ TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
 rm(players, tackles, tracking_combined, TrackingWithTackles)
 
 NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>% 
-  select(-c(7, 43:46, 48:49, 51, 55:57, 59, 61:62, 64, 66:68, 70:74, 80:87, 
+  select(-c(7, 42:46, 48:49, 51, 55:57, 59, 61:62, 64, 66:68, 70:74, 80:87, 
             91:94, 102, 105, 108:117, 122:129, 132:133, 135:144, 149:160, 
             165:166, 168:177, 183, 186:187, 189:190, 196:200, 202, 204:207, 210:244, 
             249:301, 308:309, 313:315, 317:320, 325:331, 333:362, 364:367, 372:376,
