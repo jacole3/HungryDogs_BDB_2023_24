@@ -263,3 +263,21 @@ table(MergedData$offenseFormation)
 # Make simplified version for under center vs. not under center
 MergedData <- MergedData %>% mutate(QBAlignment =
      ifelse(offenseFormation %in% c("EMPTY", "PISTOL", "SHOTGUN", "WILDCAT"), "Gun", "UC"))
+
+# Now we want to exclude "extra" frames, i.e. ones after the play ended
+# QB slide example: View(MergedData %>% filter(playId == 4789))
+Frames_EndOfPlay <- MergedData %>%
+  filter(event %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "touchdown")) %>%
+  select(gameId, playId, frameId) %>%
+  rename(FrameNumber_EndOfPlay = frameId)
+
+MergedData <- MergedData %>%
+  left_join(Frames_EndOfPlay, by = c("playId", "gameId"))
+MergedData <- unique(MergedData) # to get rid of duplicates
+
+MergedData <- MergedData %>% group_by(gameId, playId, nflId) %>% 
+  mutate(Unnecessary_Late = ifelse(frameId > FrameNumber_EndOfPlay, TRUE, FALSE)) %>% 
+  ungroup()
+
+MergedData <- MergedData %>% filter(Unnecessary_Late == FALSE)
+rm(Frames_EndOfPlay)
