@@ -773,3 +773,48 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(pre_snap_gaps, by = c("gameId", "playId", "nflId", "displayName"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 rm(pre_snap_gaps)
+
+# View(DesignedRuns_Merged %>% filter(is.na(run_gap)))
+# View(DesignedRuns_Merged %>% filter(is.na(run_location)))
+# Fix these few with str_detect
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(run_gap =
+   ifelse(is.na(run_gap) & str_detect(playDescription, "(up the middle)"), "center",
+      ifelse(is.na(run_gap) & str_detect(playDescription, "(left end)"), "end",
+           ifelse(is.na(run_gap) & str_detect(playDescription, "(left tackle)"), "tackle",
+              ifelse(is.na(run_gap) & str_detect(playDescription, "(left guard)"), "guard",
+                   ifelse(is.na(run_gap) & str_detect(playDescription, "(right guard)"), "guard",
+                     ifelse(is.na(run_gap) & str_detect(playDescription, "(right tackle)"), "tackle",
+                        ifelse(is.na(run_gap) & str_detect(playDescription, "(right end)"), "end", run_gap))))))))
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(run_location =
+  ifelse(is.na(run_location) & str_detect(playDescription, "(up the middle)"), "middle",
+     ifelse(is.na(run_location) & str_detect(playDescription, "(left end)"), "left",
+        ifelse(is.na(run_location) & str_detect(playDescription, "(left tackle)"), "left",
+           ifelse(is.na(run_location) & str_detect(playDescription, "(left guard)"), "left",
+              ifelse(is.na(run_location) & str_detect(playDescription, "(right guard)"), "right",
+                 ifelse(is.na(run_location) & str_detect(playDescription, "(right tackle)"), "right",
+                    ifelse(is.na(run_location) & str_detect(playDescription, "(right end)"), "right", run_location))))))))
+
+# Now, turn run_gap into something numeric, e.g. left end is 7, left tackle is 6 ...
+# View(DesignedRuns_Merged %>% filter(run_gap == "end" & num_total_tes == 0))
+# This is NOT empty (i.e., there can be an "end" run-gap even without any TEs on field)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(RunGap_Numeric =
+    ifelse(run_location == "left" & run_gap == "end", 7, 
+        ifelse(run_location == "left" & run_gap == "tackle", 6,
+              ifelse(run_location == "left" & run_gap == "guard", 5,
+                    ifelse(run_location == "middle" & run_gap == "center", 4,
+                         ifelse(run_location == "right" & run_gap == "guard", 3,
+                               ifelse(run_location == "right" & run_gap == "tackle", 2, 1)))))))
+
+# Make a similar adjustment relating to defensive pre-snap alignments
+table(DesignedRuns_Merged$pre_snap_gap)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(DefGap_Numeric =
+    ifelse(run_gap %in% c("L-A", "R-A"), 4,
+        ifelse(run_gap %in% c("L-B"), 5,
+             ifelse(run_gap %in% c("L-C"), 6,
+                  ifelse(run_gap %in% c("L-D", "L-E", "L-F"), 7,
+                      ifelse(run_gap %in% c("R-B"), 3,
+                           ifelse(run_gap %in% c("R-C"), 2,
+                               ifelse(run_gap %in% c("R-D", "R-E", "R-F"), 1, run_gap))))))))
+
