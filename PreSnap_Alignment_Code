@@ -79,7 +79,6 @@ DesignedRuns_Center_PreSnap <- DesignedRuns_Center_PreSnap %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   merge(DesignedRuns_Center_PreSnap, by = c("gameId", "playId"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 rm(DesignedRuns_Center_PreSnap)
 
 # Now, we can compare each player's pre-snap Y rank to the center's Y rank, to define positions
