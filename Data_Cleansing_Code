@@ -267,7 +267,7 @@ MergedData <- MergedData %>% mutate(QBAlignment =
 # Now we want to exclude "extra" frames, i.e. ones after the play ended
 # Include fumbles b/c we want to limit to only defensive players making tackles
 Frames_EndOfPlay <- MergedData %>%
-  filter(event %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "touchdown", "fumble")) %>%
+  filter(event %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "touchdown", "fumble", "fumble_defense_recovered")) %>%
   select(gameId, playId, nflId, displayName, frameId) %>%
   rename(FrameNumber_EndOfPlay = frameId)
 
