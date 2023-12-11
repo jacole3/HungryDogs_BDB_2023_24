@@ -271,6 +271,15 @@ Frames_EndOfPlay <- MergedData %>%
   select(gameId, playId, nflId, displayName, frameId) %>%
   rename(FrameNumber_EndOfPlay = frameId)
 
+# Some plays have multiple of these events, e.g. View(DesignedRuns_Merged %>% filter(playId == 3449))
+# Therefore, make it so that only the first relevant frame shows up (e.g "qb_sack" then "tackle")
+Frames_EndOfPlay <- Frames_EndOfPlay %>%
+  group_by(gameId, playId, nflId, displayName) %>%
+  mutate(Frame_Rank = rank(FrameNumber_EndOfPlay, ties.method = "first")) %>%
+  ungroup() 
+Frames_EndOfPlay <- Frames_EndOfPlay %>% filter(Frame_Rank == 1)
+Frames_EndOfPlay <- Frames_EndOfPlay %>% select(-"Frame_Rank")
+
 MergedData <- merge(x = MergedData, y = Frames_EndOfPlay, 
              by = c("playId", "gameId", "nflId", "displayName"))
 MergedData <- MergedData %>% arrange(gameId, playId)
