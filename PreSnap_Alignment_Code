@@ -774,6 +774,10 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 rm(pre_snap_gaps)
 
+# View(DesignedRuns_Merged %>% filter(frameId == 1, playId == 146))
+# This is a good example of "gap moving" on trap/power play w/ pulling tackle
+# The run_gap is "left/tackle," though it was RT who pulled toward left
+
 # View(DesignedRuns_Merged %>% filter(is.na(run_gap)))
 # View(DesignedRuns_Merged %>% filter(is.na(run_location)))
 # Fix these few with str_detect
@@ -809,12 +813,12 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(RunGap_Numeric =
 # Make a similar adjustment relating to defensive pre-snap alignments
 table(DesignedRuns_Merged$pre_snap_gap)
 
-DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(DefGap_Numeric =
-    ifelse(run_gap %in% c("L-A", "R-A"), 4,
-        ifelse(run_gap %in% c("L-B"), 5,
-             ifelse(run_gap %in% c("L-C"), 6,
-                  ifelse(run_gap %in% c("L-D", "L-E", "L-F"), 7,
-                      ifelse(run_gap %in% c("R-B"), 3,
-                           ifelse(run_gap %in% c("R-C"), 2,
-                               ifelse(run_gap %in% c("R-D", "R-E", "R-F"), 1, run_gap))))))))
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(DefAlign_Numeric =
+    ifelse(pre_snap_gap %in% c("L-A", "R-A"), 4,
+        ifelse(pre_snap_gap %in% c("L-B"), 5,
+             ifelse(pre_snap_gap %in% c("L-C"), 6,
+                  ifelse(pre_snap_gap %in% c("L-D", "L-E", "L-F"), 7,
+                      ifelse(pre_snap_gap %in% c("R-B"), 3,
+                           ifelse(pre_snap_gap %in% c("R-C"), 2,
+                               ifelse(pre_snap_gap %in% c("R-D", "R-E", "R-F"), 1, pre_snap_gap))))))))
 
