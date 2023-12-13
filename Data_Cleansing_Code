@@ -266,7 +266,48 @@ table(MergedData$offenseFormation)
 MergedData <- MergedData %>% mutate(QBAlignment =
      ifelse(offenseFormation %in% c("EMPTY", "PISTOL", "SHOTGUN", "WILDCAT"), "Gun", "UC"))
 
+# Make sure we have both offensive and defensive players
+table(MergedData$position)
+
+# Make broader "PosGroup" label from there
+MergedData <- MergedData %>% mutate(PosGroup = ifelse(position %in% c("C", "G", "T"), "OL",
+           ifelse(position %in% c("CB", "DB", "FS", "SS"), "DB",
+                ifelse(position %in% c("DE", "DT", "NT"), "DL",
+                      ifelse(position %in% c("FB", "RB"), "RB",
+                          ifelse(position %in% c("ILB", "MLB", "OLB"), "LB",
+                                ifelse(position == "QB", "QB",
+                                     ifelse(position == "TE", "TE", "WR"))))))))
+table(MergedData$PosGroup)
+
+MergedData <- MergedData %>%
+  mutate(PlayerSideOfBall = ifelse(((club == homeTeamAbbr) &
+                                      (possessionTeam == homeTeamAbbr)) |
+                                     ((club == visitorTeamAbbr) &
+                                        (possessionTeam == visitorTeamAbbr)),
+                                   "offense",
+                                   "defense"))
+
+# Add distance ranks for each side of ball
+# E.G. who is closest to ball-carrier at any given point of the play
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId, PlayerSideOfBall) %>%
+  mutate(TotDistFromBall_Rank_BySideOfBall = rank(TotDistFromBall, ties.method = "first"),
+         Y_AbsDistFromBall_Rank_BySide = rank(Y_AbsDistFromBall, ties.method = "first"),
+         X_AbsDistFromBall_Rank_BySide = rank(X_AbsDistFromBall, ties.method = "first")) %>%
+  ungroup()
+# table(MergedData$TotDistFromBall_Rank_BySideOfBall); rank is never higher than 11
+
+# And same idea for "overall" ranks (i.e., doesn't matter if player is on offense or defense)
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(TotDistFromBall_Rank_OVR = rank(TotDistFromBall, ties.method = "first"),
+         Y_AbsDistFromBall_Rank_OVR = rank(Y_AbsDistFromBall, ties.method = "first"),
+         X_AbsDistFromBall_Rank_OVR = rank(X_AbsDistFromBall, ties.method = "first")) %>%
+  ungroup()
+# table(MergedData$TotDistFromBall_Rank_OVR); rank is never higher than 22
+
 # Now we want to exclude "extra" frames, i.e. ones after the play ended
+table(MergedData$event)
 # Include fumbles b/c we want to limit to only defensive players making tackles
 Frames_EndOfPlay <- MergedData %>%
   filter(event %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "touchdown", "fumble", "fumble_defense_recovered")) %>%
