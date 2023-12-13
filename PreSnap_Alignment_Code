@@ -821,4 +821,4 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(DefAlign_Numeric =
                       ifelse(pre_snap_gap %in% c("R-B"), 3,
                            ifelse(pre_snap_gap %in% c("R-C"), 2,
                                ifelse(pre_snap_gap %in% c("R-D", "R-E", "R-F"), 1, pre_snap_gap))))))))
-
+class(DesignedRuns_Merged$DefAlign_Numeric) <- "numeric"
