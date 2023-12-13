@@ -715,11 +715,11 @@ rm(FarLeft_Box_Location, FarRight_Box_Location, DesignedRuns_BoxEnd_Left, Design
 
 # Then treat defenders similarly, where "x" within 1.5 yards of LOS means "on the line"
 # And use 6 yards of "x" from the LOS to be "in the box"
-# Likewise, "y" must be within 2.5 yards of edge (or 3, if on LOS)
+# Likewise, "y" must be within 2 yards of edge (or 3, if on LOS)
 DesignedRuns_Defenders_InBox <- DesignedRuns_Merged %>%
   group_by(gameId, playId, nflId) %>%
   filter(event == "ball_snap", PlayerSideOfBall == "defense") %>% 
-  mutate(DefenderInBox = ifelse((x - Ball_X_Frame1 <= 6 & y <= FarLeft_Box_Y_Snap + 2.5 & y >= FarRight_Box_Y_Snap - 2.5) |
+  mutate(DefenderInBox = ifelse((x - Ball_X_Frame1 <= 6 & y <= FarLeft_Box_Y_Snap + 2 & y >= FarRight_Box_Y_Snap - 2) |
                                   x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 3 & y >= FarRight_Box_Y_Snap - 3, TRUE, FALSE),
          DefenderInBox_OnLOS = ifelse(x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 3 & y >= FarRight_Box_Y_Snap - 3, TRUE, FALSE)) %>%
   ungroup() %>%
