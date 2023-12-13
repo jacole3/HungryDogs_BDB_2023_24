@@ -719,11 +719,10 @@ rm(FarLeft_Box_Location, FarRight_Box_Location, DesignedRuns_BoxEnd_Left, Design
 DesignedRuns_Defenders_InBox <- DesignedRuns_Merged %>%
   group_by(gameId, playId, nflId) %>%
   filter(event == "ball_snap", PlayerSideOfBall == "defense") %>% 
-  mutate(DefenderInBox = ifelse((x - Ball_X_Frame1 <= 6 & y <= FarLeft_Box_Y_Snap + 2 & y >= FarRight_Box_Y_Snap - 2) |
-                                  x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 3 & y >= FarRight_Box_Y_Snap - 3, TRUE, FALSE),
-         DefenderInBox_OnLOS = ifelse(x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 3 & y >= FarRight_Box_Y_Snap - 3, TRUE, FALSE)) %>%
+  mutate(DefenderInBox = ifelse(x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 3 & y >= FarRight_Box_Y_Snap - 3, "Box_LOS",
+                            ifelse(x - Ball_X_Frame1 <= 6 & y <= FarLeft_Box_Y_Snap + 2 & y >= FarRight_Box_Y_Snap - 2, "Box_OffBall", NA))) %>%
   ungroup() %>%
-  select(gameId, playId, nflId, displayName, DefenderInBox, DefenderInBox_OnLOS,
+  select(gameId, playId, nflId, displayName, DefenderInBox,
          PreSnap_x = x, PreSnap_y = y, Ball_X_Frame1)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
@@ -733,12 +732,13 @@ rm(DesignedRuns_Defenders_InBox)
 
 # Then gap alignments can proceed from there
 # Note that these gaps are based on offensive orientation (e.g. b/w C and LG is left A-gap)
+# And only the box defenders have gaps (e.g., weird to say FS 15 yards off-ball is in "B-gap")
 pre_snap_gaps <- DesignedRuns_Merged %>% 
   filter(event == "ball_snap",
-         PlayerSideOfBall == "defense") %>% 
+         PlayerSideOfBall == "defense", !is.na(DefenderInBox)) %>% 
   select(gameId, playId, nflId, displayName, position, AlignedPos_Box, DefenderInBox, 
-         DefenderInBox_OnLOS, Ball_X_Frame1, X_dist_FromBallFrame1, Y_distFromMOF, x, y,
-         yLT, yLG, yCenter, yRG, yRT, PlayerSideOfBall, yTEL1, yTER1, yTEL2, yTER2, yTEL3, yTER3,
+         Ball_X_Frame1, X_dist_FromBallFrame1, Y_distFromMOF, x, y, yLT, yLG, 
+         yCenter, yRG, yRT, PlayerSideOfBall, yTEL1, yTER1, yTEL2, yTER2, yTEL3, yTER3,
          num_right_tes, num_left_tes) %>% 
   mutate(pre_snap_gap =
            case_when(y >= yCenter & y <= yLG ~ "L-A",
