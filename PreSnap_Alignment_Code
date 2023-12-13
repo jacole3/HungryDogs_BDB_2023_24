@@ -732,6 +732,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
 rm(DesignedRuns_Defenders_InBox)
 
 # Then gap alignments can proceed from there
+# Note that these gaps are based on offensive orientation (e.g. b/w C and LG is left A-gap)
 pre_snap_gaps <- DesignedRuns_Merged %>% 
   filter(event == "ball_snap",
          PlayerSideOfBall == "defense") %>% 
