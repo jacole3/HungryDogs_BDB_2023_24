@@ -716,7 +716,6 @@ rm(FarLeft_Box_Location, FarRight_Box_Location, DesignedRuns_BoxEnd_Left, Design
 # Then treat defenders similarly, where "x" within 1.5 yards of LOS means "on the line"
 # And use 6 yards of "x" from the LOS to be "in the box"
 # Likewise, "y" must be within 2 yards of edge (or 3.5, if on LOS)
-# Example of why we stretch to 3.5 for EDGE: View(DesignedRuns_Merged %>% filter(playId == 101, displayName == "Justin Hollins"))
 DesignedRuns_Defenders_InBox <- DesignedRuns_Merged %>%
   group_by(gameId, playId, nflId) %>%
   filter(event == "ball_snap", PlayerSideOfBall == "defense") %>% 
