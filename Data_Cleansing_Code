@@ -335,8 +335,11 @@ MergedData <- MergedData %>% group_by(gameId, playId, nflId) %>%
 MergedData <- MergedData %>% filter(Unnecessary_Late == FALSE)
 rm(Frames_EndOfPlay)
 
-# Create set of just designed runs (this data set includes ball being snapped)
+# Create subsets based on play types (designed runs go back to snap of the ball)
 DesignedRuns_Merged <- MergedData %>% filter(pass == 0)
+Scrambles_Merged <- MergedData %>% filter(passResult == "R")
+AllRushes_Merged <- MergedData %>% filter(pass == 0 | passResult == "R")
+Completions_Merged <- MergedData %>% filter(passResult == "C")
 
 # Getting rid of pre-snap frames for designed runs
 Frames_AtSnap <- DesignedRuns_Merged %>%
