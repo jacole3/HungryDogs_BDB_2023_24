@@ -112,6 +112,7 @@ tracking_w1 %>%
   facet_wrap(~game_play_frame_comb)
 
 ######
+# Code for where the ball is at any given point, and each player's distance from it
 ball_df <- tracking_combined %>% 
   filter(club == "football") %>% 
   select(gameId, playId, frameId, x, y) %>% 
@@ -122,6 +123,8 @@ tracking_combined <- tracking_combined %>%
   left_join(ball_df, by = c("playId", "gameId", "frameId"))
 
 tracking_combined <- tracking_combined %>% 
-  mutate(TotDistFromBall = sqrt((x - ball_x) ^ 2 + (y - ball_y) ^ 2))
-rm(ball_df, line_of_scrimmage)
+  mutate(TotDistFromBall = sqrt((x - ball_x) ^ 2 + (y - ball_y) ^ 2),
+         Y_DistFromBall = (y - ball_y), X_DistFromBall = (x = ball_x),
+         Y_AbsDistFromBall = abs(y - ball_y), X_AbsDistFromBall = abs(x - ball_x))
+rm(ball_df)
   
