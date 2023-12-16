@@ -261,6 +261,12 @@ MergedData <- MergedData %>%
 MergedData <- MergedData %>%
   filter(wp >= 0.05 & wp <= 0.95)
 
+# Turn weather into a numeric variable using str_extract
+# The current "temp" variable is all NAs
+MergedData <- MergedData %>% 
+  mutate(Temperature = (str_extract(MergedData$weather, "\\b\\d+")))
+class(MergedData$Temperature) <- "numeric"
+
 table(MergedData$offenseFormation)
 # Make simplified version for under center vs. not under center
 MergedData <- MergedData %>% mutate(QBAlignment =
