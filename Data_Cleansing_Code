@@ -266,6 +266,7 @@ MergedData <- MergedData %>%
 MergedData <- MergedData %>% 
   mutate(Temperature = (str_extract(MergedData$weather, "\\b\\d+")))
 class(MergedData$Temperature) <- "numeric"
+MergedData <- MergedData %>% select(-"temp")
 
 table(MergedData$offenseFormation)
 # Make simplified version for under center vs. not under center
