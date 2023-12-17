@@ -281,6 +281,16 @@ MergedData <- MergedData %>%
   mutate(height_inches = sapply(height, convert_to_inches))
 MergedData <- MergedData %>% select(-"height")
 
+# Calculate player age by using birth date and game date
+MergedData <- MergedData %>% 
+  mutate(NumericBirthDate = as.Date(birthDate, origin = "1970-01-01"))
+MergedData <- MergedData %>% 
+  mutate(NumericGameDate = as.Date(time, origin = "1970-01-01"))
+MergedData <- MergedData %>% 
+  mutate(Age_Days = NumericGameDate - NumericBirthDate)
+MergedData <- MergedData %>% mutate(Age_Years = Age_Days / 365.25)
+MergedData <- MergedData %>% select(-c("birthDate", "time", "Age_Days"))
+
 table(MergedData$offenseFormation)
 # Make simplified version for under center vs. not under center
 MergedData <- MergedData %>% mutate(QBAlignment =
