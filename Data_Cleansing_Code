@@ -323,7 +323,9 @@ MergedData <- MergedData %>%
   group_by(gameId, playId, frameId, PlayerSideOfBall) %>%
   mutate(TotDistFromBall_Rank_BySideOfBall = rank(TotDistFromBall, ties.method = "first"),
          Y_AbsDistFromBall_Rank_BySide = rank(Y_AbsDistFromBall, ties.method = "first"),
-         X_AbsDistFromBall_Rank_BySide = rank(X_AbsDistFromBall, ties.method = "first")) %>%
+         X_AbsDistFromBall_Rank_BySide = rank(X_AbsDistFromBall, ties.method = "first"),
+         Y_NetDistFromBall_Rank_BySide = rank(Y_DistFromBall, ties.method = "first"),
+         X_NetDistFromBall_Rank_BySide = rank(X_DistFromBall, ties.method = "first")) %>%
   ungroup()
 # table(MergedData$TotDistFromBall_Rank_BySideOfBall); rank is never higher than 11
 
@@ -332,7 +334,9 @@ MergedData <- MergedData %>%
   group_by(gameId, playId, frameId) %>%
   mutate(TotDistFromBall_Rank_OVR = rank(TotDistFromBall, ties.method = "first"),
          Y_AbsDistFromBall_Rank_OVR = rank(Y_AbsDistFromBall, ties.method = "first"),
-         X_AbsDistFromBall_Rank_OVR = rank(X_AbsDistFromBall, ties.method = "first")) %>%
+         X_AbsDistFromBall_Rank_OVR = rank(X_AbsDistFromBall, ties.method = "first"),
+         Y_NetDistFromBall_Rank_OVR = rank(Y_DistFromBall, ties.method = "first"),
+         X_NetDistFromBall_Rank_OVR = rank(X_DistFromBall, ties.method = "first")) %>%
   ungroup()
 # table(MergedData$TotDistFromBall_Rank_OVR); rank is never higher than 22
 
