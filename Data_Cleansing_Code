@@ -268,6 +268,19 @@ MergedData <- MergedData %>%
 class(MergedData$Temperature) <- "numeric"
 MergedData <- MergedData %>% select(-"temp")
 
+# Similarly, change height into inches, rather than feet-inches
+convert_to_inches <- function(height) {
+  parts <- strsplit(height, "-")[[1]]
+  feet <- as.numeric(parts[1])
+  inches <- as.numeric(parts[2])
+  total_inches <- feet * 12 + inches
+  return(total_inches)
+}
+
+MergedData <- MergedData %>% 
+  mutate(height_inches = sapply(height, convert_to_inches))
+MergedData <- MergedData %>% select(-"height")
+
 table(MergedData$offenseFormation)
 # Make simplified version for under center vs. not under center
 MergedData <- MergedData %>% mutate(QBAlignment =
