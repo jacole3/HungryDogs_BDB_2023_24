@@ -106,7 +106,7 @@ tracking_combined <- tracking_combined %>%
 # Now create line of scrimmage for each play using ball data
 # This link explains when the frames start: https://www.kaggle.com/competitions/nfl-big-data-bowl-2024/discussion/447639
 
-# Recall that Frame 1 doesn't always mean the original LOS
+# Recall that Frame 1 doesn't always mean the original LOS (but it does for designed runs)
 Frame1_Ball_Location <- tracking_combined %>%
   filter(club == "football", frameId == 1) %>%
   select(gameId, playId, x, y) %>%
