@@ -257,6 +257,9 @@ MergedData <- MergedData %>%
   mutate(WPSuccess = ifelse(wpa > 0, 1, 0))
 # Check for NAs: View(MergedData %>% filter(is.na(WPSuccess)))
 
+# And do the same for defensive WPA (just negative offensive WPA)
+MergedData <- MergedData %>% mutate(DefWPA = (-1) * wpa)
+
 # Find other ways to filter down data, e.g. excluding garbage time
 MergedData <- MergedData %>%
   filter(wp >= 0.05 & wp <= 0.95)
