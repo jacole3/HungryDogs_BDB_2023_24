@@ -7,6 +7,10 @@
 # Highest X value is end zone offense is aiming at
 # So the offensive players lined up on LOS will have highest X
 
+# For starters, get rid of X_LOS_Approx (no need since these plays begin at snap of ball)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-c("X_LOS_Approx", "X_distFromLOS_Approx"))
+# Recall that X_dist_FromBallFrame1 already exists, which is equivalent to X distance from LOS
+
 # Add "x" pre-snap rank for each side of ball (e.g. who is closest to opposing end zone)
 DesignedRuns_AtSnap <- DesignedRuns_Merged %>%
   group_by(gameId, playId, PlayerSideOfBall) %>%
