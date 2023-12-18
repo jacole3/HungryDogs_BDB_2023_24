@@ -79,3 +79,7 @@ StatsByPlay_DesignedRuns <- DesignedRuns_Merged %>%
             num_total_tes = num_total_tes[1], IndivDefenderInBox = DefenderInBox[1],
             pre_snap_gap = pre_snap_gap[1], RunGap_Numeric = max(RunGap_Numeric),
             DefAlign_Numeric = max(DefAlign_Numeric))
+
+# View(StatsByPlay_DesignedRuns %>% filter(IndivTackle == 0 & IndivAssist == 0 & Indiv_MissedTackle == 0))
+# This is empty, i.e. it's impossible to have a 0 in all three columns
+# In other words, players who didn't have a "tackle attempt" simply have NA in all three
