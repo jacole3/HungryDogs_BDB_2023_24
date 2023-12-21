@@ -261,6 +261,18 @@ MergedData <- MergedData %>%
 
 # And do the same for defensive WPA (just negative offensive WPA)
 MergedData <- MergedData %>% mutate(DefWPA = (-1) * wpa)
+# Add a column for "Is Ball Carrier"
+MergedData <- MergedData %>% mutate(IsBallCarrier = 
+  ifelse(ballCarrierId == nflId, TRUE, FALSE))
+
+# Diagnose if any plays don't have any "IsBallCarrier"
+Frame1_DF <- MergedData %>% filter(frameId == 1)
+BallCarriers_Snap <- Frame1_DF %>% 
+  group_by(playId, gameId) %>%
+  summarize(Players = n(), BallCarriers = sum(IsBallCarrier)) %>%
+  arrange(BallCarriers, Players)
+# Every play has a ball-carrier
+rm(BallCarriers_Snap, Frame1_DF)
 
 # Find other ways to filter down data, e.g. excluding garbage time
 MergedData <- MergedData %>%
