@@ -231,8 +231,8 @@ MergedData <- merge(x = NFLVerse_Reduced, y = TrackingWithTackles_PlayerNames,
                         by = c("gameId", "playId"))
 rm(TrackingWithTackles_PlayerNames, NFLVerse_Reduced)
 
-# Arrange it by game ID, play ID, and frame ID
-MergedData <- MergedData %>% arrange(gameId, playId, frameId)
+# Arrange it by game ID, play ID, player ID, and frame ID
+MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
 
 # Now we create a variable for where the ball was at the time of the snap
 # But this is only approximate, since NFLVerse doesn't round to decimals of yards
@@ -391,7 +391,7 @@ Frames_EndOfPlay <- Frames_EndOfPlay %>% select(-"Frame_Rank")
 
 MergedData <- merge(x = MergedData, y = Frames_EndOfPlay, 
              by = c("playId", "gameId", "nflId", "displayName"))
-MergedData <- MergedData %>% arrange(gameId, playId, frameId)
+MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
 MergedData <- unique(MergedData)
 
 MergedData <- MergedData %>% group_by(gameId, playId, nflId) %>% 
@@ -422,7 +422,7 @@ Frames_AtSnap <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = Frames_AtSnap, 
                     by = c("playId", "gameId", "nflId", "displayName"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% group_by(gameId, playId, nflId) %>% 
   mutate(Unnecessary_Early = ifelse(frameId < FrameNumber_AtSnap, TRUE, FALSE)) %>% 
