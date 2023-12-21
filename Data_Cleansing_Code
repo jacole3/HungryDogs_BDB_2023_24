@@ -288,6 +288,7 @@ MergedData <- MergedData %>% mutate(YdsBeforeContact = ball_x_FirstContact - X_L
 MergedData <- MergedData %>% mutate(YdsBeforeContact = 
     ifelse(is.na(YdsBeforeContact), prePenaltyPlayResult, YdsBeforeContact))
 MergedData <- MergedData %>% mutate(YdsAfterContact = prePenaltyPlayResult - YdsBeforeContact)
+rm(BallLocation_FirstContact)
 
 # Find other ways to filter down data, e.g. excluding garbage time
 MergedData <- MergedData %>%
