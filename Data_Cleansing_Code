@@ -1,4 +1,4 @@
-# Note: some miscellaneous cleansing code, including but not limited to checking for discrepancies in names (DK Metcalf vs. D.K. Metcalf) and tricodes (e.g. JAX vs. JAC) was omitted here
+# Note: some miscellaneous cleansing code, including but not limited to checking for discrepancies in tricodes (e.g. JAX vs. JAC) was omitted here
 # This is because certain lines of code didn't result in any changes to the data set
 
 gc(reset = TRUE)
@@ -211,6 +211,13 @@ TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
                               by = c("nflId"))
 # View(TrackingWithTackles_PlayerNames %>% filter(is.na(club)))
 rm(players, tackles, tracking_combined, TrackingWithTackles)
+
+# Check for name discrepancies again (all players, not just ball-carriers)
+# View(TrackingWithTackles_PlayerNames %>% filter(displayName.x != displayName.y))
+TrackingWithTackles_PlayerNames <- TrackingWithTackles_PlayerNames %>%
+  select(-"displayName.x")
+TrackingWithTackles_PlayerNames <- TrackingWithTackles_PlayerNames %>%
+  rename(displayName = displayName.y)
 
 NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>% 
   select(-c(7, 16, 20, 31, 42:46, 48:49, 51, 55:57, 59, 61:62, 64, 66:68, 70:74, 80:87, 
