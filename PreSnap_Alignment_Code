@@ -26,7 +26,7 @@ DesignedRuns_AtSnap <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   merge(DesignedRuns_AtSnap, by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 rm(DesignedRuns_AtSnap)
 
 # Now rank the "y" column for OL specifically
@@ -55,7 +55,7 @@ DesignedRuns_By_OL_Label <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = DesignedRuns_By_OL_Label, 
                              by = c("gameId", "playId", "nflId", "displayName", "position", "OL_Label", "PlayerSideOfBall"),
                              all.x = TRUE)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 rm(DesignedRuns_By_OL_Label)
 
 # From there, use center to retroactively define other OL spots
@@ -80,7 +80,7 @@ DesignedRuns_Center_PreSnap <- DesignedRuns_Center_PreSnap %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   merge(DesignedRuns_Center_PreSnap, by = c("gameId", "playId"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 rm(DesignedRuns_Center_PreSnap)
 
 # Now, we can compare each player's pre-snap Y rank to the center's Y rank, to define positions
@@ -152,7 +152,7 @@ DesignedRuns_LG_Identify_Snap <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_LG_Identify_Snap, 
                                                          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_LG = ifelse(!is.na(Is_LG), TRUE, FALSE))
 
@@ -194,7 +194,7 @@ DesignedRuns_LT_Identify_Snap <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_LT_Identify_Snap, 
                                                          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_LT = ifelse(!is.na(Is_LT), TRUE, FALSE))
 
@@ -236,7 +236,7 @@ DesignedRuns_RG_Identify_Snap <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_RG_Identify_Snap, 
                                                          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_RG = ifelse(!is.na(Is_RG), TRUE, FALSE))
 
@@ -278,7 +278,7 @@ DesignedRuns_RT_Identify_Snap <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_RT_Identify_Snap, 
                                                          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_RT = ifelse(!is.na(Is_RT), TRUE, FALSE))
 
@@ -342,7 +342,7 @@ DesignedRuns_TEL1_Identify_Snap <- DesignedRuns_TEL1_Identify_Snap %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL1_Identify_Snap, 
           by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TEL1 = ifelse(!is.na(Is_TEL1), TRUE, FALSE))
 
@@ -398,7 +398,7 @@ DesignedRuns_TEL2_Identify_Snap <- DesignedRuns_TEL2_Identify_Snap %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL2_Identify_Snap, 
                     by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TEL2 = ifelse(!is.na(Is_TEL2), TRUE, FALSE))
 
@@ -454,7 +454,7 @@ DesignedRuns_TEL3_Identify_Snap <- DesignedRuns_TEL3_Identify_Snap %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TEL3_Identify_Snap, 
                 by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TEL3 = ifelse(!is.na(Is_TEL3), TRUE, FALSE))
 
@@ -510,7 +510,7 @@ DesignedRuns_TER1_Identify_Snap <- DesignedRuns_TER1_Identify_Snap %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER1_Identify_Snap, 
                by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TER1 = ifelse(!is.na(Is_TER1), TRUE, FALSE))
 
@@ -566,7 +566,7 @@ DesignedRuns_TER2_Identify_Snap <- DesignedRuns_TER2_Identify_Snap %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER2_Identify_Snap, 
          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TER2 = ifelse(!is.na(Is_TER2), TRUE, FALSE))
 
@@ -622,7 +622,7 @@ DesignedRuns_TER3_Identify_Snap <- DesignedRuns_TER3_Identify_Snap %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_TER3_Identify_Snap, 
             by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% 
   mutate(Is_TER3 = ifelse(!is.na(Is_TER3), TRUE, FALSE))
 
@@ -718,6 +718,7 @@ rm(FarLeft_Box_Location, FarRight_Box_Location, DesignedRuns_BoxEnd_Left, Design
 # Then treat defenders similarly, where "x" within 1.5 yards of LOS means "on the line"
 # And use 6 yards of "x" from the LOS to be "in the box"
 # Likewise, "y" must be within 2 yards of edge (or 3.5, if on LOS)
+# Example of why we stretch to 3.5 for EDGE: View(DesignedRuns_Merged %>% filter(playId == 101, displayName == "Justin Hollins"))
 DesignedRuns_Defenders_InBox <- DesignedRuns_Merged %>%
   group_by(gameId, playId, nflId) %>%
   filter(event == "ball_snap", PlayerSideOfBall == "defense") %>% 
@@ -729,7 +730,7 @@ DesignedRuns_Defenders_InBox <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(DesignedRuns_Defenders_InBox, by = c("gameId", "playId", "nflId", "displayName", "Ball_X_Frame1", "PreSnap_x", "PreSnap_y"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 rm(DesignedRuns_Defenders_InBox)
 
 # Then gap alignments can proceed from there
@@ -774,7 +775,7 @@ pre_snap_gaps <- pre_snap_gaps %>%
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(pre_snap_gaps, by = c("gameId", "playId", "nflId", "displayName"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, frameId)
 rm(pre_snap_gaps)
 
 # View(DesignedRuns_Merged %>% filter(frameId == 1, playId == 146))
