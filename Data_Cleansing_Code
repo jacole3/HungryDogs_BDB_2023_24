@@ -261,6 +261,7 @@ MergedData <- MergedData %>%
 
 # And do the same for defensive WPA (just negative offensive WPA)
 MergedData <- MergedData %>% mutate(DefWPA = (-1) * wpa)
+
 # Add a column for "Is Ball Carrier"
 MergedData <- MergedData %>% mutate(IsBallCarrier = 
   ifelse(ballCarrierId == nflId, TRUE, FALSE))
@@ -273,6 +274,20 @@ BallCarriers_Snap <- Frame1_DF %>%
   arrange(BallCarriers, Players)
 # Every play has a ball-carrier
 rm(BallCarriers_Snap, Frame1_DF)
+
+# Use first_contact, ball_x, and X_LOS_Approx to create yards after contact
+# Note that even some plays with tackles don't have an event == "first_contact"
+# E.G. View(MergedData %>% filter(playId == 56)) -- that means tackle was first contact
+BallLocation_FirstContact <- MergedData %>% filter(IsBallCarrier == TRUE, event == "first_contact") %>%
+  select(gameId, playId, ballCarrierId, ball_x) %>%
+  rename(ball_x_FirstContact = ball_x)
+MergedData <- merge(x = MergedData, y = BallLocation_FirstContact,
+                    by = c("gameId", "playId", "ballCarrierId"), all.x = TRUE)
+
+MergedData <- MergedData %>% mutate(YdsBeforeContact = ball_x_FirstContact - X_LOS_Approx)
+MergedData <- MergedData %>% mutate(YdsBeforeContact = 
+    ifelse(is.na(YdsBeforeContact), prePenaltyPlayResult, YdsBeforeContact))
+MergedData <- MergedData %>% mutate(YdsAfterContact = prePenaltyPlayResult - YdsBeforeContact)
 
 # Find other ways to filter down data, e.g. excluding garbage time
 MergedData <- MergedData %>%
