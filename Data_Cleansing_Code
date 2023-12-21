@@ -219,7 +219,7 @@ TrackingWithTackles <- merge(x = tackles, y = tracking_combined,
                    by = c("gameId", "playId", "nflId"), all.y = TRUE)
 
 TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
-                              by = c("nflId", "displayName"))
+                              by = c("nflId"))
 # View(TrackingWithTackles_PlayerNames %>% filter(is.na(club)))
 rm(players, tackles, tracking_combined, TrackingWithTackles)
 
