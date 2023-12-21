@@ -238,6 +238,12 @@ rm(TrackingWithTackles_PlayerNames, NFLVerse_Reduced)
 # Arrange it by game ID and play ID
 MergedData <- MergedData %>% arrange(gameId, playId)
 
+# Test to see if there are any more Robby Anderson-style duplicate names
+Duplicates_Merged <- MergedData %>% 
+  group_by(nflId, playId, gameId, frameId) %>%
+  summarize(Copies = n()) %>% arrange(desc(Copies))
+# It's clean now
+
 # Now we create a variable for where the ball was at the time of the snap
 # But this is only approximate, since NFLVerse doesn't round to decimals of yards
 # For designed runs, we already have precise ball location at LOS (Frame1_Ball_Location above)
