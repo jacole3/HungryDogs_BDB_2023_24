@@ -239,6 +239,7 @@ rm(TrackingWithTackles_PlayerNames, NFLVerse_Reduced)
 MergedData <- MergedData %>% arrange(gameId, playId)
 
 # Test to see if there are any more Robby Anderson-style duplicate names
+# But now for all players, not just ball-carriers
 Duplicates_Merged <- MergedData %>% 
   group_by(nflId, playId, gameId, frameId) %>%
   summarize(Copies = n()) %>% arrange(desc(Copies))
