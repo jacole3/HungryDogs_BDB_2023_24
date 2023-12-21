@@ -71,6 +71,12 @@ tracking_combined <- rbind(tracking_week_1, tracking_week_2, tracking_week_3,
                            tracking_week_4, tracking_week_5, tracking_week_6,
                            tracking_week_7, tracking_week_8, tracking_week_9)
 
+# Before anything else, fix Robbie Chosen/Robby Anderson name error
+# View(players %>% filter(nflId == 43808))
+# View(tracking_combined %>% filter(nflId == 43808))
+players <- players %>% mutate(displayName = 
+    ifelse(nflId == 43808, "Robby Anderson", displayName))
+
 # Note that o means orientation, and dir means direction, both scaled 0-360
 # In both cases, 0 is facing the visitor sideline (i.e. where Y = 53.3)
 # Thus, both 0 and 180 are parallel to the LOS when discussing o and dir
