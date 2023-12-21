@@ -154,17 +154,6 @@ nflverse_pbp <- nflverse_pbp %>% mutate(
 sort(table(players$nflId)) # no duplicates
 sort(table(players$displayName)) # no duplicates
 
-# Find any instances of one "ballCarrierId" having more than one name
-# E.G. Kenneth Walker III and Kenneth Walker
-NameDiscrepancies <- plays %>% 
-  group_by(ballCarrierId, ballCarrierDisplayName) %>%
-  summarize(n = n())
-NameRankings <- sort(table(NameDiscrepancies$ballCarrierId), decreasing = TRUE)
-NameDiscrepancy_Table <- as.data.frame(NameRankings)
-NameDiscrepancy_Table <- NameDiscrepancy_Table %>% filter(Freq > 1) 
-# This is empty, therefore there are no name repeats
-rm(NameDiscrepancies, NameDiscrepancy_Table)
-
 table(plays$passResult)
 # C means complete, R means scramble
 
@@ -237,14 +226,6 @@ rm(TrackingWithTackles_PlayerNames, NFLVerse_Reduced)
 
 # Arrange it by game ID and play ID
 MergedData <- MergedData %>% arrange(gameId, playId)
-
-# Test to see if there are any more Robby Anderson-style duplicate names
-# But now for all players, not just ball-carriers
-Duplicates_Merged <- MergedData %>% 
-  group_by(nflId, playId, gameId, frameId) %>%
-  summarize(Copies = n()) %>% arrange(desc(Copies))
-# It's clean now
-rm(Duplicates_Merged)
 
 # Now we create a variable for where the ball was at the time of the snap
 # But this is only approximate, since NFLVerse doesn't round to decimals of yards
