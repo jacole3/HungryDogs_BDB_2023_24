@@ -826,3 +826,32 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(DefAlign_Numeric =
                            ifelse(pre_snap_gap %in% c("R-C"), 2,
                                ifelse(pre_snap_gap %in% c("R-D", "R-E", "R-F"), 1, pre_snap_gap))))))))
 class(DesignedRuns_Merged$DefAlign_Numeric) <- "numeric"
+
+# Get rid of frames where ball-carrier doesn't have ball yet
+# For designed runs, we had to wait until after we defined all the gap alignments
+# Recall that we already did this for dropbacks in "data cleansing code" file
+Frames_AtHandoff <- DesignedRuns_Merged %>%
+  filter(event %in% c("run", "handoff", "lateral")) %>%
+  select(gameId, playId, nflId, displayName, frameId) %>%
+  rename(FrameNumber_AtHandoff = frameId)
+
+# Account for plays that could have multiple of these events
+Frames_AtHandoff <- Frames_AtHandoff %>%
+  group_by(gameId, playId, nflId, displayName) %>%
+  mutate(Frame_Rank = rank(FrameNumber_AtHandoff, ties.method = "first")) %>%
+  ungroup() 
+Frames_AtHandoff <- Frames_AtHandoff %>% filter(Frame_Rank == 1)
+Frames_AtHandoff <- Frames_AtHandoff %>% select(-"Frame_Rank")
+
+DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = Frames_AtHandoff, 
+                             by = c("playId", "gameId", "nflId", "displayName"))
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% group_by(gameId, playId, nflId) %>% 
+  mutate(Unnecessary_Early = ifelse(frameId < FrameNumber_AtHandoff, TRUE, FALSE)) %>% 
+  ungroup()
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% filter(Unnecessary_Early == FALSE)
+rm(Frames_AtHandoff)
+DesignedRuns_Merged <- unique(DesignedRuns_Merged)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"Unnecessary_Early")
