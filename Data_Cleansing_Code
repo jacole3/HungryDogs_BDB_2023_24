@@ -420,7 +420,7 @@ Scrambles_Merged <- MergedData %>% filter(passResult == "R")
 AllRushes_Merged <- MergedData %>% filter(pass == 0 | passResult == "R")
 Completions_Merged <- MergedData %>% filter(passResult == "C")
 
-# Getting rid of pre-snap frames for designed runs (XXX decide later if we want to keep)
+# Getting rid of pre-snap frames for designed runs
 Frames_AtSnap <- DesignedRuns_Merged %>%
   filter(event %in% c("ball_snap")) %>%
   select(gameId, playId, nflId, displayName, frameId) %>%
