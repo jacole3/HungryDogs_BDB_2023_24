@@ -373,7 +373,7 @@ MergedData <- MergedData %>%
   ungroup()
 # table(MergedData$TotDistFromBall_Rank_OVR); rank is never higher than 22
 
-# Create a merge() for "did the play have a missed tackle at all?"
+# Create a merge() for "did the entire play have a missed tackle at all?"
 TackleAttempts_Merged <- MergedData %>% 
   filter(!is.na(tackle) | !is.na(assist) | !is.na(forcedFumble) | !is.na(pff_missedTackle))
 MissedTackles_Merged_ByPlayer <- TackleAttempts_Merged %>% 
@@ -382,11 +382,11 @@ MissedTackles_Merged_ByPlayer <- TackleAttempts_Merged %>%
 # Now we sum the individual missed tackles, for teammates who missed one on the same play
 MissedTackles_Merged <- MissedTackles_Merged_ByPlayer %>%
   group_by(gameId, playId) %>%
-  summarize(Players_TackleAttempt = n(), TeamMissedTackles = sum(MissedTackles)) %>% arrange(desc(TeamMissedTackles))
+  summarize(Players_TackleAttempt = n(), TeamMT_FullPlay = sum(MissedTackles)) %>% arrange(desc(TeamMissedTackles))
 MergedData <- merge(x = MergedData, y = MissedTackles_Merged,
                     by = c("gameId", "playId"), all.x = TRUE)
 MergedData <- MergedData %>% 
-  replace_na(list(Players_TackleAttempt = 0, TeamMissedTackles = 0)) 
+  replace_na(list(Players_TackleAttempt = 0, TeamMT_FullPlay = 0)) 
 MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
 rm(TackleAttempts_Merged, MissedTackles_Merged, MissedTackles_Merged_ByPlayer)
 
