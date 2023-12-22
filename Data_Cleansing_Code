@@ -393,6 +393,28 @@ MergedData <- MergedData %>%
 MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
 rm(TackleAttempts_Merged, MissedTackles_Merged, MissedTackles_Merged_ByPlayer)
 
+# Also make variable for "penalized tackle", first for individuals
+MergedData <- MergedData %>% mutate(IndivTackle_Penalized =
+    ifelse((tackle == 1 | assist == 1) & (nflId == foulNFLId1 | nflId == foulNFLId2), 1, NA))
+# View(MergedData %>% filter(tackle == 0 & assist == 0 & !is.na(IndivTackle_Penalized))); this is empty
+
+# And now "penalized tackle" for teams
+IndivTackles_Penalized <- MergedData %>% 
+  filter(!is.na(IndivTackle_Penalized))
+IndivTackles_Penalized_ByPlayer <- IndivTackles_Penalized %>% 
+  group_by(gameId, playId, nflId, displayName) %>%
+  summarize(Frames = n(), MT_Pen = IndivTackle_Penalized[1]) %>% arrange(desc(MT_Pen), playId)
+# Now we sum them, if any teammates had one on the same play
+PenalizedTackles_Merged <- IndivTackles_Penalized_ByPlayer %>%
+  group_by(gameId, playId) %>%
+  summarize(TeamDef_MT_Pen = sum(MT_Pen)) %>% arrange(desc(TeamDef_MT_Pen))
+MergedData <- merge(x = MergedData, y = PenalizedTackles_Merged,
+                    by = c("gameId", "playId"), all.x = TRUE)
+MergedData <- MergedData %>% 
+  replace_na(list(TeamDef_MT_Pen = 0)) 
+MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
+rm(IndivTackles_Penalized, IndivTackles_Penalized_ByPlayer, PenalizedTackles_Merged)
+
 # Now we want to exclude "extra" frames, i.e. ones after the play ended
 table(MergedData$event)
 # Include fumbles b/c we want to limit to only defensive players making tackles
