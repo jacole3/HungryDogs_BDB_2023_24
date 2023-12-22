@@ -409,8 +409,8 @@ MergedData <- MergedData %>% mutate(YACOE = yards_after_catch - xyac_mean_yardag
                   YAC_Success_OE = ifelse(passResult == "C", (success - xyac_fd), NA),
                   YAC_FD_OE = ifelse(passResult == "C", (first_down - xyac_fd), NA))
 
-# Use lead() to label when there was a tackle in the next frame
-MergedData <- MergedData %>% mutate(Tackle_NextFrame =
+# Use lead() to label when defense made a tackle in the next frame
+MergedData <- MergedData %>% mutate(TeamTackle_NextFrame =
       ifelse(lead(event) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId) & nflId == lead(nflId), TRUE,
              ifelse(playId == lead(playId) & nflId == lead(nflId), FALSE, NA)))
 
