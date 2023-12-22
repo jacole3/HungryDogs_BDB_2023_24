@@ -440,7 +440,7 @@ DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"Unnecessary_Early")
 
 # For dropbacks, get rid of frames where ball-carrier doesn't have ball yet
-# For designed runs, this will go in pre-snap alignment code file, b/c we need to define pre-snap gaps first
+# For designed runs, this will go in "pre-snap alignment code" file, b/c we need to define pre-snap gaps first
 Scrambles_StartOfRun <- Scrambles_Merged %>%
   filter(event %in% c("run", "lateral")) %>%
   select(gameId, playId, nflId, displayName, frameId) %>%
