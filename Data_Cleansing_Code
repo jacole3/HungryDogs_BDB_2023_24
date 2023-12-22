@@ -212,6 +212,8 @@ TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
 # View(TrackingWithTackles_PlayerNames %>% filter(is.na(club)))
 rm(players, tackles, tracking_combined, TrackingWithTackles)
 
+max(tackles$pff_missedTackle) # no player had more than 1 MT on a play
+
 # Check for name discrepancies again (all players, not just ball-carriers)
 # View(TrackingWithTackles_PlayerNames %>% filter(displayName.x != displayName.y))
 TrackingWithTackles_PlayerNames <- TrackingWithTackles_PlayerNames %>%
