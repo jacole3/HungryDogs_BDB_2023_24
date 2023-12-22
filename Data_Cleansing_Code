@@ -438,3 +438,57 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% filter(Unnecessary_Early == FALSE
 rm(Frames_AtSnap)
 DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"Unnecessary_Early")
+
+# For dropbacks, get rid of frames where ball-carrier doesn't have ball yet
+Scrambles_StartOfRun <- Scrambles_Merged %>%
+  filter(event %in% c("run", "lateral")) %>%
+  select(gameId, playId, nflId, displayName, frameId) %>%
+  rename(FrameNumber_AtStart = frameId)
+
+# Account for plays that could have multiple of these events
+Scrambles_StartOfRun <- Scrambles_StartOfRun %>%
+  group_by(gameId, playId, nflId, displayName) %>%
+  mutate(Frame_Rank = rank(FrameNumber_AtStart, ties.method = "first")) %>%
+  ungroup() 
+Scrambles_StartOfRun <- Scrambles_StartOfRun %>% filter(Frame_Rank == 1)
+Scrambles_StartOfRun <- Scrambles_StartOfRun %>% select(-"Frame_Rank")
+
+Scrambles_Merged <- merge(x = Scrambles_Merged, y = Scrambles_StartOfRun, 
+                             by = c("playId", "gameId", "nflId", "displayName"))
+Scrambles_Merged <- Scrambles_Merged %>% arrange(gameId, playId, nflId, frameId)
+
+Scrambles_Merged <- Scrambles_Merged %>% group_by(gameId, playId, nflId) %>% 
+  mutate(Unnecessary_Early = ifelse(frameId < FrameNumber_AtStart, TRUE, FALSE)) %>% 
+  ungroup()
+
+Scrambles_Merged <- Scrambles_Merged %>% filter(Unnecessary_Early == FALSE)
+rm(Scrambles_StartOfRun)
+Scrambles_Merged <- unique(Scrambles_Merged)
+Scrambles_Merged <- Scrambles_Merged %>% select(-"Unnecessary_Early")
+
+Completions_Arrival <- Completions_Merged %>%
+  filter(event %in% c("pass_outcome_caught", "lateral")) %>%
+  select(gameId, playId, nflId, displayName, frameId) %>%
+  rename(FrameNumber_AtStart = frameId)
+
+# Account for plays that could have multiple of these events
+Completions_Arrival <- Completions_Arrival %>%
+  group_by(gameId, playId, nflId, displayName) %>%
+  mutate(Frame_Rank = rank(FrameNumber_AtStart, ties.method = "first")) %>%
+  ungroup() 
+Completions_Arrival <- Completions_Arrival %>% filter(Frame_Rank == 1)
+Completions_Arrival <- Completions_Arrival %>% select(-"Frame_Rank")
+
+Completions_Merged <- merge(x = Completions_Merged, y = Completions_Arrival, 
+                          by = c("playId", "gameId", "nflId", "displayName"))
+Completions_Merged <- Completions_Merged %>% arrange(gameId, playId, nflId, frameId)
+
+Completions_Merged <- Completions_Merged %>% group_by(gameId, playId, nflId) %>% 
+  mutate(Unnecessary_Early = ifelse(frameId < FrameNumber_AtStart, TRUE, FALSE)) %>% 
+  ungroup()
+
+Completions_Merged <- Completions_Merged %>% filter(Unnecessary_Early == FALSE)
+rm(Completions_Arrival)
+Completions_Merged <- unique(Completions_Merged)
+Completions_Merged <- Completions_Merged %>% select(-"Unnecessary_Early")
+
