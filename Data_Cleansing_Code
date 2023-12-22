@@ -325,6 +325,7 @@ MergedData <- MergedData %>%
   mutate(Age_Days = NumericGameDate - NumericBirthDate)
 MergedData <- MergedData %>% mutate(Age_Years = Age_Days / 365.25)
 MergedData <- MergedData %>% select(-c("birthDate", "time", "Age_Days"))
+class(MergedData$Age_Years) <- "numeric"
 
 table(MergedData$offenseFormation)
 # Make simplified version for under center vs. not under center
