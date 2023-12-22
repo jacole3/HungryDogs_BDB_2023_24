@@ -384,7 +384,7 @@ MissedTackles_Merged_ByPlayer <- TackleAttempts_Merged %>%
 # Now we sum the individual missed tackles, for teammates who missed one on the same play
 MissedTackles_Merged <- MissedTackles_Merged_ByPlayer %>%
   group_by(gameId, playId) %>%
-  summarize(Players_TackleAttempt = n(), TeamMT_FullPlay = sum(MissedTackles)) %>% arrange(desc(TeamMissedTackles))
+  summarize(Players_TackleAttempt = n(), TeamMT_FullPlay = sum(MissedTackles)) %>% arrange(desc(TeamMT_FullPlay))
 MergedData <- merge(x = MergedData, y = MissedTackles_Merged,
                     by = c("gameId", "playId"), all.x = TRUE)
 MergedData <- MergedData %>% 
