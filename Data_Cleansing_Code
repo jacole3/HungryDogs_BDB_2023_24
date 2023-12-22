@@ -467,17 +467,9 @@ Scrambles_Merged <- unique(Scrambles_Merged)
 Scrambles_Merged <- Scrambles_Merged %>% select(-"Unnecessary_Early")
 
 Completions_Arrival <- Completions_Merged %>%
-  filter(event %in% c("pass_outcome_caught", "lateral")) %>%
+  filter(event %in% c("pass_outcome_caught")) %>%
   select(gameId, playId, nflId, displayName, frameId) %>%
   rename(FrameNumber_AtStart = frameId)
-
-# Account for plays that could have multiple of these events
-Completions_Arrival <- Completions_Arrival %>%
-  group_by(gameId, playId, nflId, displayName) %>%
-  mutate(Frame_Rank = rank(FrameNumber_AtStart, ties.method = "first")) %>%
-  ungroup() 
-Completions_Arrival <- Completions_Arrival %>% filter(Frame_Rank == 1)
-Completions_Arrival <- Completions_Arrival %>% select(-"Frame_Rank")
 
 Completions_Merged <- merge(x = Completions_Merged, y = Completions_Arrival, 
                           by = c("playId", "gameId", "nflId", "displayName"))
