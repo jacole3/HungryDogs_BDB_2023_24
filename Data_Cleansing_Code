@@ -403,15 +403,15 @@ IndivTackles_Penalized <- MergedData %>%
   filter(!is.na(IndivTackle_Penalized))
 IndivTackles_Penalized_ByPlayer <- IndivTackles_Penalized %>% 
   group_by(gameId, playId, nflId, displayName) %>%
-  summarize(Frames = n(), MT_Pen = IndivTackle_Penalized[1]) %>% arrange(desc(MT_Pen), playId)
+  summarize(Frames = n(), Tackle_Pen = IndivTackle_Penalized[1]) %>% arrange(desc(Tackle_Pen), playId)
 # Now we sum them, if any teammates had one on the same play
 PenalizedTackles_Merged <- IndivTackles_Penalized_ByPlayer %>%
   group_by(gameId, playId) %>%
-  summarize(TeamDef_MT_Pen = sum(MT_Pen)) %>% arrange(desc(TeamDef_MT_Pen))
+  summarize(TeamDef_Tkl_Pen = sum(Tackle_Pen)) %>% arrange(desc(TeamDef_Tkl_Pen))
 MergedData <- merge(x = MergedData, y = PenalizedTackles_Merged,
                     by = c("gameId", "playId"), all.x = TRUE)
 MergedData <- MergedData %>% 
-  replace_na(list(TeamDef_MT_Pen = 0)) 
+  replace_na(list(TeamDef_Tkl_Pen = 0)) 
 MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
 rm(IndivTackles_Penalized, IndivTackles_Penalized_ByPlayer, PenalizedTackles_Merged)
 
