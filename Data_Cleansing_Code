@@ -386,7 +386,8 @@ MergedData <- MergedData %>%
 
 # Make a column for an individual having a tackle attempt
 MergedData <- MergedData %>% mutate(IndivTackleAttempt =
-    ifelse(!is.na(tackle) | !is.na(assist) | !is.na(forcedFumble) | !is.na(pff_missedTackle), 1, 0))
+    ifelse(!is.na(tackle) | !is.na(assist) | !is.na(forcedFumble) | !is.na(pff_missedTackle), 1, 
+           ifelse(PlayerSideOfBall == "defense", 0, NA)))
 
 # Create a merge() for "did the entire play have a missed tackle at all?"
 TackleAttempts_Merged <- MergedData %>% 
