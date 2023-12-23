@@ -384,6 +384,10 @@ MergedData <- MergedData %>%
   ungroup()
 # table(MergedData$TotDistFromBall_Rank_OVR); rank is never higher than 22
 
+# Make a column for an individual having a tackle attempt
+MergedData <- MergedData %>% mutate(IndivTackleAttempt =
+    ifelse(!is.na(tackle) | !is.na(assist) | !is.na(forcedFumble) | !is.na(pff_missedTackle), 1, 0))
+
 # Create a merge() for "did the entire play have a missed tackle at all?"
 TackleAttempts_Merged <- MergedData %>% 
   filter(!is.na(tackle) | !is.na(assist) | !is.na(forcedFumble) | !is.na(pff_missedTackle))
