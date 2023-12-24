@@ -391,6 +391,14 @@ MergedData <- MergedData %>% mutate(IndivTackleAttempt =
     ifelse(!is.na(tackle) | !is.na(assist) | !is.na(forcedFumble) | !is.na(pff_missedTackle), 1, 
            ifelse(PlayerSideOfBall == "defense", 0, NA)))
 
+# Add columns for "total tackles", as well as a binary column for whether one had a tackle
+MergedData <- MergedData %>% mutate(IndivTotTackles = 
+      ifelse(!is.na(tackle), tackle + 0.5*assist,
+             ifelse(PlayerSideOfBall == "defense", 0, NA)))
+MergedData <- MergedData %>% mutate(Indiv_MadeTackle = ifelse(IndivTotTackles > 0, TRUE, FALSE))
+# Note that we can't add a column for "tackler name" b/c some plays have more than one
+# I.e., this would result in multiple rows per frame, per play
+
 # Create a merge() for "did the entire play have a missed tackle at all?"
 TackleAttempts_Merged <- MergedData %>% 
   filter(!is.na(tackle) | !is.na(assist) | !is.na(forcedFumble) | !is.na(pff_missedTackle))
