@@ -212,12 +212,14 @@ TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
 # View(TrackingWithTackles_PlayerNames %>% filter(is.na(club)))
 rm(players, tackles, tracking_combined, TrackingWithTackles)
 
-# Check if any play has multiple "tackle" instances
-Tackle_Multiples <- tackles %>% filter(tackle > 0) %>%
+# Check if any play has multiple "tackle" instances, or none
+Tackle_Multiples <- tackles %>% # filter(tackle > 0) %>%
   group_by(gameId, playId) %>%
-  summarize(Players = n(), Tackles = sum(tackle)) %>% arrange(desc(Tackles))
-# One instance: View(plays %>% filter(gameId == 2022091107, playId == 1879))
-# And that play had a forced fumble, therefore we know "tackle" means solo tackle
+  summarize(Players = n(), Tackles = sum(tackle), Assists = sum(assist)) %>% arrange(desc(Tackles))
+# View(Tackle_Multiples %>% arrange(Tackles))
+# One instance of multiple: View(plays %>% filter(gameId == 2022091107, playId == 1879)) - and that play had a forced fumble
+# But there are many instances of a play having no "tackles" but some "assists"
+# Therefore we know "tackle" means solo tackle
 rm(Tackle_Multiples)
 
 max(tackles$pff_missedTackle) # no player had more than 1 MT on a play
