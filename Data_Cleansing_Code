@@ -441,21 +441,21 @@ rm(IndivTackles_Penalized, IndivTackles_Penalized_ByPlayer, PenalizedTackles_Mer
 # These will be useful in the "aggregating frames into plays" section
 # E.G., getting the average defensive WPA added across a single player's tackle attempts
 MergedData <- MergedData %>% mutate(PlayEPA_TackleAttemptOnly =
-                                      ifelse(IndivTackleAttempt == 1, epa, NA))
+        ifelse(IndivTackleAttempt == 1, expectedPointsAdded, NA))
 MergedData <- MergedData %>% mutate(PlayEPA_TacklerOnly =
-                                      ifelse(IndivTotTackles > 0, epa, NA))
-MergedData <- MergedData %>% mutate(PlayEPA_TackleAttemptOnly =
-                                      ifelse(IndivTackleAttempt == 1, epa, NA))
-MergedData <- MergedData %>% mutate(PlayEPA_TacklerOnly =
-                                      ifelse(IndivTotTackles > 0, epa, NA))
+        ifelse(IndivTotTackles > 0, expectedPointsAdded, NA))
+MergedData <- MergedData %>% mutate(PlayDefWPA_TackleAttemptOnly =
+        ifelse(IndivTackleAttempt == 1, DefWPA, NA))
+MergedData <- MergedData %>% mutate(PlayDefWPA_TacklerOnly =
+        ifelse(IndivTotTackles > 0, DefWPA, NA))
 MergedData <- MergedData %>% mutate(PlayEPASuccess_TackleAttemptOnly =
-                                      ifelse(IndivTackleAttempt == 1, success, NA))
+        ifelse(IndivTackleAttempt == 1, success, NA))
 MergedData <- MergedData %>% mutate(PlayEPASuccess_TacklerOnly =
-                                      ifelse(IndivTotTackles > 0, success, NA))
+        ifelse(IndivTotTackles > 0, success, NA))
 MergedData <- MergedData %>% mutate(PlayWPASuccess_TackleAttemptOnly =
-                                      ifelse(IndivTackleAttempt == 1, WPSuccess, NA))
+        ifelse(IndivTackleAttempt == 1, WPSuccess, NA))
 MergedData <- MergedData %>% mutate(PlayEPA_TacklerOnly =
-                                      ifelse(IndivTotTackles > 0, WPSuccess, NA))
+        ifelse(IndivTotTackles > 0, WPSuccess, NA))
 
 # Now we want to exclude "extra" frames, i.e. ones after the play ended
 table(MergedData$event)
