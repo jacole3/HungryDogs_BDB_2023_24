@@ -827,6 +827,12 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(DefAlign_Numeric =
                                ifelse(pre_snap_gap %in% c("R-D", "R-E", "R-F"), 1, pre_snap_gap))))))))
 class(DesignedRuns_Merged$DefAlign_Numeric) <- "numeric"
 
+# Also add a column for IDL vs. EDGE vs. off-ball LB
+DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(Box_IDLvsEDGE =
+  ifelse(DefenderInBox %in% "Box_OffBall", "OffBall_LB",
+      ifelse(DefenderInBox %in% "Box_LOS" & DefAlign_Numeric %in% 3:5, "IDL",
+            ifelse(DefenderInBox %in% "Box_LOS" & DefAlign_Numeric %in% c(1, 2, 6, 7), "EDGE", NA))))
+
 # Get rid of frames where ball-carrier doesn't have ball yet
 # For designed runs, we had to wait until after we defined all the gap alignments
 # Recall that we already did this for dropbacks in "data cleansing code" file
