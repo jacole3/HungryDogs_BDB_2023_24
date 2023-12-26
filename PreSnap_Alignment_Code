@@ -833,6 +833,27 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(Box_IDLvsEDGE =
       ifelse(DefenderInBox %in% "Box_LOS" & DefAlign_Numeric %in% 3:5, "IDL",
             ifelse(DefenderInBox %in% "Box_LOS" & DefAlign_Numeric %in% c(1, 2, 6, 7), "EDGE", NA))))
 
+# Do a group-by to create each player's "Primary_BoxPosition"
+# I.e. each player's general most-often played position, even if not on this specific play
+PrimPosition_Label <- DesignedRuns_Merged %>% filter(event == "ball_snap") %>%
+  group_by(nflId, displayName) %>%
+  summarize(Plays = n(), 
+            IDLSnaps = sum(Box_IDLvsEDGE == "IDL", na.rm = TRUE), IDLSnap_Rate = IDLSnaps / Plays,
+            EDGESnaps = sum(Box_IDLvsEDGE == "EDGE", na.rm = TRUE), EDGESnap_Rate = EDGESnaps / Plays,
+            OffBall_LBSnaps = sum(Box_IDLvsEDGE == "OffBall_LB", na.rm = TRUE), OffBall_LBSnap_Rate = OffBall_LBSnaps / Plays,
+            BoxSnaps = IDLSnaps + EDGESnaps + OffBall_LBSnaps, BoxSnapRate = BoxSnaps / Plays)
+PrimPosition_Label <- PrimPosition_Label %>% filter(BoxSnapRate >= 0.5)
+PrimPosition_Label <- PrimPosition_Label %>% mutate(Primary_BoxPosition =
+    ifelse(EDGESnaps >= OffBall_LBSnaps & EDGESnaps >= IDLSnaps, "EDGE",
+           ifelse(IDLSnaps >= EDGESnaps & IDLSnaps >= OffBall_LBSnaps, "IDL",
+                  ifelse(OffBall_LBSnaps >= EDGESnaps & OffBall_LBSnaps >= IDLSnaps, "OffBall_LB", NA))))
+# View(PrimPosition_Label %>% filter(is.na(Primary_BoxPosition))) # it's empty
+
+PrimPosition_Label <- PrimPosition_Label %>% select(nflId, displayName, Primary_BoxPosition, BoxSnaps)
+DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = PrimPosition_Label,
+                             by = c("nflId", "displayName"), all.x = TRUE)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"BoxSnaps")
+
 # Get rid of frames where ball-carrier doesn't have ball yet
 # For designed runs, we had to wait until after we defined all the gap alignments
 # Recall that we already did this for dropbacks in "data cleansing code" file
