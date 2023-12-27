@@ -337,6 +337,20 @@ MergedData <- MergedData %>% mutate(Age_Years = Age_Days / 365.25)
 MergedData <- MergedData %>% select(-c("birthDate", "time", "Age_Days"))
 class(MergedData$Age_Years) <- "numeric"
 
+# Also code for each player's maximum speed
+TopSeasonSpeeds <- MergedData %>% 
+  group_by(nflId, displayName) %>%
+  mutate(Indiv_SpeedRank = rank(-s, ties.method = "first")) %>%
+  ungroup()
+TopSeasonSpeeds <- TopSeasonSpeeds %>% select(nflId, displayName, s, Indiv_SpeedRank)  
+TopSeasonSpeeds <- TopSeasonSpeeds %>% filter(Indiv_SpeedRank == 1)
+TopSeasonSpeeds <- TopSeasonSpeeds %>% select(-"Indiv_SpeedRank")
+TopSeasonSpeeds <- TopSeasonSpeeds %>% rename(Season_MaxSpeed = s)
+
+MergedData <- merge(x = MergedData, y = TopSeasonSpeeds,
+                    by = c("nflId", "displayName"))
+rm(TopSeasonSpeeds)
+
 table(MergedData$offenseFormation)
 # Make simplified version for under center vs. not under center
 MergedData <- MergedData %>% mutate(QBAlignment =
