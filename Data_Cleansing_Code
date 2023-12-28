@@ -435,12 +435,13 @@ rm(TackleAttempts_Merged, MissedTackles_Merged, MissedTackles_Merged_ByPlayer)
 
 # Also make variable for "penalized tackle", first for individuals
 MergedData <- MergedData %>% mutate(IndivTackle_Penalized =
-    ifelse((tackle == 1 | assist == 1) & (nflId == foulNFLId1 | nflId == foulNFLId2), 1, NA))
+    ifelse((tackle == 1 | assist == 1 | forcedFumble == 1) & (nflId == foulNFLId1 | nflId == foulNFLId2), 1, NA))
 # View(MergedData %>% filter(tackle == 0 & assist == 0 & !is.na(IndivTackle_Penalized))); this is empty
 
 # And now "penalized tackle" for teams
 IndivTackles_Penalized <- MergedData %>% 
   filter(!is.na(IndivTackle_Penalized))
+# This group_by shows most penalized tackles by any single player on a play
 IndivTackles_Penalized_ByPlayer <- IndivTackles_Penalized %>% 
   group_by(gameId, playId, nflId, displayName) %>%
   summarize(Frames = n(), Tackle_Pen = IndivTackle_Penalized[1]) %>% arrange(desc(Tackle_Pen), playId)
