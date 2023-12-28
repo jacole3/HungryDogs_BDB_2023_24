@@ -478,9 +478,9 @@ MergedData <- MergedData %>% mutate(PlayEPASuccess_TackleAttemptOnly =
         ifelse(IndivTackleAttempt == 1, success, NA))
 MergedData <- MergedData %>% mutate(PlayEPASuccess_TacklerOnly =
         ifelse(IndivTotTackles > 0, success, NA))
-MergedData <- MergedData %>% mutate(PlayDefWPASuccess_TackleAttemptOnly =
+MergedData <- MergedData %>% mutate(PlayWPASuccess_TackleAttemptOnly =
         ifelse(IndivTackleAttempt == 1, WPSuccess, NA))
-MergedData <- MergedData %>% mutate(PlayDefWPASuccess_TacklerOnly =
+MergedData <- MergedData %>% mutate(PlayWPASuccess_TacklerOnly =
         ifelse(IndivTotTackles > 0, WPSuccess, NA))
 
 # Now we want to exclude "extra" frames, i.e. ones after the play ended
