@@ -456,6 +456,14 @@ MergedData <- MergedData %>%
 MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
 rm(IndivTackles_Penalized, IndivTackles_Penalized_ByPlayer, PenalizedTackles_Merged)
 
+# And do the same thing for "clean tackles"
+MergedData <- MergedData %>% mutate(IndivTotTackle_Clean =
+    ifelse(tackle == 1 & (is.na(IndivTackle_Penalized)), 1, 
+           ifelse(assist == 1 & (is.na(IndivTackle_Penalized)), 0.5, NA)))
+
+MergedData <- MergedData %>% mutate(TeamDef_Tackle_Clean =
+    ifelse((solo_tackle == 1 | assist_tackle == 1 | fumble_forced == 1) & TeamDef_Tkl_Pen == 0, 1, 0))
+
 # These will be useful in the "aggregating frames into plays" section
 # E.G., getting the average defensive WPA added across a single player's tackle attempts
 MergedData <- MergedData %>% mutate(PlayEPA_TackleAttemptOnly =
