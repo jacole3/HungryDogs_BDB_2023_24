@@ -406,6 +406,8 @@ MergedData <- MergedData %>% mutate(IndivTackleAttempt =
            ifelse(PlayerSideOfBall == "defense", 0, NA)))
 
 # Add columns for "total tackles", as well as a binary column for whether one had a tackle
+# Note that this is empty: View(MergedData %>% filter(forcedFumble > 0, tackle == 0, assist == 0))
+# I.e., it's impossible to force a fumble and not be credited with tackle or assist
 MergedData <- MergedData %>% mutate(IndivTotTackles = 
       ifelse(!is.na(tackle), tackle + 0.5*assist,
              ifelse(PlayerSideOfBall == "defense", 0, NA)))
