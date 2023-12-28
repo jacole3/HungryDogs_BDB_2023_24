@@ -415,13 +415,14 @@ MergedData <- MergedData %>% mutate(Indiv_MadeTackle = ifelse(IndivTotTackles > 
 # Note that we can't add a column for "tackler name" b/c some plays have more than one
 # I.e., this would result in multiple rows per frame, per play
 
-# Create a merge() for "did the entire play have a missed tackle at all?"
+# Create a variable for "did the entire play have a missed tackle at all?"
 TackleAttempts_Merged <- MergedData %>% 
   filter(!is.na(tackle) | !is.na(assist) | !is.na(forcedFumble) | !is.na(pff_missedTackle))
+# This group_by shows most missed tackles by any single player on a play
 MissedTackles_Merged_ByPlayer <- TackleAttempts_Merged %>% 
   group_by(gameId, playId, nflId, displayName) %>%
   summarize(Frames = n(), MissedTackles = pff_missedTackle[1]) %>% arrange(desc(MissedTackles), playId)
-# Now we sum the individual missed tackles, for teammates who missed one on the same play
+# Now we sum the individual missed tackles, for teammates who each missed one on the same play
 MissedTackles_Merged <- MissedTackles_Merged_ByPlayer %>%
   group_by(gameId, playId) %>%
   summarize(TeamPlayers_TackleAtt = n(), TeamMT_FullPlay = sum(MissedTackles)) %>% arrange(desc(TeamMT_FullPlay))
