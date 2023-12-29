@@ -6,6 +6,24 @@ library(gganimate)
 library(deldir)
 library(ggvoronoi)
 
+# url_geo <- "https://cran.r-project.org/src/contrib/Archive/rgeos/rgeos_0.6-4.tar.gz"
+# pkgFile_geo <- "rgeos_0.6-4.tar.gz"
+# download.file(url = url_geo, destfile = pkgFile_geo)
+# 
+# url_voronoi <- "https://cran.r-project.org/src/contrib/Archive/ggvoronoi/ggvoronoi_0.8.5.tar.gz"
+# pkgFile_voronoi <- "ggvoronoi_0.8.5.tar.gz"
+# download.file(url = url_voronoi, destfile = pkgFile_voronoi)
+# 
+# require(devtools)
+# install_version("rgeos", version = "0.6.4", repos = "http://cran.us.r-project.org")
+# install_version("ggvoronoi", version = "0.8.5", repos = "http://cran.us.r-project.org")
+# 
+# # # Install package
+# install.packages(pkgs=pkgFile_geo, type="source", repos=NULL)
+# 
+# # Delete package tarball
+# unlink(pkgFile)
+
 ## Frames for how long we want to project forward
 frame_length <- 0.5
 
