@@ -75,7 +75,7 @@ tracking_w1 %>%
 #adding projection forward
 tracking_w1 <- tracking_w1 %>%
   mutate(X_end = X_std + (s*frame_length*cos((90-dir2)*pi/180)),
-         Y_end = Y_std + (s*frame_length*sin((90-dir2*pi)/180)))
+         Y_end = Y_std + (s*frame_length*sin((90-dir2)*pi/180)))
 
 ## Here's a sample play and the corresponding vornoi diagram
 sample_play <- tracking_w1 %>%
