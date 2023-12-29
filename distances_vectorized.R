@@ -5,6 +5,7 @@ library(tidyverse)
 library(gganimate)
 library(deldir)
 library(ggvoronoi)
+# Try this if ggvoronoi doesn't install: remotes::install_github("garretrc/ggvoronoi", dependencies = TRUE, build_opts = c("--no-resave-data"))
 
 ## Frames for how long we want to project forward
 frame_length <- 0.5
