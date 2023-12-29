@@ -234,11 +234,12 @@ TrackingWithTackles_PlayerNames <- TrackingWithTackles_PlayerNames %>%
 TrackingWithTackles_PlayerNames <- TrackingWithTackles_PlayerNames %>%
   rename(displayName = displayName.y)
 
+# Make a new version of PlaysAndGames_NFLVerse with fewer columns 
 NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>% 
   select(-c(7, 16, 20, 31, 42:46, 48:49, 51, 55:57, 59, 61:62, 64, 66:68, 70:74, 80:87, 
             91:94, 102, 105, 108:117, 122:129, 132:133, 135:144, 149:160, 
-            165:166, 168:177, 183, 186:187, 189:190, 196:200, 202, 204:207, 210:244, 
-            249:301, 308:309, 311:315, 317:320, 325:331, 333:362, 364:367, 372:376,
+            165:166, 168:177, 183, 186:187, 189:191, 196:200, 202, 204:207, 210:244, 
+            249:301, 302:309, 311:315, 317:320, 325:331, 333:362, 364:367, 372:376,
             378:383, 385, 387:398, 400))
 
 rm(PlaysAndGames_NFLVerse)
