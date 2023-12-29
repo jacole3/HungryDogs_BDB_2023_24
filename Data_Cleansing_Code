@@ -157,8 +157,11 @@ sort(table(players$displayName)) # no duplicates
 table(plays$passResult)
 # C means complete, R means scramble
 
-# View(plays %>% filter(!passResult %in% c("C", "R") & str_detect(playDescription, "(sack)")))
-# This is empty, therefore every play that doesn't have "C" or "R" is a designed run
+# View(plays %>% filter(str_detect(playDescription, "(sack)")))
+# This is empty, so no sacks are included in the data set
+
+# View(plays %>% filter(!passResult %in% c("C", "R")))
+# This is empty, therefore all plays that don't have "C" or "R" are designed runs
 plays <- plays %>% mutate(passResult = 
               ifelse(passResult %in% c("C", "R"), passResult, NA))
 
