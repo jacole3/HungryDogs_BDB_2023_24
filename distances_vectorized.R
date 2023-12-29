@@ -6,6 +6,7 @@ library(gganimate)
 library(deldir)
 library(ggvoronoi)
 
+# Code I used to download ggvoronoi
 # url_geo <- "https://cran.r-project.org/src/contrib/Archive/rgeos/rgeos_0.6-4.tar.gz"
 # pkgFile_geo <- "rgeos_0.6-4.tar.gz"
 # download.file(url = url_geo, destfile = pkgFile_geo)
@@ -66,6 +67,11 @@ tracking_w1 <- tracking_w1 %>%
          dir2 = ifelse(playDirection == "right", dir, 
                        ifelse((playDirection == "left" & dir < 180), dir + 180, dir - 180)))
 
+tracking_w1 %>%
+  ggplot(aes(x = dir)) +
+  geom_density(fill='dodgerblue') +
+  facet_wrap(~playDirection)
+
 #adding projection forward
 tracking_w1 <- tracking_w1 %>%
   mutate(X_end = X_std + (s*frame_length*cos((90-dir2)*pi/180)),
@@ -78,9 +84,11 @@ sample_play <- tracking_w1 %>%
 
 playDescription <- unique(sample_play$playDescription)
 
+plotly::ggplotly(
 sample_play %>%
   filter(frameId>18) %>%
-  ggplot(aes(x = X_std, y = Y_std)) +
+  ggplot(aes(x = X_std, y = Y_std, text = paste0('Dir: ', dir2,
+                                                 'Player Name: ',displayName))) +
   stat_voronoi(geom="path") +
   geom_point(aes(color = Player_Desc)) +
   geom_segment(aes(x = X_std, y = Y_std, xend = X_end,
@@ -92,6 +100,7 @@ sample_play %>%
   labs(x = "X (Standardized)", y = "Y (Stand=ardized)", caption = paste0("Description: ", playDescription)) +
   geom_hline(yintercept = 0, color = 'red', linetype='dashed')+
   facet_wrap(~frameId)
+)
 
 ## Let's start getting the distances
 ## This is the week 1 data with a subset of the columns
@@ -202,3 +211,32 @@ tracking_sub <- tracking_sub %>%
 ## View a sample play:
 View(tracking_sub %>%
        filter(gameId==2022090800 & playId==617))
+
+
+mckenzie_catch <- tracking_sub %>%
+  filter(gameId==2022090800 & playId==617)
+plotly::ggplotly(
+  mckenzie_catch %>%
+    filter(frameId>=unique(frameId[which(event=='pass_arrived')]), frameId<=unique(frameId[which(event=='first_contact')])) %>%
+    ggplot(aes(x = X_std, y = Y_std, 
+               text = paste0('Dir: ', dir2, '\n',
+                             'Player Name: ',displayName, '\n',
+                             'Closest Opposing Player: ', closest_player_name, '\n',
+                             'Closest Opposing Player Dist: ', round(min_dist,3), '\n',
+                             'Distance to Ball: ', round(dist_to_ball_carrier,3), '\n',
+                             'Second Closest Opposing Player', second_closest_player_name, '\n',
+                             'Second Closest Opposing Player Dist: ', round(second_closest_dist,3)
+               )
+                             )) +
+    stat_voronoi(geom="path") +
+    geom_point(aes(color = Player_Desc)) +
+    geom_segment(aes(x = X_std, y = Y_std, xend = X_end,
+                     yend = Y_end, color=Player_Desc)) +
+    scale_color_manual(values = c("Ball Carrier" = "black", 
+                                  "Offense" = "red",
+                                  "Defense" = "blue",
+                                  "Football"="brown")) +
+    labs(x = "X (Standardized)", y = "Y (Stand=ardized)", caption = paste0("Description: ", playDescription)) +
+    geom_hline(yintercept = 0, color = 'red', linetype='dashed')+
+    facet_wrap(~frameId)
+)
