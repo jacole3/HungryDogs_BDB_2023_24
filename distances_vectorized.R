@@ -83,8 +83,10 @@ MergedData %>%
 tracking_w1 <- tracking_w1 %>%
   mutate(X_proj = X_std + (s*frame_length*cos((90-dir2)*pi/180)),
          Y_proj = Y_std + (s*frame_length*sin((90-dir2)*pi/180)))
+# Note that we tested a kinematics-based approach (incorporating accelration) in addition to the "speed*frame_length" approach
+# Turned out the simpler approach (without acceleration) was more accurate in projecting future distances
 
-## Here's a sample play and the corresponding vornoi diagram
+## Here's a sample play and the corresponding voronoi diagram
 sample_play <- tracking_w1 %>%
   filter(gameId==2022091109 & playId==1915) %>%
   arrange(frameId)
