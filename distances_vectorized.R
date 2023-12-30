@@ -106,7 +106,8 @@ sample_play %>%
                                 "Football"="brown")) +
   labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
        caption = paste0("Description: ", playDescription)) +
-  geom_hline(yintercept = 0, color = 'red', linetype='dashed')+
+  geom_hline(yintercept = 0, color = 'darkgreen', linetype='dashed')+
+  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
   facet_wrap(~frameId)
 )
 
@@ -155,7 +156,8 @@ Singletary_run %>%
                                 "Defense" = "blue",
                                 "Football" = "brown")) +
   labs(x = "X (Standardized)", y = "Y (Standardized)") +
-  geom_hline(yintercept = 0, color = 'red', linetype='dashed')+
+  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
+  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
   facet_wrap(~frameId)
 
 
@@ -246,6 +248,7 @@ plotly::ggplotly(
                                   "Football" = "brown")) +
     labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
     caption = paste0("Description: ", playDescription)) +
-    geom_hline(yintercept = 0, color = 'red', linetype='dashed')+
+    geom_hline(yintercept = 0, color = 'darkgreen', linetype='dashed')+
+    geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
     facet_wrap(~frameId)
 )
