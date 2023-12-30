@@ -551,3 +551,11 @@ MergedData <- MergedData %>% mutate(TeamTackle_NextFrame =
       ifelse(lead(event) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId) & nflId == lead(nflId), TRUE,
              ifelse(playId == lead(playId) & nflId == lead(nflId), FALSE, NA)))
 
+# Create a Player_Role variable (i.e. defender, ball-carrier, or other offensive player)
+MergedData <- MergedData %>%
+  mutate(Player_Role = case_when(
+           nflId == ballCarrierId ~ "Ball Carrier",
+           possessionTeam != club & displayName != "football"~ "Defense",
+           possessionTeam == club & ballCarrierId != nflId ~ "Offense",
+           displayName == "football" ~ "Football")) 
+
