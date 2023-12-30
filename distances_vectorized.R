@@ -146,7 +146,8 @@ Singletary_run <- tracking_sub %>%
   filter(gameId==2022090800 & playId==101)
 
 ## Another Voronoi Diagram
-Singletary_run %>%
+ggplotly(
+  Singletary_run %>%
   filter(frameId>=unique(frameId[which(event=='handoff')]), frameId<=unique(frameId[which(event=='first_contact')])) %>%
   ggplot(aes(x = X_std, y = Y_std)) +
   stat_voronoi(geom="path") +
@@ -161,7 +162,7 @@ Singletary_run %>%
   geom_hline(yintercept = 0, color = 'darkgreen', linetype='dashed') +
   geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed') +
   facet_wrap(~frameId)
-
+)
 
 ## Most important chunk: Calculating Distances to Closest Players on Opposing teams
 tracking_sub <- tracking_sub %>%
