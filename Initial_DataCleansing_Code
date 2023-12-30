@@ -516,6 +516,36 @@ MergedData <- MergedData %>% mutate(YACOE = yards_after_catch - xyac_mean_yardag
                   YAC_Success_OE = ifelse(passResult == "C", (success - xyac_fd), NA),
                   YAC_FD_OE = ifelse(passResult == "C", (first_down - xyac_fd), NA))
 
+# Now we want to exclude "extra" frames, i.e. ones after the play ended
+table(MergedData$event)
+# Include fumbles b/c we want to limit to only defensive players making tackles
+Frames_EndOfPlay <- MergedData %>%
+  filter(event %in% c("out_of_bounds", "safety", "qb_sack", "qb_slide", "tackle", "touchdown", "fumble", "fumble_defense_recovered")) %>%
+  select(gameId, playId, nflId, displayName, frameId) %>%
+  rename(FrameNumber_EndOfPlay = frameId)
+
+# Some plays have multiple of these events, e.g. View(DesignedRuns_Merged %>% filter(playId == 3449))
+# Therefore, make it so that only the first relevant frame shows up
+Frames_EndOfPlay <- Frames_EndOfPlay %>%
+  group_by(gameId, playId, nflId, displayName) %>%
+  mutate(Frame_Rank = rank(FrameNumber_EndOfPlay, ties.method = "first")) %>%
+  ungroup() 
+Frames_EndOfPlay <- Frames_EndOfPlay %>% filter(Frame_Rank == 1)
+Frames_EndOfPlay <- Frames_EndOfPlay %>% select(-"Frame_Rank")
+
+MergedData <- merge(x = MergedData, y = Frames_EndOfPlay, 
+             by = c("playId", "gameId", "nflId", "displayName"))
+MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
+MergedData <- unique(MergedData)
+
+MergedData <- MergedData %>% group_by(gameId, playId, nflId) %>% 
+  mutate(Unnecessary_Late = ifelse(frameId > FrameNumber_EndOfPlay, TRUE, FALSE)) %>% 
+  ungroup()
+
+MergedData <- MergedData %>% filter(Unnecessary_Late == FALSE)
+rm(Frames_EndOfPlay)
+MergedData <- MergedData %>% select(-"Unnecessary_Late")
+
 # Use lead() to label when defense made a tackle in the next frame
 MergedData <- MergedData %>% mutate(TeamTackle_NextFrame =
       ifelse(lead(event) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId) & nflId == lead(nflId), TRUE,
