@@ -174,7 +174,7 @@ tracking_sub <- tracking_sub %>%
                                                                      y = Y_std[which(club[.x]!=club & club!='football')],
                                                                      x_baseline = X_std[.x],
                                                                      y_baseline = Y_std[.x])))),
-         num_same_dist=ifelse(displayName=='football', 0, num_same_dist),
+         num_same_dist = ifelse(displayName=='football', 0, num_same_dist),
          min_dist_pos = map_dbl(.x=row_number(), ~which(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
                                                                       y = Y_std[which(club[.x]!=club & club!='football')],
                                                                       x_baseline = X_std[.x],
