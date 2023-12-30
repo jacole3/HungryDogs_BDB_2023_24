@@ -310,8 +310,8 @@ Frame1_DF <- MergedData %>% filter(frameId == 1)
 BallCarriers_Snap <- Frame1_DF %>% 
   group_by(playId, gameId) %>%
   summarize(Players = n(), BallCarriers = sum(IsBallCarrier)) %>%
-  arrange(BallCarriers, Players)
-# Every play has a ball-carrier
+  arrange(desc(BallCarriers), desc(Players))
+# Every play has exactly one ball-carrier
 rm(BallCarriers_Snap, Frame1_DF)
 
 # Use first_contact, ball_x, and X_LOS_Approx to create yards after contact
