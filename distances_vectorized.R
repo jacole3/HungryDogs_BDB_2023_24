@@ -57,7 +57,7 @@ tracking_w1 <- tracking_w1 %>%
            nflId==ballCarrierId ~ "Ball Carrier",
            possessionTeam!=club & displayName!="football"~ "Defense",
            possessionTeam==club & ballCarrierId!=nflId ~ "Offense",
-           displayName=="football" ~ "Football"
+           displayName == "football" ~ "Football"
          )) 
 
 #adjusting the orientations as well
@@ -70,13 +70,13 @@ tracking_w1 <- tracking_w1 %>%
 # This is a basic visualization of which "dir" values are most common, based on play direction
 tracking_w1 %>%
   ggplot(aes(x = dir)) +
-  geom_density(fill='dodgerblue') +
+  geom_density(fill = 'dodgerblue') +
   facet_wrap(~playDirection)
 
 # Here's same concept, but based on which side of ball player is on
 tracking_w1 %>%
   ggplot(aes(x = dir)) +
-  geom_density(fill='dodgerblue') +
+  geom_density(fill = 'dodgerblue') +
   facet_wrap(~IsPlayerOnOffense)
 
 #adding projection forward
@@ -105,11 +105,11 @@ Zay_Jones_catch %>%
   scale_color_manual(values = c("Ball Carrier" = "black", 
                                 "Offense" = "red",
                                 "Defense" = "blue",
-                                "Football"="brown")) +
+                                "Football" = "brown")) +
   labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
        caption = paste0("Description: ", playDescription)) +
-  geom_hline(yintercept = 0, color = 'darkgreen', linetype='dashed')+
-  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
+  geom_hline(yintercept = 0, color = 'darkgreen', linetype='dashed') +
+  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed') +
   facet_wrap(~frameId)
 )
 
@@ -158,8 +158,8 @@ Singletary_run %>%
                                 "Defense" = "blue",
                                 "Football" = "brown")) +
   labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)") +
-  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
-  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
+  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed') +
+  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed') +
   facet_wrap(~frameId)
 
 
@@ -174,7 +174,7 @@ tracking_sub <- tracking_sub %>%
                                                                      y = Y_std[which(club[.x]!=club & club!='football')],
                                                                      x_baseline = X_std[.x],
                                                                      y_baseline = Y_std[.x])))),
-         num_same_dist = ifelse(displayName=='football', 0, num_same_dist),
+         num_same_dist = ifelse(displayName == 'football', 0, num_same_dist),
          min_dist_pos = map_dbl(.x=row_number(), ~which(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
                                                                       y = Y_std[which(club[.x]!=club & club!='football')],
                                                                       x_baseline = X_std[.x],
@@ -192,7 +192,7 @@ tracking_sub <- tracking_sub %>%
                                                                                 y_baseline = Y_std[.x])== Rfast::nth(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
                                                                                                                                    y = Y_std[which(club[.x]!=club & club!='football')],
                                                                                                                                    x_baseline = X_std[.x],
-                                                                                                                                   y_baseline = Y_std[.x]),2,descending = F))[1])#Where I account for duplicates
+                                                                                                                                   y_baseline = Y_std[.x]),2,descending = F))[1]) # Where I account for duplicates
          
   ) %>%
   ungroup()
@@ -229,7 +229,7 @@ mckenzie_catch <- tracking_sub %>%
   filter(gameId==2022090800 & playId==617)
 plotly::ggplotly(
   mckenzie_catch %>%
-    filter(frameId>=unique(frameId[which(event=='pass_arrived')]), frameId<=unique(frameId[which(event=='first_contact')])) %>%
+    filter(frameId >= unique(frameId[which(event == 'pass_arrived')]), frameId <= unique(frameId[which(event == 'first_contact')])) %>%
     ggplot(aes(x = X_std, y = Y_std, 
                text = paste0('Dir: ', dir2, '\n',
                              'Player Name: ',displayName, '\n',
@@ -243,14 +243,14 @@ plotly::ggplotly(
     stat_voronoi(geom="path") +
     geom_point(aes(color = Player_Role)) +
     geom_segment(aes(x = X_std, y = Y_std, xend = X_proj,
-                     yend = Y_proj, color=Player_Role)) +
+                     yend = Y_proj, color = Player_Role)) +
     scale_color_manual(values = c("Ball Carrier" = "black", 
                                   "Offense" = "red",
                                   "Defense" = "blue",
                                   "Football" = "brown")) +
     labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
     caption = paste0("Description: ", playDescription)) +
-    geom_hline(yintercept = 0, color = 'darkgreen', linetype='dashed')+
-    geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
+    geom_hline(yintercept = 0, color = 'darkgreen', linetype='dashed') +
+    geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed') +
     facet_wrap(~frameId)
 )
