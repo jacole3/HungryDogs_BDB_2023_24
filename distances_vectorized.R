@@ -74,10 +74,10 @@ tracking_w1 %>%
   facet_wrap(~playDirection)
 
 # Here's same concept, but based on which side of ball player is on
-MergedData %>%
+tracking_w1 %>%
   ggplot(aes(x = dir)) +
   geom_density(fill='dodgerblue') +
-  facet_wrap(~PlayerSideOfBall)
+  facet_wrap(~IsPlayerOnOffense)
 
 #adding projection forward
 tracking_w1 <- tracking_w1 %>%
