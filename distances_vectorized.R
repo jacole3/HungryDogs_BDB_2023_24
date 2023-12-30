@@ -236,7 +236,7 @@ plotly::ggplotly(
                              'Closest Opposing Player: ', closest_player_name, '\n',
                              'Closest Opposing Player Dist: ', round(min_dist,3), '\n',
                              'Distance to Ball: ', round(dist_to_ball_carrier,3), '\n',
-                             'Second Closest Opposing Player:', second_closest_player_name, '\n',
+                             'Second Closest Opposing Player: ', second_closest_player_name, '\n',
                              'Second Closest Opposing Player Dist: ', round(second_closest_dist,3)
                )
                              )) +
