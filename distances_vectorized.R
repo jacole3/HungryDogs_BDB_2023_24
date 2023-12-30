@@ -145,8 +145,8 @@ Singletary_run %>%
   scale_color_manual(values = c("Ball Carrier" = "black", 
                                 "Offense" = "red",
                                 "Defense" = "blue",
-                                "Football"="brown")) +
-  labs(x = "X (Standardized)", y = "Y (Stand=ardized)") +
+                                "Football" = "brown")) +
+  labs(x = "X (Standardized)", y = "Y (Standardized)") +
   geom_hline(yintercept = 0, color = 'red', linetype='dashed')+
   facet_wrap(~frameId)
 
@@ -191,19 +191,19 @@ tracking_sub <- tracking_sub %>%
   mutate(
     closest_player_name = case_when(
       row_number()<=11 ~ displayName[12+min_dist_pos],
-      row_number()>=13 ~displayName[min_dist_pos]
+      row_number()>=13 ~ displayName[min_dist_pos]
     ),
     closest_player_nflID = case_when(
       row_number()<=11 ~ nflId[12+min_dist_pos],
-      row_number()>=13 ~nflId[min_dist_pos]
+      row_number()>=13 ~ nflId[min_dist_pos]
     ),
     second_closest_player_name = case_when(
       row_number()<=11 ~ displayName[12+second_closest_def_pos],
-      row_number()>=13 ~displayName[second_closest_def_pos]
+      row_number()>=13 ~ displayName[second_closest_def_pos]
     ),
     second_closest_player_nflID = case_when(
       row_number()<=11 ~ nflId[12+second_closest_def_pos],
-      row_number()>=13 ~nflId[second_closest_def_pos]
+      row_number()>=13 ~ nflId[second_closest_def_pos]
     )
   ) %>%
   ungroup()
@@ -235,8 +235,8 @@ plotly::ggplotly(
     scale_color_manual(values = c("Ball Carrier" = "black", 
                                   "Offense" = "red",
                                   "Defense" = "blue",
-                                  "Football"="brown")) +
-    labs(x = "X (Standardized)", y = "Y (Stand=ardized)", caption = paste0("Description: ", playDescription)) +
+                                  "Football" = "brown")) +
+    labs(x = "X (Standardized)", y = "Y (Standardized)", caption = paste0("Description: ", playDescription)) +
     geom_hline(yintercept = 0, color = 'red', linetype='dashed')+
     facet_wrap(~frameId)
 )
