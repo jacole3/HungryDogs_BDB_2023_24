@@ -139,7 +139,7 @@ tracking_sub <- tracking_sub %>%
 
 
 #### More Distances and two more sample plays:
-mckenzie_catch <- tracking_sub %>%
+McKenzie_catch <- tracking_sub %>%
   filter(gameId==2022090800 & playId==617)
 
 Singletary_run <- tracking_sub %>%
@@ -225,10 +225,10 @@ View(tracking_sub %>%
        filter(gameId==2022090800 & playId==617))
 
 
-mckenzie_catch <- tracking_sub %>%
+McKenzie_catch <- tracking_sub %>%
   filter(gameId==2022090800 & playId==617)
 plotly::ggplotly(
-  mckenzie_catch %>%
+  McKenzie_catch %>%
     filter(frameId >= unique(frameId[which(event == 'pass_arrived')]), frameId <= unique(frameId[which(event == 'first_contact')])) %>%
     ggplot(aes(x = X_std, y = Y_std, 
                text = paste0('Dir: ', dir2, '\n',
