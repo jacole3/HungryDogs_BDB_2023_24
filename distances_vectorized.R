@@ -87,14 +87,14 @@ tracking_w1 <- tracking_w1 %>%
 # Turned out the simpler approach (without acceleration) was more accurate in projecting future distances
 
 ## Here's a sample play and the corresponding voronoi diagram
-sample_play <- tracking_w1 %>%
+Zay_Jones_catch <- tracking_w1 %>%
   filter(gameId==2022091109 & playId==1915) %>%
   arrange(frameId)
 
-playDescription <- unique(sample_play$playDescription)
+playDescription <- unique(Zay_Jones_catch$playDescription)
 
 plotly::ggplotly(
-sample_play %>%
+Zay_Jones_catch %>%
   filter(frameId>18) %>%
   ggplot(aes(x = X_std, y = Y_std, text = paste0('Dir: ', dir2,
                                                  'Player Name: ',displayName))) +
