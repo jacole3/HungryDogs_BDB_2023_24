@@ -157,7 +157,7 @@ Singletary_run %>%
                                 "Offense" = "red",
                                 "Defense" = "blue",
                                 "Football" = "brown")) +
-  labs(x = "X (Standardized)", y = "Y (Standardized)") +
+  labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)") +
   geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
   geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed')+
   facet_wrap(~frameId)
