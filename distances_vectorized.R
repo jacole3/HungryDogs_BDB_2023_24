@@ -96,7 +96,7 @@ playDescription <- unique(Zay_Jones_catch$playDescription)
 plotly::ggplotly(
 Zay_Jones_catch %>%
   filter(frameId>18) %>%
-  ggplot(aes(x = X_std, y = Y_std, text = paste0('Dir: ', dir2,
+  ggplot(aes(x = X_std, y = Y_std, text = paste0('Dir: ', dir2, '\n',
                                                  'Player Name: ',displayName))) +
   stat_voronoi(geom="path") +
   geom_point(aes(color = Player_Role)) +
