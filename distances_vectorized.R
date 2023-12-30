@@ -186,7 +186,7 @@ tracking_sub <- tracking_sub %>%
                                                                              y = Y_std[which(club[.x]!=club & club!='football')],
                                                                              x_baseline = X_std[.x],
                                                                              y_baseline = Y_std[.x]), 2, descending = F)),
-         second_closest_def_pos = map_dbl(.x=row_number(), ~which(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
+         second_closest_pos = map_dbl(.x=row_number(), ~which(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
                                                                                 y = Y_std[which(club[.x]!=club & club!='football')],
                                                                                 x_baseline = X_std[.x],
                                                                                 y_baseline = Y_std[.x])== Rfast::nth(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
@@ -210,12 +210,12 @@ tracking_sub <- tracking_sub %>%
       row_number()>=13 ~ nflId[min_dist_pos]
     ),
     second_closest_player_name = case_when(
-      row_number()<=11 ~ displayName[12+second_closest_def_pos],
-      row_number()>=13 ~ displayName[second_closest_def_pos]
+      row_number()<=11 ~ displayName[12+second_closest_pos],
+      row_number()>=13 ~ displayName[second_closest_pos]
     ),
     second_closest_player_nflID = case_when(
-      row_number()<=11 ~ nflId[12+second_closest_def_pos],
-      row_number()>=13 ~ nflId[second_closest_def_pos]
+      row_number()<=11 ~ nflId[12+second_closest_pos],
+      row_number()>=13 ~ nflId[second_closest_pos]
     )
   ) %>%
   ungroup()
