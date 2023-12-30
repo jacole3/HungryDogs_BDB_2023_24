@@ -98,8 +98,8 @@ sample_play %>%
                                                  'Player Name: ',displayName))) +
   stat_voronoi(geom="path") +
   geom_point(aes(color = Player_Role)) +
-  geom_segment(aes(x = X_std, y = Y_std, x_proj = X_proj,
-                   y_proj = Y_proj, color=Player_Role)) +
+  geom_segment(aes(x = X_std, y = Y_std, xend = X_proj,
+                   yend = Y_proj, color=Player_Role)) +
   scale_color_manual(values = c("Ball Carrier" = "black", 
                                 "Offense" = "red",
                                 "Defense" = "blue",
@@ -147,8 +147,8 @@ Singletary_run %>%
   ggplot(aes(x = X_std, y = Y_std)) +
   stat_voronoi(geom="path") +
   geom_point(aes(color = Player_Role)) +
-  geom_segment(aes(x = X_std, y = Y_std, x_proj = X_proj,
-                   y_proj = Y_proj, color=Player_Role)) +
+  geom_segment(aes(x = X_std, y = Y_std, xend = X_proj,
+                   yend = Y_proj, color=Player_Role)) +
   scale_color_manual(values = c("Ball Carrier" = "black", 
                                 "Offense" = "red",
                                 "Defense" = "blue",
@@ -237,8 +237,8 @@ plotly::ggplotly(
                              )) +
     stat_voronoi(geom="path") +
     geom_point(aes(color = Player_Role)) +
-    geom_segment(aes(x = X_std, y = Y_std, x_proj = X_proj,
-                     y_proj = Y_proj, color=Player_Role)) +
+    geom_segment(aes(x = X_std, y = Y_std, xend = X_proj,
+                     yend = Y_proj, color=Player_Role)) +
     scale_color_manual(values = c("Ball Carrier" = "black", 
                                   "Offense" = "red",
                                   "Defense" = "blue",
