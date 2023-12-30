@@ -101,7 +101,7 @@ Zay_Jones_catch %>%
   stat_voronoi(geom="path") +
   geom_point(aes(color = Player_Role)) +
   geom_segment(aes(x = X_std, y = Y_std, xend = X_proj,
-                   yend = Y_proj, color=Player_Role)) +
+                   yend = Y_proj, color = Player_Role)) +
   scale_color_manual(values = c("Ball Carrier" = "black", 
                                 "Offense" = "red",
                                 "Defense" = "blue",
@@ -153,7 +153,7 @@ ggplotly(
   stat_voronoi(geom="path") +
   geom_point(aes(color = Player_Role)) +
   geom_segment(aes(x = X_std, y = Y_std, xend = X_proj,
-                   yend = Y_proj, color=Player_Role)) +
+                   yend = Y_proj, color = Player_Role)) +
   scale_color_manual(values = c("Ball Carrier" = "black", 
                                 "Offense" = "red",
                                 "Defense" = "blue",
