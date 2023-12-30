@@ -67,10 +67,17 @@ tracking_w1 <- tracking_w1 %>%
          dir2 = ifelse(playDirection == "right", dir, 
                        ifelse((playDirection == "left" & dir < 180), dir + 180, dir - 180)))
 
+# This is a basic visualization of which "dir" values are most common, based on play direction
 tracking_w1 %>%
   ggplot(aes(x = dir)) +
   geom_density(fill='dodgerblue') +
   facet_wrap(~playDirection)
+
+# Here's same concept, but based on which side of ball player is on
+MergedData %>%
+  ggplot(aes(x = dir)) +
+  geom_density(fill='dodgerblue') +
+  facet_wrap(~PlayerSideOfBall)
 
 #adding projection forward
 tracking_w1 <- tracking_w1 %>%
