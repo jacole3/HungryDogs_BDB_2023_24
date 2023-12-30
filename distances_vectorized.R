@@ -53,7 +53,7 @@ tracking_w1 <- tracking_w1 %>%
          IsPlayerOnOffense = ifelse(possessionTeam==club, "offense", "defense"),
          X_std = ifelse(toLeft==1, 120-x, x), ## Standardizes X
          Y_std = ifelse(toLeft==1, 160/3-y, y), ## Standardized Y
-         Player_Desc= case_when(
+         Player_Role= case_when(
            nflId==ballCarrierId ~ "Ball Carrier",
            possessionTeam!=club & displayName!="football"~ "Defense",
            possessionTeam==club & ballCarrierId!=nflId ~ "Offense",
@@ -90,9 +90,9 @@ sample_play %>%
   ggplot(aes(x = X_std, y = Y_std, text = paste0('Dir: ', dir2,
                                                  'Player Name: ',displayName))) +
   stat_voronoi(geom="path") +
-  geom_point(aes(color = Player_Desc)) +
+  geom_point(aes(color = Player_Role)) +
   geom_segment(aes(x = X_std, y = Y_std, xend = X_end,
-                   yend = Y_end, color=Player_Desc)) +
+                   yend = Y_end, color=Player_Role)) +
   scale_color_manual(values = c("Ball Carrier" = "black", 
                                 "Offense" = "red",
                                 "Defense" = "blue",
@@ -111,7 +111,7 @@ tracking_sub <- tracking_w1 %>%
          o, dir, event, passResult, passLength,
          ballCarrierId, ballCarrierDisplayName, playDescription,
          possessionTeam, defensiveTeam, toLeft, TeamOnOffense,
-         AwayOrHome, IsPlayerOnOffense, Player_Desc, 
+         AwayOrHome, IsPlayerOnOffense, Player_Role, 
          X_std, Y_std, o2, dir2, X_end, Y_end) %>%
   arrange(gameId, playId, frameId, club, nflId)
 
@@ -139,9 +139,9 @@ Singletary_run %>%
   filter(frameId>=unique(frameId[which(event=='handoff')]), frameId<=unique(frameId[which(event=='first_contact')])) %>%
   ggplot(aes(x = X_std, y = Y_std)) +
   stat_voronoi(geom="path") +
-  geom_point(aes(color = Player_Desc)) +
+  geom_point(aes(color = Player_Role)) +
   geom_segment(aes(x = X_std, y = Y_std, xend = X_end,
-                   yend = Y_end, color=Player_Desc)) +
+                   yend = Y_end, color=Player_Role)) +
   scale_color_manual(values = c("Ball Carrier" = "black", 
                                 "Offense" = "red",
                                 "Defense" = "blue",
@@ -229,9 +229,9 @@ plotly::ggplotly(
                )
                              )) +
     stat_voronoi(geom="path") +
-    geom_point(aes(color = Player_Desc)) +
+    geom_point(aes(color = Player_Role)) +
     geom_segment(aes(x = X_std, y = Y_std, xend = X_end,
-                     yend = Y_end, color=Player_Desc)) +
+                     yend = Y_end, color=Player_Role)) +
     scale_color_manual(values = c("Ball Carrier" = "black", 
                                   "Offense" = "red",
                                   "Defense" = "blue",
