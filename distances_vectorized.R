@@ -164,59 +164,57 @@ ggplotly(
   facet_wrap(~frameId)
 )
 
-## Most important chunk: Calculating Distances to Closest Players on Opposing teams
+## Most important chunk: Calculating distances to closest players on opposing teams
 tracking_sub <- tracking_sub %>%
   group_by(gameId, playId, frameId) %>%
-  mutate(min_dist = map_dbl(.x=row_number(), ~min(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
-                                                                y = Y_std[which(club[.x]!=club & club!='football')],
-                                                                x_baseline = X_std[.x],
-                                                                y_baseline = Y_std[.x]))),
-         num_same_dist = map_dbl(.x=row_number(), ~11 - length(unique(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
-                                                                     y = Y_std[which(club[.x]!=club & club!='football')],
-                                                                     x_baseline = X_std[.x],
-                                                                     y_baseline = Y_std[.x])))),
-         num_same_dist = ifelse(displayName == 'football', 0, num_same_dist),
-         min_dist_pos = map_dbl(.x=row_number(), ~which(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
-                                                                      y = Y_std[which(club[.x]!=club & club!='football')],
-                                                                      x_baseline = X_std[.x],
-                                                                      y_baseline = Y_std[.x])== min(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
-                                                                                                                  y = Y_std[which(club[.x]!=club & club!='football')],
-                                                                                                                  x_baseline = X_std[.x],
-                                                                                                                  y_baseline = Y_std[.x])))[1]),
-         second_closest_dist = map_dbl(.x=row_number(), ~Rfast::nth(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
-                                                                             y = Y_std[which(club[.x]!=club & club!='football')],
-                                                                             x_baseline = X_std[.x],
-                                                                             y_baseline = Y_std[.x]), 2, descending = F)),
-         second_closest_pos = map_dbl(.x=row_number(), ~which(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
-                                                                                y = Y_std[which(club[.x]!=club & club!='football')],
-                                                                                x_baseline = X_std[.x],
-                                                                                y_baseline = Y_std[.x])== Rfast::nth(calc_distance(x = X_std[which(club[.x]!=club & club!='football')],
-                                                                                                                                   y = Y_std[which(club[.x]!=club & club!='football')],
-                                                                                                                                   x_baseline = X_std[.x],
-                                                                                                                                   y_baseline = Y_std[.x]),2,descending = F))[1]) # Where I account for duplicates
-         
+  mutate(min_dist_opp_player = map_dbl(.x=row_number(), ~min(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                y = y[which(club[.x]!=club & club!='football')],
+                                                                x_baseline = x[.x],
+                                                                y_baseline = y[.x]))),
+         num_opp_players_same_dist = map_dbl(.x=row_number(), ~11 - length(unique(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                    y = y[which(club[.x]!=club & club!='football')],
+                                                                                    x_baseline = x[.x],
+                                                                                    y_baseline = y[.x])))),
+         num_opp_players_same_dist = ifelse(displayName == 'football', 0, num_opp_players_same_dist),
+         min_dist_opp_index = map_dbl(.x=row_number(), ~which(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                      y = y[which(club[.x]!=club & club!='football')],
+                                                                      x_baseline = x[.x],
+                                                                      y_baseline = y[.x])== min(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                                                  y = y[which(club[.x]!=club & club!='football')],
+                                                                                                                  x_baseline = x[.x],
+                                                                                                                  y_baseline = y[.x])))[1]),
+         second_closest_dist_opp_player = map_dbl(.x=row_number(), ~Rfast::nth(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                  y = y[which(club[.x]!=club & club!='football')],
+                                                                                  x_baseline = x[.x],
+                                                                                  y_baseline = y[.x]), 2, descending = F)),
+         second_closest_opp_index = map_dbl(.x=row_number(), ~which(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                y = y[which(club[.x]!=club & club!='football')],
+                                                                                x_baseline = x[.x],
+                                                                                y_baseline = y[.x])== Rfast::nth(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                                                                   y = y[which(club[.x]!=club & club!='football')],
+                                                                                                                                   x_baseline = x[.x],
+                                                                                                                                   y_baseline = y[.x]),2,descending = F))[1]) # Where I account for duplicates
   ) %>%
   ungroup()
-
 
 tracking_sub <- tracking_sub %>%
   group_by(gameId, playId, frameId) %>%
   mutate(
-    closest_player_name = case_when(
-      row_number()<=11 ~ displayName[12+min_dist_pos],
-      row_number()>=13 ~ displayName[min_dist_pos]
+    closest_opp_player_name = case_when(
+      row_number()<=11 ~ displayName[12+min_dist_opp_index],
+      row_number()>=13 ~ displayName[min_dist_opp_index]
     ),
-    closest_player_nflID = case_when(
-      row_number()<=11 ~ nflId[12+min_dist_pos],
-      row_number()>=13 ~ nflId[min_dist_pos]
+    closest_opp_player_nflID = case_when(
+      row_number()<=11 ~ nflId[12+min_dist_opp_index],
+      row_number()>=13 ~ nflId[min_dist_opp_index]
     ),
-    second_closest_player_name = case_when(
-      row_number()<=11 ~ displayName[12+second_closest_pos],
-      row_number()>=13 ~ displayName[second_closest_pos]
+    second_closest_opp_player_name = case_when(
+      row_number()<=11 ~ displayName[12+second_closest_opp_index],
+      row_number()>=13 ~ displayName[second_closest_opp_index]
     ),
-    second_closest_player_nflID = case_when(
-      row_number()<=11 ~ nflId[12+second_closest_pos],
-      row_number()>=13 ~ nflId[second_closest_pos]
+    second_closest_opp_player_nflID = case_when(
+      row_number()<=11 ~ nflId[12+second_closest_opp_index],
+      row_number()>=13 ~ nflId[second_closest_opp_index]
     )
   ) %>%
   ungroup()
@@ -225,23 +223,22 @@ tracking_sub <- tracking_sub %>%
 View(tracking_sub %>%
        filter(gameId==2022090800 & playId==617))
 
-
 McKenzie_catch <- tracking_sub %>%
   filter(gameId==2022090800 & playId==617)
 plotly::ggplotly(
   McKenzie_catch %>%
     filter(frameId >= unique(frameId[which(event == 'pass_arrived')]), frameId <= unique(frameId[which(event == 'first_contact')])) %>%
-    ggplot(aes(x = X_std, y = Y_std, 
-               text = paste0('Dir: ', dir2, '\n',
+    ggplot(aes(x = x, y = y, 
+               text = paste0('Dir: ', dir, '\n',
                              'Player Name: ',displayName, '\n',
-                             'Closest Opposing Player: ', closest_player_name, '\n',
-                             'Closest Opposing Player Dist: ', round(min_dist,3), '\n',
-                             'Distance to Ball: ', round(dist_to_ball_carrier,3), '\n',
-                             'Second Closest Opposing Player: ', second_closest_player_name, '\n',
-                             'Second Closest Opposing Player Dist: ', round(second_closest_dist,3)
+                             'Closest Opposing Player: ', closest_opp_player_name, '\n',
+                             'Closest Opposing Player Dist: ', round(min_dist_opp_player, 3), '\n',
+                             'Distance to Ball: ', round(dist_to_ball_carrier, 3), '\n',
+                             'Second Closest Opposing Player: ', second_closest_opp_player_name, '\n',
+                             'Second Closest Opposing Player Dist: ', round(second_closest_dist_opp_player, 3)
                )
-                             )) +
-    stat_voronoi(geom="path") +
+    )) +
+    stat_voronoi(geom = "path") +
     geom_point(aes(color = Player_Role)) +
     geom_segment(aes(x = X_std, y = Y_std, xend = X_proj,
                      yend = Y_proj, color = Player_Role)) +
