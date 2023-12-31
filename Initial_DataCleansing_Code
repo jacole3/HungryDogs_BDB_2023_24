@@ -235,7 +235,7 @@ TrackingWithTackles <- merge(x = tackles, y = tracking_combined,
 
 TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
                               by = c("nflId"))
-# View(TrackingWithTackles_PlayerNames %>% filter(is.na(club)))
+# If we wanted to keep club == "football", we could use all.x = TRUE here
 rm(players, tackles, tracking_combined, TrackingWithTackles)
 
 # Check if any play has multiple "tackle" instances, or none
