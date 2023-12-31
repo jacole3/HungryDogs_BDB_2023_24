@@ -125,6 +125,7 @@ tracking_sub <- tracking_w1 %>%
          AwayOrHome, IsPlayerOnOffense, Player_Role, 
          X_std, Y_std, o2, dir2, X_proj, Y_proj) %>%
   arrange(gameId, playId, frameId, club, nflId)
+# Important to arrange in this order so that all 11 players on one team appear before the other team's players
 
 ## Each Player's Distance to the ball carrier
 tracking_sub <- tracking_sub %>%
