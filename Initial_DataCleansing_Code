@@ -239,7 +239,7 @@ TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
 rm(players, tackles, tracking_combined, TrackingWithTackles)
 
 # Check if any play has multiple "tackle" instances, or none
-Tackle_Multiples <- tackles %>% # filter(tackle > 0) %>%
+Tackle_Multiples <- tackles %>% 
   group_by(gameId, playId) %>%
   summarize(Players = n(), Tackles = sum(tackle), Assists = sum(assist)) %>% arrange(desc(Tackles))
 # View(Tackle_Multiples %>% arrange(Tackles))
