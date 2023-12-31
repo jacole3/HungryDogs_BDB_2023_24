@@ -550,6 +550,10 @@ MergedData <- MergedData %>% select(-"Unnecessary_Late")
 MergedData <- MergedData %>% mutate(TeamTackle_NextFrame =
       ifelse(lead(event) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId) & nflId == lead(nflId), TRUE,
              ifelse(playId == lead(playId) & nflId == lead(nflId), FALSE, NA)))
+# Same concept for five frames ahead, since our time frame of interest is 0.5 sec
+MergedData <- MergedData %>% mutate(TeamTackle_0.5SecAhead =
+      ifelse(lead(event, 5) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId, 5) & nflId == lead(nflId, 5), TRUE,
+             ifelse(playId == lead(playId, 5) & nflId == lead(nflId, 5), FALSE, NA)))
 
 # Create a Player_Role variable (i.e. defender, ball-carrier, or other offensive player)
 MergedData <- MergedData %>%
