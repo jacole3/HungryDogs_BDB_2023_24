@@ -228,7 +228,7 @@ McKenzie_catch <- tracking_sub %>%
 plotly::ggplotly(
   McKenzie_catch %>%
     filter(frameId >= unique(frameId[which(event == 'pass_arrived')]), frameId <= unique(frameId[which(event == 'first_contact')])) %>%
-    ggplot(aes(x = x, y = y, 
+    ggplot(aes(x = X_std, y = Y_std, 
                text = paste0('Dir: ', dir, '\n',
                              'Player Name: ',displayName, '\n',
                              'Closest Opposing Player: ', closest_opp_player_name, '\n',
