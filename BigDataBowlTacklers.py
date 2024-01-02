@@ -1,4 +1,4 @@
-#nessacary packages
+#necessary packages
 import pandas as pd
 import matplotlib.pyplot as plt
 
