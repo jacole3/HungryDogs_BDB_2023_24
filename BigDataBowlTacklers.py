@@ -133,7 +133,6 @@ def FindOptimalDefenders(df):
     used_Y = set()
 
     optimal_pairs = []
-    optimal_distances = []
     UnblockedDefenders = []
     ExtraBlockers = []
 
@@ -142,14 +141,15 @@ def FindOptimalDefenders(df):
 
         if x not in used_X and y not in used_Y:
             optimal_pairs.append((x, y))
-            optimal_distances.append(distance)
             used_X.add(x)
             used_Y.add(y)
+
+    for _, row in df.iterrows():
+        x, y, distance = row['Defender'], row['displayName'], row['distance']
 
         if x not in used_X:
             UnblockedDefenders.append(x)
             used_X.add(x)
-
         if y not in used_Y:
             ExtraBlockers.append((x, y))
             used_Y.add(y)
