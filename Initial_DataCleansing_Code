@@ -555,6 +555,21 @@ MergedData <- MergedData %>% mutate(TeamTackle_0.5SecAhead =
       ifelse(lead(event, 5) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId, 5) & nflId == lead(nflId, 5), TRUE,
              ifelse(playId == lead(playId, 5) & nflId == lead(nflId, 5), FALSE, NA)))
 
+# Repeat those for individual tackles instead of team tackles
+MergedData <- MergedData %>% mutate(IndivSoloTackle_NextFrame =
+      ifelse(tackle == 1 & TeamTackle_NextFrame == 1, 1, 
+             ifelse(PlayerSideOfBall == "defense", 0, NA)))
+MergedData <- MergedData %>% mutate(IndivSoloTackle_0.5SecAhead =
+      ifelse(tackle == 1 & TeamTackle_0.5SecAhead == 1, 1, 
+             ifelse(PlayerSideOfBall == "defense", 0, NA)))
+
+MergedData <- MergedData %>% mutate(IndivAssist_NextFrame =
+      ifelse(assist == 1 & TeamTackle_NextFrame == 1, 1, 
+             ifelse(PlayerSideOfBall == "defense", 0, NA)))
+MergedData <- MergedData %>% mutate(IndivAssist_0.5SecAhead =
+      ifelse(assist == 1 & TeamTackle_0.5SecAhead == 1, 1, 
+             ifelse(PlayerSideOfBall == "defense", 0, NA)))
+
 # Create a Player_Role variable (i.e. defender, ball-carrier, or other offensive player)
 MergedData <- MergedData %>%
   mutate(Player_Role = case_when(
