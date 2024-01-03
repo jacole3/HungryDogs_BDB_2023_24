@@ -25,6 +25,9 @@ library(ggvoronoi)
 # # Delete package tarball
 # unlink(pkgFile)
 
+# This GitHub file is split into two parts: one starts from scratch (i.e., if you've done no prior code), and one picks off where "Initial_DataCleansing_Code" left off
+# Right here is the first part
+
 ## Frames for how long we want to project forward
 frame_length <- 0.5
 
@@ -254,3 +257,225 @@ plotly::ggplotly(
     geom_hline(yintercept = 53.3, color = 'darkgreen', linetype='dashed') +
     facet_wrap(~frameId)
 )
+
+##########################################################################################
+
+# Now this is the second part of the file, i.e. the one that assumes you pick up where Initial_DataCleansing_Code left off
+# Also this part includes the "test" of a physics-based approach for projecting future player locations, vs. a simple "current speed"-based approach
+
+# Frames for how long we want to project forward
+frame_length <- 0.5
+
+# Writing a function for calculating distance
+calc_distance <- function(x, y, x_baseline = 0, y_baseline = 0) {
+  sqrt((x-x_baseline)^2 + (y - y_baseline)^2)
+}
+
+# Recall, when making MergedData, we standardized so highest "y" is always to offense's left
+# I.e., make it so that it doesn't matter which end zone the offense is aiming at
+# Likewise, adjust "o" and "dir" were adjusted so 0 is always to offense's left
+# So 90 is always toward the EZ offense is aiming at, 180 is to offense's right, etc.
+# Same adjustment for "x" - high "x" is always where offense is aiming at
+
+# Adding projections for each player's location going forward (by 0.5 seconds)
+MergedData <- MergedData %>%
+  mutate(X_proj_1 = x + ((s*frame_length + 0.5*a*(frame_length)^2)*cos((90-dir)*pi/180)),
+         Y_proj_1 = y + ((s*frame_length + 0.5*a*(frame_length)^2)*sin((90-dir)*pi/180)),
+         X_proj_2 = x + (s*frame_length*cos((90-dir)*pi/180)),
+         Y_proj_2 = y + (s*frame_length*sin((90-dir)*pi/180)))
+
+# Figure out which approach is more accurate (physics-based, or just speed * time)
+AccuracyTest <- MergedData %>% mutate(X_Actual_0.5SecAhead = 
+   ifelse(displayName == lead(displayName, 5), lead(x, 5), NA))
+AccuracyTest <- AccuracyTest %>% mutate(Y_Actual_0.5SecAhead = 
+   ifelse(displayName == lead(displayName, 5), lead(y, 5), NA))
+
+AccuracyTest <- AccuracyTest %>%
+  mutate(X_proj_Error1 = X_proj_1 - X_Actual_0.5SecAhead,
+         X_proj_Error2 = X_proj_2 - X_Actual_0.5SecAhead,
+         Y_proj_Error1 = Y_proj_1 - Y_Actual_0.5SecAhead,
+         Y_proj_Error2 = Y_proj_2 - Y_Actual_0.5SecAhead)
+
+sd(AccuracyTest$X_proj_Error1, na.rm = TRUE)
+sd(AccuracyTest$X_proj_Error2, na.rm = TRUE)
+sd(AccuracyTest$Y_proj_Error1, na.rm = TRUE)
+sd(AccuracyTest$Y_proj_Error2, na.rm = TRUE)
+
+mean(AccuracyTest$X_proj_Error1, na.rm = TRUE)
+mean(AccuracyTest$X_proj_Error2, na.rm = TRUE)
+mean(AccuracyTest$Y_proj_Error1, na.rm = TRUE)
+mean(AccuracyTest$Y_proj_Error2, na.rm = TRUE)
+
+sqrt(mean((AccuracyTest$X_proj_Error1)^2, na.rm = TRUE))
+sqrt(mean((AccuracyTest$X_proj_Error2)^2, na.rm = TRUE))
+sqrt(mean((AccuracyTest$Y_proj_Error1)^2, na.rm = TRUE))
+sqrt(mean((AccuracyTest$Y_proj_Error2)^2, na.rm = TRUE))
+# Method 2 (non-physics approach) has significantly lower RMSE
+
+# So, get rid of first version
+MergedData <- MergedData %>% select(-c("X_proj_1", "Y_proj_1"))
+MergedData <- MergedData %>% 
+  rename(X_proj = X_proj_2, Y_proj = Y_proj_2)
+rm(AccuracyTest)
+
+## Here's a sample play and the corresponding voronoi diagram
+McKenzie_catch <- MergedData %>%
+  filter(gameId == 2022090800 & playId == 617) %>%
+  arrange(frameId)
+
+playDescription <- unique(McKenzie_catch$playDescription)
+
+ggplotly(
+  McKenzie_catch %>%
+    filter(frameId >= unique(frameId[which(event=='pass_arrived')])) %>%
+    ggplot(aes(x = x, y = y, text = paste0('Dir: ', dir, '\n',
+                                           'Player Name: ',displayName))) +
+    # stat_voronoi(geom="path") +
+    geom_point(aes(color = Player_Role)) +
+    geom_segment(aes(x = x, y = y, xend = X_proj,
+                     yend = Y_proj, color = Player_Role)) +
+    scale_color_manual(values = c("Ball Carrier" = "black", 
+                                  "Offense" = "red",
+                                  "Defense" = "blue")) +
+    theme_bw() + 
+    labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
+         title = "Frame-By-Frame Diagram of J. Allen Pass to I. McKenzie (From Arrival of Pass)") +
+    geom_hline(yintercept = 0, color = 'darkgreen', linetype = 'dashed') +
+    geom_hline(yintercept = 53.3, color = 'darkgreen', linetype = 'dashed') +
+    facet_wrap(~frameId) +
+    theme(plot.title = element_text(size = 10, hjust = 0.5))
+)
+
+# Recall in MergedData, we already have TotDistFromBall
+# Also Y_DistFromBall, X_DistFromBall, Y_AbsDistFromBall, X_AbsDistFromBall
+
+## Each player's distance to the ball carrier
+# ball_x won't be exact same as X_ball_carrier (e.g. arm extended with ball)
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(X_ball_carrier = x[which(nflId == ballCarrierId)],
+         Y_ball_carrier = y[which(nflId == ballCarrierId)],
+         dist_to_ball_carrier = calc_distance(x, 
+                                              y, 
+                                              x_baseline = X_ball_carrier, 
+                                              y_baseline = Y_ball_carrier)) %>%
+  ungroup()
+MergedData <- MergedData %>%
+  arrange(gameId, playId, frameId, club, nflId)
+
+# Another sample play to work with
+Singletary_run <- MergedData %>%
+  filter(gameId == 2022090800 & playId == 101)
+
+## Another Voronoi diagram
+ggplotly(
+  Singletary_run %>%
+  filter(frameId >= unique(frameId[which(event=='handoff')]), frameId <= unique(frameId[which(event=='first_contact')])) %>%
+    ggplot(aes(x = x, y = y, text = paste0('Dir: ', dir, '\n',
+                                           'Player Name: ',displayName))) +
+  # stat_voronoi(geom = "path") +
+  geom_point(aes(color = Player_Role)) +
+  geom_segment(aes(x = x, y = y, xend = X_proj,
+                   yend = Y_proj, color=Player_Role)) +
+  scale_color_manual(values = c("Ball Carrier" = "black", 
+                                "Offense" = "red",
+                                "Defense" = "blue")) +
+  theme_bw() +
+  labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
+       title = "Frame-By-Frame Diagram of D. Singletary Rush (From Handoff to First Contact)") +
+  geom_hline(yintercept = 0, color = 'darkgreen', linetype = 'dashed') +
+  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype = 'dashed') +
+  facet_wrap(~frameId) +
+  theme(plot.title = element_text(size = 10, hjust = 0.5))
+)
+
+## Most important chunk: Calculating distances to closest players on opposing teams
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(min_dist_opp_player = map_dbl(.x=row_number(), ~min(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                y = y[which(club[.x]!=club & club!='football')],
+                                                                x_baseline = x[.x],
+                                                                y_baseline = y[.x]))),
+         num_opp_players_same_dist = map_dbl(.x=row_number(), ~11 - length(unique(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                    y = y[which(club[.x]!=club & club!='football')],
+                                                                                    x_baseline = x[.x],
+                                                                                    y_baseline = y[.x])))),
+         num_opp_players_same_dist = ifelse(displayName == 'football', 0, num_opp_players_same_dist),
+         min_dist_opp_index = map_dbl(.x=row_number(), ~which(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                      y = y[which(club[.x]!=club & club!='football')],
+                                                                      x_baseline = x[.x],
+                                                                      y_baseline = y[.x])== min(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                                                  y = y[which(club[.x]!=club & club!='football')],
+                                                                                                                  x_baseline = x[.x],
+                                                                                                                  y_baseline = y[.x])))[1]),
+         second_closest_dist_opp_player = map_dbl(.x=row_number(), ~Rfast::nth(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                  y = y[which(club[.x]!=club & club!='football')],
+                                                                                  x_baseline = x[.x],
+                                                                                  y_baseline = y[.x]), 2, descending = F)),
+         second_closest_opp_index = map_dbl(.x=row_number(), ~which(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                y = y[which(club[.x]!=club & club!='football')],
+                                                                                x_baseline = x[.x],
+                                                                                y_baseline = y[.x])== Rfast::nth(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                                                                   y = y[which(club[.x]!=club & club!='football')],
+                                                                                                                                   x_baseline = x[.x],
+                                                                                                                                   y_baseline = y[.x]),2,descending = F))[1]) # Where I account for duplicates
+  ) %>%
+  ungroup()
+
+# This section was adjusted so that it accounts for "football" no longer being there
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(
+    closest_opp_player_name = case_when(
+      row_number()<=11 ~ displayName[11+min_dist_opp_index],
+      row_number()>=12 ~ displayName[min_dist_opp_index]
+    ),
+    closest_opp_player_nflID = case_when(
+      row_number()<=11 ~ nflId[11+min_dist_opp_index],
+      row_number()>=12 ~ nflId[min_dist_opp_index]
+    ),
+    second_closest_opp_player_name = case_when(
+      row_number()<=11 ~ displayName[11+second_closest_opp_index],
+      row_number()>=12 ~ displayName[second_closest_opp_index]
+    ),
+    second_closest_opp_player_nflID = case_when(
+      row_number()<=11 ~ nflId[11+second_closest_opp_index],
+      row_number()>=12 ~ nflId[second_closest_opp_index]
+    )
+  ) %>%
+  ungroup()
+
+## View a sample play: View(McKenzie_catch)
+McKenzie_catch <- MergedData %>%
+  filter(gameId == 2022090800 & playId == 617) %>%
+  arrange(frameId)
+
+plotly::ggplotly(
+  McKenzie_catch %>%
+    filter(frameId >= unique(frameId[which(event == 'pass_arrived')]), frameId <= unique(frameId[which(event == 'first_contact')])) %>%
+    ggplot(aes(x = x, y = y, 
+               text = paste0('Dir: ', dir, '\n',
+                             'Player Name: ',displayName, '\n',
+                             'Closest Opposing Player: ', closest_opp_player_name, '\n',
+                             'Closest Opposing Player Dist: ', round(min_dist_opp_player, 3), '\n',
+                             'Distance to Ball: ', round(dist_to_ball_carrier, 3), '\n',
+                             'Second Closest Opposing Player: ', second_closest_opp_player_name, '\n',
+                             'Second Closest Opposing Player Dist: ', round(second_closest_dist_opp_player, 3)
+               )
+    )) +
+    # stat_voronoi(geom = "path") +
+    geom_point(aes(color = Player_Role)) +
+    geom_segment(aes(x = x, y = y, xend = X_proj,
+                     yend = Y_proj, color = Player_Role)) +
+    scale_color_manual(values = c("Ball Carrier" = "black", 
+                                  "Offense" = "red",
+                                  "Defense" = "blue")) +
+    theme_bw() +
+    labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
+    title = "Frame-By-Frame Diagram of J. Allen Pass to I. McKenzie (Pass Arrival to First Contact)") +
+    geom_hline(yintercept = 0, color = 'darkgreen', linetype = 'dashed') +
+    geom_hline(yintercept = 53.3, color = 'darkgreen', linetype = 'dashed') +
+    facet_wrap(~frameId) +
+    theme(plot.title = element_text(size = 9, hjust = 0.5))
+)
+
