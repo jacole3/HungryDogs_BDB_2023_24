@@ -100,8 +100,8 @@ tracking_combined <- rbind(tracking_week_1, tracking_week_2, tracking_week_3,
 players <- players %>% mutate(displayName = 
     ifelse(nflId == 43808, "Robby Anderson", displayName))
 
+# These plays don't have any tracking data besides the football, get rid of them
 # View(tracking_combined %>% filter(gameId == 2022101605, playId == 2970))
-# This play doesn't have any tracking data besides the football, get rid of it
 tracking_combined <- tracking_combined %>%
   filter(gameId != 2022101605 | playId != 2970)
 
