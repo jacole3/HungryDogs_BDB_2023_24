@@ -115,7 +115,9 @@ tracking_w1 %>%
   geom_point()+
   facet_wrap(~game_play_frame_comb)
 
-####################
+#############################################################
+# Now this is the second part of the file, i.e. the one that assumes you pick up where Initial_DataCleansing_Code left off
+# This one will run much slower, though, since it includes the full data set, rather than just Week 1
 
 # Recall that calc_distance() formula was already established in distances_vectorized
 
