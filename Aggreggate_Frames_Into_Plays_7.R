@@ -9,7 +9,6 @@
 # NOT just the frames where the ball-carrier already has ball
 # But, everything "Initial" refers just to frames when ball-carrier has ball
 
-# Dissect overall play results rather than frame-by-frame insights
 # Stats by play for all plays in data set
 StatsByPlay_MergedData <- MergedData %>% 
   group_by(gameId, playId, nflId, displayName) %>%
@@ -125,7 +124,7 @@ IndivStats_MergedData <- StatsByPlay_MergedData %>%
             WPASuccessRate_TacklesOnly = mean(PlayWPASuccess_TacklerOnly, na.rm = TRUE),
             MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
             MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE)) %>%
-  filter(TackleAttempts >= 1) %>%
+  filter(TackleAttempts >= 10) %>% # insert your own minimum there
   arrange(desc(MissedTackles_DefEPASuccess)) %>%
   select(1:4, "MissedTackles_DefEPASuccess", "MissedTackles_DefWPASuccess", 5:15)
 
@@ -244,7 +243,7 @@ IndivStats_Completions_BehindLOS <- StatsByPlay_Completions_BehindLOS %>%
             WPASuccessRate_TacklesOnly = mean(PlayWPASuccess_TacklerOnly, na.rm = TRUE),
             MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
             MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE)) %>%
-  filter(TackleAttempts >= 2) %>%
+  filter(TackleAttempts >= 5) %>% # insert your own minimum there
   arrange(MissedTackleRate)
 
 # Stats by play for scrambles
@@ -465,5 +464,5 @@ NearbyBoxDefender_Stats_DesignedRuns <- StatsByPlay_DesignedRuns_NearDefender %>
             WPASuccessRate_TacklesOnly = mean(PlayWPASuccess_TacklerOnly, na.rm = TRUE),
             MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
             MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE)) %>%
-  filter(Plays >= 5) %>%
+  filter(Plays >= 20) %>% # insert your own minimum there
   arrange(desc(SoloTkl_PerPlay))
