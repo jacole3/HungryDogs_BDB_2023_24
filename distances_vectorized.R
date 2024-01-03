@@ -261,7 +261,8 @@ plotly::ggplotly(
 ##########################################################################################
 
 # Now this is the second part of the file, i.e. the one that assumes you pick up where Initial_DataCleansing_Code left off
-# Also this part includes the "test" of a physics-based approach for projecting future player locations, vs. a simple "current speed"-based approach
+# This one will run much slower, though, since it includes the full data set, rather than just Week 1
+# Also this part includes the "test" of a physics-based approach for projecting future player locations, vs. a simple approach based only on current speed
 
 # Frames for how long we want to project forward
 frame_length <- 0.5
