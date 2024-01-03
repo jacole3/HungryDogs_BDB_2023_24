@@ -1,4 +1,4 @@
-# Recall that MergedData was created in the "Data_Cleansing_Code" file, and adjusted more in "distances_vectorized"
+# Recall that MergedData was created in the "Initial_DataCleansing_Code" file, and adjusted more in "distances_vectorized"
 
 # Create subsets based on play types (designed runs go back to snap of ball)
 MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
