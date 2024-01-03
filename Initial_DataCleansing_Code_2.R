@@ -615,7 +615,7 @@ MergedData <- MergedData %>% mutate(IndivAssist_CurrentFrame =
 MergedData <- MergedData %>%
   mutate(Player_Role = case_when(
            nflId == ballCarrierId ~ "Ball Carrier",
-           possessionTeam != club & displayName != "football"~ "Defense",
+           possessionTeam != club & displayName != "football" ~ "Defense",
            possessionTeam == club & ballCarrierId != nflId ~ "Offense",
            displayName == "football" ~ "Football")) 
 
