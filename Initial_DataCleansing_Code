@@ -592,6 +592,16 @@ MergedData <- MergedData %>% mutate(IndivAssist_Within0.5Sec =
    ifelse(assist == 1 & TeamTackle_Within0.5Sec == 1, 1, 
          ifelse(PlayerSideOfBall == "defense", 0, NA)))
 
+# And, finally, for both teams and players, label tackles in the current frame
+MergedData <- MergedData %>% mutate(TeamTackle_CurrentFrame =
+    ifelse(event %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety"), 1, 0))
+MergedData <- MergedData %>% mutate(IndivSoloTackle_CurrentFrame =
+    ifelse(tackle == 1 & TeamTackle_CurrentFrame == 1, 1, 
+         ifelse(PlayerSideOfBall == "defense", 0, NA)))
+MergedData <- MergedData %>% mutate(IndivAssist_CurrentFrame =
+    ifelse(assist == 1 & TeamTackle_CurrentFrame == 1, 1, 
+         ifelse(PlayerSideOfBall == "defense", 0, NA)))
+
 # Create a Player_Role variable (i.e. defender, ball-carrier, or other offensive player)
 MergedData <- MergedData %>%
   mutate(Player_Role = case_when(
