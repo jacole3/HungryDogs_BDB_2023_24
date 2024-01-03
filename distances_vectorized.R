@@ -50,7 +50,8 @@ tracking_w1 <- tracking_w1 %>%
 tracking_w1 <- tracking_w1 %>%
   mutate(TeamOnOffense = ifelse(possessionTeam==homeTeamAbbr, "home", "away"),
          AwayOrHome = ifelse(club==homeTeamAbbr, "home", "away"),
-         IsPlayerOnOffense = ifelse(possessionTeam==club, "offense", "defense"),
+         IsPlayerOnOffense = ifelse(possessionTeam==club, "offense", 
+                        ifelse(club == "football", "football", "defense")),
          X_std = ifelse(toLeft==1, 120-x, x), ## Standardizes X
          Y_std = ifelse(toLeft==1, 53.3-y, y), ## Standardized Y
          Player_Role= case_when(
