@@ -111,20 +111,79 @@ tracking_w1 %>%
   geom_point()+
   facet_wrap(~game_play_frame_comb)
 
-######
-# Code for where the ball is at any given point, and each player's distance from it
-ball_df <- tracking_combined %>% 
-  filter(club == "football") %>% 
-  select(gameId, playId, frameId, x, y) %>% 
-  rename(ball_x = x,
-         ball_y = y)
+####################
 
-tracking_combined <- tracking_combined %>% 
-  left_join(ball_df, by = c("playId", "gameId", "frameId"))
+# Recall that calc_distance() formula was already established in distances_vectorized
 
-tracking_combined <- tracking_combined %>% 
-  mutate(TotDistFromBall = sqrt((x - ball_x) ^ 2 + (y - ball_y) ^ 2),
-         Y_DistFromBall = (y - ball_y), X_DistFromBall = (x = ball_x),
-         Y_AbsDistFromBall = abs(y - ball_y), X_AbsDistFromBall = abs(x - ball_x))
-rm(ball_df)
+# Also recall that TotDistFromBall, Y_DistFromBall, Y_AbsDistFromBall
+# X_DistFromBall, and X_AbsDistFromBall were all established in the data cleansing code file
+
+## Arrange by each game, play, and frame within the play
+## Also grab each unique combination of games, plays, and frames (to make looping easier)
+MergedData <- MergedData %>%
+  arrange(gameId, playId, frameId) %>%
+  mutate(game_play_comb = paste0(gameId, "-", playId),
+         game_play_frame_comb = paste0(gameId, "-", playId, "-", frameId))
+
+## this turns each "game-play-frame" combination into a number
+MergedData$game_play_frame_number <- as.numeric(factor(MergedData$game_play_frame_comb))
+length(unique(MergedData$game_play_frame_comb)) ## shows how many frames are in data set
+MergedData <- MergedData %>%
+  arrange(game_play_frame_comb)
+
+game_play_frame_comb<-c()                          
+player <- c() # player of interest
+closest_player <- c() # other players in frame
+dist <- c()
+t1 <- Sys.time()
+for (i in 1:length(unique(MergedData$game_play_frame_comb))) {
+  print(i)
+  frame_i <- MergedData[which(MergedData$game_play_frame_number==i), c("game_play_frame_comb","nflId", "club", "displayName", "frameId", "x", "y")] 
+  game_play_frame_comb_i <- rep(frame_i$game_play_frame_comb[which(frame_i$club!="football")],3) # not that simple
+  game_play_frame_comb <- c(game_play_frame_comb, game_play_frame_comb_i)
+  for (j in 1:22) { ##looping through each player in the frame
+    if (frame_i$club[j]!="football") {
+      club_i <- frame_i$club[j] #player's club
+      player_i <- frame_i$nflId[j] #player
+      x_coord <- frame_i$x[j] #player's x coord
+      y_coord <- frame_i$y[j] #player's y coord
+      player <- c(player, rep(player_i,3)) #player's name repeated three times
+      
+      #calculating distances and grabbing other stats
+      dist_i <- calc_distance(x = x_coord, y = y_coord, x_baseline = frame_i$x, y_baseline = frame_i$y)#player's distance to everyone on the field
+      min_dist_same_team <- min(dist_i[which(frame_i$club==club_i & dist_i>0)])
+      min_dist_diff_team <- min(dist_i[which(frame_i$club!=club_i & frame_i$club!="football" & dist_i>0)])
+      dist <- c(dist, min_dist_same_team, min_dist_diff_team)
+      closest_player_i <- frame_i$nflId[c(which(dist_i==min_dist_same_team),
+                                          which(dist_i==min_dist_diff_team))]
+      closest_player <- c(closest_player, closest_player_i)
+    }
+    else if (frame_i$club[j]=="football") {
+      next
+    }
+  }
+}
+t2 <- Sys.time()
+t2-t1
+
+closest_player
+## checking output:
+test_output <- data.frame(cbind(game_play_frame_comb, player, closest_player, dist))
+colnames(test_output) <- c("game_play_frame_comb", "nflid", "closest_player", "distance")
+# If we need to export to CSV: write.csv(test_output,"Merged_distances.csv")
+# View(test_output[1:100,])
+
+test_output <- test_output %>%
+  group_by(game_play_frame_comb) %>%
+  mutate(count = n()) %>%
+  ungroup()
+
+# View(MergedData %>% filter(game_play_frame_comb == '2022090800-101-1'))
+# View(MergedData %>% filter(game_play_frame_number == 1))
+
+MergedData %>%
+  filter(game_play_frame_comb%in% c("2022090800-101-1", "2022090800-101-2")) %>%
+  ggplot(aes(x = x, y = y, color = club)) +
+  geom_point()+
+  facet_wrap(~game_play_frame_comb)
   
