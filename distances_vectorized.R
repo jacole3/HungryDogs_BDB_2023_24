@@ -52,7 +52,7 @@ tracking_w1 <- tracking_w1 %>%
          AwayOrHome = ifelse(club==homeTeamAbbr, "home", "away"),
          IsPlayerOnOffense = ifelse(possessionTeam==club, "offense", "defense"),
          X_std = ifelse(toLeft==1, 120-x, x), ## Standardizes X
-         Y_std = ifelse(toLeft==1, 160/3-y, y), ## Standardized Y
+         Y_std = ifelse(toLeft==1, 53.3-y, y), ## Standardized Y
          Player_Role= case_when(
            nflId==ballCarrierId ~ "Ball Carrier",
            possessionTeam!=club & displayName!="football"~ "Defense",
