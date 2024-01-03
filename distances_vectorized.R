@@ -43,7 +43,7 @@ plays <- read_csv("plays.csv")
 tracking_w1 <- tracking_w1 %>%
   left_join(plays, by = c("gameId", "playId")) %>%
   left_join(games, by = "gameId") %>%
-  mutate(ball_carrier_ind = ifelse(ballCarrierId==nflId,1,0),
+  mutate(ball_carrier_indicator = ifelse(ballCarrierId==nflId,1,0),
          toLeft = ifelse(playDirection=="left", 1, 0))
 
 #standardizing directions:
