@@ -1,5 +1,9 @@
 setwd("C:/Users/justi/OneDrive/Penn/BigDataBowl")
 library(tidyverse)
+
+# This GitHub file is split into two parts: one starts from scratch (i.e., if you've done no prior code), and one picks off where "Initial_DataCleansing_Code" and "distances_vectorized" left off
+# Right here is the first part
+
 tracking_w1 <- read_csv("tracking_week_1.csv")
 
 ## distance formula:
