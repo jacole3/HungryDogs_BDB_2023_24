@@ -16,7 +16,7 @@ tracking_w1 <- tracking_w1 %>%
   left_join(plays, by = c("gameId", "playId")) %>%
   mutate(ball_carrier_indicator = ifelse(ballCarrierId==nflId,1,0)) %>%
   mutate(x = ifelse(playDirection == "left", 120-x, x),
-         y = ifelse(playDirection == "left", 160/3 - y, y))
+         y = ifelse(playDirection == "left", 53.3 - y, y))
 
 #setting variables: (you can adjust these on your own)
 ballcarrier <- 'CeeDee Lamb'
