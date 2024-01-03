@@ -105,7 +105,7 @@ players <- players %>% mutate(displayName =
 tracking_combined <- tracking_combined %>%
   filter(gameId != 2022101605 | playId != 2970)
 
-# View(tracking_w7 %>% filter(gameId == 2022102307, playId == 1505))
+# View(tracking_combined %>% filter(gameId == 2022102307, playId == 1505))
 tracking_combined <- tracking_combined %>%
   filter(gameId != 2022102307 | playId != 1505)
 
