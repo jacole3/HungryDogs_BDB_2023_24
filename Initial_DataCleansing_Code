@@ -563,12 +563,34 @@ MergedData <- MergedData %>% mutate(IndivSoloTackle_0.5SecAhead =
       ifelse(tackle == 1 & TeamTackle_0.5SecAhead == 1, 1, 
              ifelse(PlayerSideOfBall == "defense", 0, NA)))
 
+# Likewise for individual assists
 MergedData <- MergedData %>% mutate(IndivAssist_NextFrame =
       ifelse(assist == 1 & TeamTackle_NextFrame == 1, 1, 
              ifelse(PlayerSideOfBall == "defense", 0, NA)))
 MergedData <- MergedData %>% mutate(IndivAssist_0.5SecAhead =
       ifelse(assist == 1 & TeamTackle_0.5SecAhead == 1, 1, 
              ifelse(PlayerSideOfBall == "defense", 0, NA)))
+
+# Same concept for "within the next five frames", starting with teams
+MergedData <- MergedData %>% mutate(TeamTackle_Within0.5Sec =
+    ifelse((lead(event) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId) & nflId == lead(nflId)) |
+              (lead(event, 2) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId, 2) & nflId == lead(nflId, 2)) |
+              (lead(event, 3) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId, 3) & nflId == lead(nflId, 3)) | 
+              (lead(event, 4) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId, 4) & nflId == lead(nflId, 4)) | 
+              (lead(event, 5) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId, 5) & nflId == lead(nflId, 5)), TRUE,
+         ifelse((playId == lead(playId) & nflId == lead(nflId)) &
+                   (playId == lead(playId, 2) & nflId == lead(nflId, 2)) &
+                   (playId == lead(playId, 3) & nflId == lead(nflId, 3)) &
+                   (playId == lead(playId, 4) & nflId == lead(nflId, 4)) &
+                   (playId == lead(playId, 5) & nflId == lead(nflId, 5)), FALSE, NA)))
+
+# Now do the same for individual tackles and assists
+MergedData <- MergedData %>% mutate(IndivSoloTackle_Within0.5Sec =
+   ifelse(tackle == 1 & TeamTackle_Within0.5Sec == 1, 1, 
+         ifelse(PlayerSideOfBall == "defense", 0, NA)))
+MergedData <- MergedData %>% mutate(IndivAssist_Within0.5Sec =
+   ifelse(assist == 1 & TeamTackle_Within0.5Sec == 1, 1, 
+         ifelse(PlayerSideOfBall == "defense", 0, NA)))
 
 # Create a Player_Role variable (i.e. defender, ball-carrier, or other offensive player)
 MergedData <- MergedData %>%
