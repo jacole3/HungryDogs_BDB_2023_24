@@ -51,11 +51,10 @@ library(tictoc)
 library(data.table)
 library(nflreadr)
 library(nflplotR)
+library(reticulate)
 library(nflverse)
 library(tidyverse)
 library(dplyr)
-library(rsvg)
-library(reticulate)
 
 # Use this code to install ggvoronoi package if it doesn't work immediately
 # url_geo <- "https://cran.r-project.org/src/contrib/Archive/rgeos/rgeos_0.6-4.tar.gz"
@@ -535,7 +534,6 @@ Frames_EndOfPlay <- Frames_EndOfPlay %>% select(-"Frame_Rank")
 MergedData <- merge(x = MergedData, y = Frames_EndOfPlay, 
              by = c("playId", "gameId", "nflId", "displayName"))
 MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
-MergedData <- unique(MergedData)
 
 MergedData <- MergedData %>% group_by(gameId, playId, nflId) %>% 
   mutate(Unnecessary_Late = ifelse(frameId > FrameNumber_EndOfPlay, TRUE, FALSE)) %>% 
