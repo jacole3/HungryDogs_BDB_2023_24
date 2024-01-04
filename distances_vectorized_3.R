@@ -302,11 +302,6 @@ plotly::ggplotly(
 # Frames for how long we want to project forward
 frame_length <- 0.5
 
-# Writing a function for calculating distance
-calc_distance <- function(x, y, x_baseline = 0, y_baseline = 0) {
-  sqrt((x-x_baseline)^2 + (y - y_baseline)^2)
-}
-
 # Recall, when making MergedData, we standardized so highest "y" is always to offense's left
 # I.e., make it so that it doesn't matter which end zone the offense is aiming at
 # Likewise, adjust "o" and "dir" were adjusted so 0 is always to offense's left
@@ -385,20 +380,10 @@ ggplotly(
 
 # Recall in MergedData, we already have TotDistFromBall
 # Also Y_DistFromBall, X_DistFromBall, Y_AbsDistFromBall, X_AbsDistFromBall
+# And the overall distance from ball-carrier
 
-## Each player's distance to the ball carrier
-# ball_x won't be exact same as X_ball_carrier (e.g. arm extended with ball)
-MergedData <- MergedData %>%
-  group_by(gameId, playId, frameId) %>%
-  mutate(X_ball_carrier = x[which(nflId == ballCarrierId)],
-         Y_ball_carrier = y[which(nflId == ballCarrierId)],
-         dist_to_ball_carrier = calc_distance(x, 
-                                              y, 
-                                              x_baseline = X_ball_carrier, 
-                                              y_baseline = Y_ball_carrier)) %>%
-  ungroup()
-MergedData <- MergedData %>%
-  arrange(gameId, playId, frameId, club, nflId)
+# Arrange like this so that all 11 players on one team show up before the other team
+MergedData <- MergedData %>% arrange(gameId, playId, frameId, club, nflId)
 
 # Another sample play to work with
 Singletary_run <- MergedData %>%
