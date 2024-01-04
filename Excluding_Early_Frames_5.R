@@ -23,7 +23,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% group_by(gameId, playId, nflId) %
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% filter(Unnecessary_Early == FALSE)
 rm(Frames_AtSnap)
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"Unnecessary_Early")
 
 # For dropbacks, get rid of frames where ball-carrier doesn't have ball yet
@@ -51,7 +50,6 @@ Scrambles_Merged <- Scrambles_Merged %>% group_by(gameId, playId, nflId) %>%
 
 Scrambles_Merged <- Scrambles_Merged %>% filter(Unnecessary_Early == FALSE)
 rm(Scrambles_StartOfRun)
-Scrambles_Merged <- unique(Scrambles_Merged)
 Scrambles_Merged <- Scrambles_Merged %>% select(-"Unnecessary_Early")
 
 Completions_Arrival <- Completions_Merged %>%
@@ -69,5 +67,4 @@ Completions_Merged <- Completions_Merged %>% group_by(gameId, playId, nflId) %>%
 
 Completions_Merged <- Completions_Merged %>% filter(Unnecessary_Early == FALSE)
 rm(Completions_Arrival)
-Completions_Merged <- unique(Completions_Merged)
 Completions_Merged <- Completions_Merged %>% select(-"Unnecessary_Early")
