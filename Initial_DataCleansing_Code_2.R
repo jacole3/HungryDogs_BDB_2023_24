@@ -543,32 +543,7 @@ MergedData <- MergedData %>% filter(Unnecessary_Late == FALSE)
 rm(Frames_EndOfPlay)
 MergedData <- MergedData %>% select(-"Unnecessary_Late")
 
-# Use lead() to label when defense made a tackle in the next frame
-MergedData <- MergedData %>% mutate(TeamTackle_NextFrame =
-      ifelse(lead(event) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId) & nflId == lead(nflId), TRUE,
-             ifelse(playId == lead(playId) & nflId == lead(nflId), FALSE, NA)))
-# Same concept for five frames ahead, since our time frame of interest is 0.5 sec
-MergedData <- MergedData %>% mutate(TeamTackle_0.5SecAhead =
-      ifelse(lead(event, 5) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId, 5) & nflId == lead(nflId, 5), TRUE,
-             ifelse(playId == lead(playId, 5) & nflId == lead(nflId, 5), FALSE, NA)))
-
-# Repeat those for individual tackles instead of team tackles
-MergedData <- MergedData %>% mutate(IndivSoloTackle_NextFrame =
-      ifelse(tackle == 1 & TeamTackle_NextFrame == 1, 1, 
-             ifelse(PlayerSideOfBall == "defense", 0, NA)))
-MergedData <- MergedData %>% mutate(IndivSoloTackle_0.5SecAhead =
-      ifelse(tackle == 1 & TeamTackle_0.5SecAhead == 1, 1, 
-             ifelse(PlayerSideOfBall == "defense", 0, NA)))
-
-# Likewise for individual assists
-MergedData <- MergedData %>% mutate(IndivAssist_NextFrame =
-      ifelse(assist == 1 & TeamTackle_NextFrame == 1, 1, 
-             ifelse(PlayerSideOfBall == "defense", 0, NA)))
-MergedData <- MergedData %>% mutate(IndivAssist_0.5SecAhead =
-      ifelse(assist == 1 & TeamTackle_0.5SecAhead == 1, 1, 
-             ifelse(PlayerSideOfBall == "defense", 0, NA)))
-
-# Same concept for "within the next five frames", starting with teams
+# Use lead() to create tackles "within the next five frames", both for teams and players
 MergedData <- MergedData %>% mutate(TeamTackle_Within0.5Sec =
     ifelse((lead(event) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId) & nflId == lead(nflId)) |
               (lead(event, 2) %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety") & playId == lead(playId, 2) & nflId == lead(nflId, 2)) |
@@ -588,8 +563,10 @@ MergedData <- MergedData %>% mutate(IndivSoloTackle_Within0.5Sec =
 MergedData <- MergedData %>% mutate(IndivAssist_Within0.5Sec =
    ifelse(assist == 1 & TeamTackle_Within0.5Sec == 1, 1, 
          ifelse(PlayerSideOfBall == "defense", 0, NA)))
+MergedData <- MergedData %>%
+  mutate(IndivTotTackles_Within0.5Sec = IndivSoloTackle_Within0.5Sec + 0.5*IndivAssist_Within0.5Sec)
 
-# And, finally, for both teams and players, label tackles in the current frame
+# And, for both teams and players, label tackles in the current frame
 MergedData <- MergedData %>% mutate(TeamTackle_CurrentFrame =
     ifelse(event %in% c("out_of_bounds", "qb_sack", "qb_slide", "tackle", "fumble", "safety"), 1, 0))
 MergedData <- MergedData %>% mutate(IndivSoloTackle_CurrentFrame =
@@ -598,6 +575,9 @@ MergedData <- MergedData %>% mutate(IndivSoloTackle_CurrentFrame =
 MergedData <- MergedData %>% mutate(IndivAssist_CurrentFrame =
     ifelse(assist == 1 & TeamTackle_CurrentFrame == 1, 1, 
          ifelse(PlayerSideOfBall == "defense", 0, NA)))
+MergedData <- MergedData %>% 
+  mutate(IndivTotTackles_CurrentFrame = IndivSoloTackle_CurrentFrame + 0.5*IndivAssist_CurrentFrame)
+
 
 # Create a Player_Role variable (i.e. defender, ball-carrier, or other offensive player)
 MergedData <- MergedData %>%
