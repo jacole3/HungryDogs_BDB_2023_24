@@ -632,5 +632,5 @@ MergedData <- MergedData %>% select(-c("Rel_Orient_ToBC", "Rel_Dir_ToBC"))
 # E.G., if Players X and Y are moving 10 yds/sec in opposite direction, relative speed is 0
 # But, relative velocity is 10 - (-1 * 10), or 20
 MergedData <- MergedData %>%
-  mutate(Rel_Velocity_ToBC = ball_carrier_speed - (s * CosSimilarity_Dir_ToBC))
+  mutate(Rel_Velocity_ToBC = s - (ball_carrier_speed * CosSimilarity_Dir_ToBC))
 
