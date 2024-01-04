@@ -268,13 +268,13 @@ TrackingWithTackles_PlayerNames <- TrackingWithTackles_PlayerNames %>%
 
 max(PlaysAndGames_NFLVerse$interception, na.rm = TRUE) # there are no interceptions
 
-# Make a new version of PlaysAndGames_NFLVerse with fewer columns 
+# Make a new version of PlaysAndGames_NFLVerse with fewer columns
 NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>% 
-  select(-c(7, 16, 20, 31, 42:46, 48:49, 51, 55:57, 59, 61:62, 64, 66:68, 70:74, 80:87, 
-            91:94, 102, 105, 108:117, 122:129, 132:133, 135:144, 149:160, 
-            165:166, 168:177, 183, 186:187, 189:191, 196:200, 202, 204:207, 210:244, 
-            249:301, 302:309, 311:315, 317:320, 325:331, 333:362, 364:367, 372:376,
-            378:383, 385, 387:398, 400))
+  select(-c(7, 10:11, 16, 20, 31, 42:46, 48:49, 51, 55:57, 59, 61:62, 64:68, 70:75, 
+            80:87, 89:94, 98:105, 108:117, 122:129, 132:133, 135:144, 149:180, 
+            183, 185:187, 189:191, 196:200, 202, 204:244, 
+            249:309, 311:315, 317:322, 325:331, 333:367, 370, 372:376,
+            378:383, 385, 387:398, 400, 407:408))
 
 rm(PlaysAndGames_NFLVerse)
 MergedData <- merge(x = NFLVerse_Reduced, y = TrackingWithTackles_PlayerNames,
@@ -292,17 +292,6 @@ MergedData <- MergedData %>%
 
 MergedData <- MergedData %>%
   mutate(X_distFromLOS_Approx = x - X_LOS_Approx)
-
-MergedData <- MergedData %>% mutate(posteam_win = 
-                        case_when(
-                          (result > 0 & possessionTeam == homeTeamAbbr) | (result < 0 & possessionTeam == visitorTeamAbbr) ~ 1,
-                          (result < 0 & possessionTeam == homeTeamAbbr) | ( result > 0 & possessionTeam == visitorTeamAbbr) ~ 0,
-                          result == 0 ~ 0.5))
-
-MergedData <- MergedData %>%
-  mutate(EndGamePtDiff = ifelse(possessionTeam == homeTeamAbbr, result, (-1 * result)))
-# Good way to test effectiveness:
-# View(MergedData %>% filter(posteam_win == 1 & EndGamePtDiff < 0))
 
 # Add a WP success column
 MergedData <- MergedData %>% 
@@ -345,11 +334,10 @@ MergedData <- MergedData %>%
   filter(wp >= 0.05 & wp <= 0.95)
 
 # Turn weather into a numeric variable using str_extract
-# The current "temp" variable is all NAs
+# The given "temp" variable is all NAs
 MergedData <- MergedData %>% 
   mutate(Temperature = (str_extract(MergedData$weather, "\\b\\d+")))
 class(MergedData$Temperature) <- "numeric"
-MergedData <- MergedData %>% select(-"temp")
 
 # Similarly, change height into inches, rather than feet-inches
 convert_to_inches <- function(height) {
