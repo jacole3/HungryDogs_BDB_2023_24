@@ -266,6 +266,8 @@ TrackingWithTackles_PlayerNames <- TrackingWithTackles_PlayerNames %>%
 TrackingWithTackles_PlayerNames <- TrackingWithTackles_PlayerNames %>%
   rename(displayName = displayName.y)
 
+max(PlaysAndGames_NFLVerse$interception, na.rm = TRUE) # there are no interceptions
+
 # Make a new version of PlaysAndGames_NFLVerse with fewer columns 
 NFLVerse_Reduced <- PlaysAndGames_NFLVerse %>% 
   select(-c(7, 16, 20, 31, 42:46, 48:49, 51, 55:57, 59, 61:62, 64, 66:68, 70:74, 80:87, 
