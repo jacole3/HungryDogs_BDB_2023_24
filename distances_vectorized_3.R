@@ -83,12 +83,48 @@ tracking_w1 %>%
   geom_density(fill = 'dodgerblue') +
   facet_wrap(~IsPlayerOnOffense)
 
-#adding projection forward
-tracking_w1 <- tracking_w1 %>%
-  mutate(X_proj = X_std + (s*frame_length*cos((90-dir2)*pi/180)),
-         Y_proj = Y_std + (s*frame_length*sin((90-dir2)*pi/180)))
+# Adding projections for each player's location going forward (by 0.5 seconds)
 # Note that we tested a kinematics-based approach (incorporating acceleration) in addition to the "speed*frame_length" approach
 # Turned out the simpler approach (without acceleration) was more accurate in projecting future distances
+tracking_w1 <- tracking_w1 %>%
+  mutate(X_proj_1 = X_std + ((s*frame_length + 0.5*a*(frame_length)^2)*cos((90-dir)*pi/180)),
+         Y_proj_1 = Y_std + ((s*frame_length + 0.5*a*(frame_length)^2)*sin((90-dir)*pi/180)),
+         X_proj_2 = X_std + (s*frame_length*cos((90-dir)*pi/180)),
+         Y_proj_2 = Y_std + (s*frame_length*sin((90-dir)*pi/180)))
+
+# Figure out which approach is more accurate (physics-based, or just speed * time)
+AccuracyTest <- tracking_w1 %>% mutate(X_Actual_0.5SecAhead = 
+   ifelse(displayName == lead(displayName, 5), lead(X_std, 5), NA))
+AccuracyTest <- AccuracyTest %>% mutate(Y_Actual_0.5SecAhead = 
+   ifelse(displayName == lead(displayName, 5), lead(Y_std, 5), NA))
+
+AccuracyTest <- AccuracyTest %>%
+  mutate(X_proj_Error1 = X_proj_1 - X_Actual_0.5SecAhead,
+         X_proj_Error2 = X_proj_2 - X_Actual_0.5SecAhead,
+         Y_proj_Error1 = Y_proj_1 - Y_Actual_0.5SecAhead,
+         Y_proj_Error2 = Y_proj_2 - Y_Actual_0.5SecAhead)
+
+sd(AccuracyTest$X_proj_Error1, na.rm = TRUE)
+sd(AccuracyTest$X_proj_Error2, na.rm = TRUE)
+sd(AccuracyTest$Y_proj_Error1, na.rm = TRUE)
+sd(AccuracyTest$Y_proj_Error2, na.rm = TRUE)
+
+mean(AccuracyTest$X_proj_Error1, na.rm = TRUE)
+mean(AccuracyTest$X_proj_Error2, na.rm = TRUE)
+mean(AccuracyTest$Y_proj_Error1, na.rm = TRUE)
+mean(AccuracyTest$Y_proj_Error2, na.rm = TRUE)
+
+sqrt(mean((AccuracyTest$X_proj_Error1)^2, na.rm = TRUE))
+sqrt(mean((AccuracyTest$X_proj_Error2)^2, na.rm = TRUE))
+sqrt(mean((AccuracyTest$Y_proj_Error1)^2, na.rm = TRUE))
+sqrt(mean((AccuracyTest$Y_proj_Error2)^2, na.rm = TRUE))
+# Method 2 (non-physics approach) has significantly lower RMSE
+
+# So, get rid of first version
+tracking_w1 <- tracking_w1 %>% select(-c("X_proj_1", "Y_proj_1"))
+tracking_w1 <- tracking_w1 %>% 
+  rename(X_proj = X_proj_2, Y_proj = Y_proj_2)
+rm(AccuracyTest)
 
 ## Here's a sample play and the corresponding voronoi diagram
 Zay_Jones_catch <- tracking_w1 %>%
@@ -262,7 +298,6 @@ plotly::ggplotly(
 
 # Now this is the second part of the file, i.e. the one that assumes you pick up where Initial_DataCleansing_Code left off
 # This one will run much slower, though, since it includes the full data set, rather than just Week 1
-# Also this part includes the "test" of a physics-based approach for projecting future player locations, vs. a simple approach based only on current speed
 
 # Frames for how long we want to project forward
 frame_length <- 0.5
@@ -279,6 +314,7 @@ calc_distance <- function(x, y, x_baseline = 0, y_baseline = 0) {
 # Same adjustment for "x" - high "x" is always where offense is aiming at
 
 # Adding projections for each player's location going forward (by 0.5 seconds)
+# Test the kinematics-based approach vs. the simple approach solely based on current player speed
 MergedData <- MergedData %>%
   mutate(X_proj_1 = x + ((s*frame_length + 0.5*a*(frame_length)^2)*cos((90-dir)*pi/180)),
          Y_proj_1 = y + ((s*frame_length + 0.5*a*(frame_length)^2)*sin((90-dir)*pi/180)),
