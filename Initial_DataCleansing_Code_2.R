@@ -620,3 +620,17 @@ MergedData <- MergedData %>%
          Rel_Weight_ToBC = weight - ball_carrier_weight, Rel_Height_ToBC = height_inches - ball_carrier_height,
          Rel_SeasonMaxSpeed_ToBC = Season_MaxSpeed - BC_Season_MaxSpeed)
 rm(BallCarrier_Traits)
+
+# Now get cosine similarity for the direction and orientation
+# This gives 1 if you're in same direction, -1 if opposite direction, 0 if perpendicular
+MergedData <- MergedData %>% 
+  mutate(CosSimilarity_Orient_ToBC = cos(Rel_Orient_ToBC*pi/180),
+         CosSimilarity_Dir_ToBC = cos(Rel_Dir_ToBC*pi/180))
+MergedData <- MergedData %>% select(-c("Rel_Orient_ToBC", "Rel_Dir_ToBC"))
+
+# Relative velocity accounts for direction, relative speed does NOT
+# E.G., if Players X and Y are moving 10 yds/sec in opposite direction, relative speed is 0
+# But, relative velocity is 10 - (-1 * 10), or 20
+MergedData <- MergedData %>%
+  mutate(Rel_Velocity_ToBC = ball_carrier_speed - (s * CosSimilarity_Dir_ToBC))
+
