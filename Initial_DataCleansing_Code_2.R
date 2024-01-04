@@ -579,7 +579,6 @@ MergedData <- MergedData %>% mutate(IndivAssist_CurrentFrame =
 MergedData <- MergedData %>% 
   mutate(IndivTotTackles_CurrentFrame = IndivSoloTackle_CurrentFrame + 0.5*IndivAssist_CurrentFrame)
 
-
 # Create a Player_Role variable (i.e. defender, ball-carrier, or other offensive player)
 MergedData <- MergedData %>%
   mutate(Player_Role = case_when(
@@ -587,4 +586,22 @@ MergedData <- MergedData %>%
            possessionTeam != club & displayName != "football" ~ "Defense",
            possessionTeam == club & ballCarrierId != nflId ~ "Offense",
            displayName == "football" ~ "Football")) 
+
+# Now, add ball-carrier traits like weight, speed, etc., to all frames
+# Writing a function for calculating distance
+calc_distance <- function(x, y, x_baseline = 0, y_baseline = 0) {
+  sqrt((x-x_baseline)^2 + (y - y_baseline)^2)
+}
+
+## Each player's distance to the ball carrier
+# ball_x won't be exact same as X_ball_carrier (e.g. arm extended with ball)
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(X_ball_carrier = x[which(nflId == ballCarrierId)],
+         Y_ball_carrier = y[which(nflId == ballCarrierId)],
+         dist_to_ball_carrier = calc_distance(x, 
+                                              y, 
+                                              x_baseline = X_ball_carrier, 
+                                              y_baseline = Y_ball_carrier)) %>%
+  ungroup()
 
