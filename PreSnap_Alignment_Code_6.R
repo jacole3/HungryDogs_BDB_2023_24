@@ -170,9 +170,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(LG_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(LG_coordinates, DesignedRuns_LG_Identify_Snap)
 
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
-
 # Use group_by to see if any play has multiple players listed at same position
 LGNumbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
   filter(AlignedPos_Box == "LG", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
@@ -211,9 +208,6 @@ LT_coordinates <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(LT_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(LT_coordinates, DesignedRuns_LT_Identify_Snap)
-
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 
 # Use group_by to see if any play has multiple players listed at same position
 LTNumbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
@@ -254,9 +248,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(RG_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(RG_coordinates, DesignedRuns_RG_Identify_Snap)
 
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
-
 # Use group_by to see if any play has multiple players listed at same position
 RGNumbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
   filter(AlignedPos_Box == "RG", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
@@ -295,9 +286,6 @@ RT_coordinates <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(RT_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(RT_coordinates, DesignedRuns_RT_Identify_Snap)
-
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 
 # Use group_by to see if any play has multiple players listed at same position
 RTNumbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
@@ -360,9 +348,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL1_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Snap)
 
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
-
 # Run a final check to see if any play has multiple players listed at same position
 TEL1Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
   filter(AlignedPos_Box == "TEL1", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
@@ -415,9 +400,6 @@ TEL2_coordinates <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL2_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TEL2_coordinates, DesignedRuns_TEL2_Identify_Snap)
-
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 
 # Run a final check to see if any play has multiple players listed at same position
 TEL2Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
@@ -472,9 +454,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TEL3_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TEL3_coordinates, DesignedRuns_TEL3_Identify_Snap)
 
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
-
 # Run a final check to see if any play has multiple players listed at same position
 TEL3Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
   filter(AlignedPos_Box == "TEL3", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
@@ -527,9 +506,6 @@ TER1_coordinates <- DesignedRuns_Merged %>%
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER1_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TER1_coordinates, DesignedRuns_TER1_Identify_Snap)
-
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 
 # Run a final check to see if any play has multiple players listed at same position
 TER1Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
@@ -584,9 +560,6 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER2_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TER2_coordinates, DesignedRuns_TER2_Identify_Snap)
 
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
-
 # Run a final check to see if any play has multiple players listed at same position
 TER2Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
   filter(AlignedPos_Box == "TER2", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
@@ -640,14 +613,14 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(TER3_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TER3_coordinates, DesignedRuns_TER3_Identify_Snap)
 
-# Use unique() to get rid of any duplicates
-DesignedRuns_Merged <- unique(DesignedRuns_Merged)
-
 # Run a final check to see if any play has multiple players listed at same position
 TER3Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
   filter(AlignedPos_Box == "TER3", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
 rm(TER3Numbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
+
+# Use unique() to get rid of any duplicates
+DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 
 # Now classify how many total TEs there are on each play
 left_tes <- DesignedRuns_Merged %>% 
