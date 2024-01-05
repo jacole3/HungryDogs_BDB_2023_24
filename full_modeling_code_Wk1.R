@@ -705,6 +705,7 @@ MergedData <- MergedData %>%
                                               x_baseline = ball_carrier_X_proj, 
                                               y_baseline = ball_carrier_Y_proj)) %>%
   ungroup()
+rm(BallCarrier_ProjDist)
 
 ## Calculating distances to closest players on opposing teams
 MergedData <- MergedData %>%
