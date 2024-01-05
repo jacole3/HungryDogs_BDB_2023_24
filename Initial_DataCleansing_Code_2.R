@@ -238,15 +238,6 @@ PlaysAndGames_NFLVerse <- merge(x = PlaysAndGames, y = nflverse_pbp,
                     by.y = c("old_game_id", "play_id",  "season", "week", "down")) 
 rm(games, plays, nflverse_pbp, PlaysAndGames)
 
-# Use all.y = TRUE, since we also want players who didn't make tackles
-TrackingWithTackles <- merge(x = tackles, y = tracking_combined,
-                   by = c("gameId", "playId", "nflId"), all.y = TRUE)
-
-TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
-                              by = c("nflId"))
-# If we wanted to keep club == "football", we could use all.x = TRUE here
-rm(players, tackles, tracking_combined, TrackingWithTackles)
-
 # Check if any play has multiple "tackle" instances, or none
 Tackle_Multiples <- tackles %>% 
   group_by(gameId, playId) %>%
@@ -256,6 +247,15 @@ Tackle_Multiples <- tackles %>%
 # But there are many instances of a play having no "tackles" but some "assists"
 # Therefore we know "tackle" means solo tackle
 rm(Tackle_Multiples)
+
+# Use all.y = TRUE, since we also want players who didn't make tackles
+TrackingWithTackles <- merge(x = tackles, y = tracking_combined,
+                   by = c("gameId", "playId", "nflId"), all.y = TRUE)
+
+TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
+                              by = c("nflId"))
+# If we wanted to keep club == "football", we could use all.x = TRUE here
+rm(players, tackles, tracking_combined, TrackingWithTackles)
 
 max(tackles$pff_missedTackle) # no player had more than 1 MT on a play
 
@@ -352,16 +352,16 @@ MergedData <- MergedData %>%
   mutate(height_inches = sapply(height, convert_to_inches))
 MergedData <- MergedData %>% select(-"height")
 
-# Calculate player age by using birth date and game date
-MergedData <- MergedData %>% 
-  mutate(NumericBirthDate = as.Date(birthDate, origin = "1970-01-01"))
-MergedData <- MergedData %>% 
-  mutate(NumericGameDate = as.Date(time, origin = "1970-01-01"))
-MergedData <- MergedData %>% 
-  mutate(Age_Days = NumericGameDate - NumericBirthDate)
-MergedData <- MergedData %>% mutate(Age_Years = Age_Days / 365.25)
+# If we want, can calculate player age by using birth date and game date
+# MergedData <- MergedData %>% 
+#   mutate(NumericBirthDate = as.Date(birthDate, origin = "1970-01-01"))
+# MergedData <- MergedData %>% 
+#   mutate(NumericGameDate = as.Date(time, origin = "1970-01-01"))
+# MergedData <- MergedData %>% 
+#   mutate(Age_Days = NumericGameDate - NumericBirthDate)
+# MergedData <- MergedData %>% mutate(Age_Years = Age_Days / 365.25)
+# class(MergedData$Age_Years) <- "numeric"
 MergedData <- MergedData %>% select(-c("birthDate", "time", "Age_Days"))
-class(MergedData$Age_Years) <- "numeric"
 
 # Also code for each player's maximum speed
 TopSeasonSpeeds <- MergedData %>% 
