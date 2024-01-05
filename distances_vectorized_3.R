@@ -126,6 +126,31 @@ tracking_w1 <- tracking_w1 %>%
   rename(X_proj = X_proj_2, Y_proj = Y_proj_2)
 rm(AccuracyTest)
 
+# And, now, also add the ball-carrier's projected distance in 0.5 seconds
+BallCarrier_ProjDist <- tracking_w1 %>% 
+  filter(IsBallCarrier > 0) %>% 
+  select(gameId, playId, frameId, s, a, o, dir, X_std, Y_std) %>% 
+  rename(ball_carrier_speed = s, ball_carrier_acc = a,
+         ball_carrier_orient = o, ball_carrier_direction = dir,
+         ball_carrier_x = X_std, ball_carrier_y = Y_std)
+BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
+  mutate(ball_carrier_X_proj = ball_carrier_x + (ball_carrier_speed*frame_length*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj = ball_carrier_y + (ball_carrier_speed*frame_length*sin((90-ball_carrier_direction)*pi/180)))
+BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
+  select(c("playId", "gameId", "frameId", "ball_carrier_X_proj", "ball_carrier_Y_proj"))
+tracking_w1 <- tracking_w1 %>% 
+  left_join(BallCarrier_ProjDist, by = c("playId", "gameId", "frameId"))
+
+tracking_w1 <- tracking_w1 %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(ball_carrier_X_proj = ball_carrier_X_proj,
+         ball_carrier_Y_proj = ball_carrier_Y_proj,
+         proj_dist_to_ball_carrier = calc_distance(X_proj, 
+                                              Y_proj, 
+                                              x_baseline = ball_carrier_X_proj, 
+                                              y_baseline = ball_carrier_Y_proj)) %>%
+  ungroup()
+
 ## Here's a sample play and the corresponding voronoi diagram
 Zay_Jones_catch <- tracking_w1 %>%
   filter(gameId==2022091109 & playId==1915) %>%
@@ -349,6 +374,31 @@ MergedData <- MergedData %>% select(-c("X_proj_1", "Y_proj_1"))
 MergedData <- MergedData %>% 
   rename(X_proj = X_proj_2, Y_proj = Y_proj_2)
 rm(AccuracyTest)
+
+# And, now, also add the ball-carrier's projected distance in 0.5 seconds
+BallCarrier_ProjDist <- MergedData %>% 
+  filter(IsBallCarrier > 0) %>% 
+  select(gameId, playId, frameId, s, a, o, dir, x, y) %>% 
+  rename(ball_carrier_speed = s, ball_carrier_acc = a,
+         ball_carrier_orient = o, ball_carrier_direction = dir,
+         ball_carrier_x = x, ball_carrier_y = y)
+BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
+  mutate(ball_carrier_X_proj = ball_carrier_x + (ball_carrier_speed*frame_length*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj = ball_carrier_y + (ball_carrier_speed*frame_length*sin((90-ball_carrier_direction)*pi/180)))
+BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
+  select(c("playId", "gameId", "frameId", "ball_carrier_X_proj", "ball_carrier_Y_proj"))
+MergedData <- MergedData %>% 
+  left_join(BallCarrier_ProjDist, by = c("playId", "gameId", "frameId"))
+
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(ball_carrier_X_proj = ball_carrier_X_proj,
+         ball_carrier_Y_proj = ball_carrier_Y_proj,
+         proj_dist_to_ball_carrier = calc_distance(X_proj, 
+                                              Y_proj, 
+                                              x_baseline = ball_carrier_X_proj, 
+                                              y_baseline = ball_carrier_Y_proj)) %>%
+  ungroup()
 
 ## Here's a sample play and the corresponding voronoi diagram
 McKenzie_catch <- MergedData %>%
