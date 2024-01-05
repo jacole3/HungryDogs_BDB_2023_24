@@ -68,3 +68,6 @@ Completions_Merged <- Completions_Merged %>% group_by(gameId, playId, nflId) %>%
 Completions_Merged <- Completions_Merged %>% filter(Unnecessary_Early == FALSE)
 rm(Completions_Arrival)
 Completions_Merged <- Completions_Merged %>% select(-"Unnecessary_Early")
+
+MergedData <- rbind(DesignedRuns_Merged, Scrambles_Merged, Completions_Merged)
+MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
