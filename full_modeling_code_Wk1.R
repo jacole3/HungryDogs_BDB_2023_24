@@ -660,7 +660,7 @@ MergedData <- MergedData %>%
          Rel_Momentum_ToBC = Momentum - ball_carrier_momentum)
 rm(BallCarrier_Traits)
 
-a# Now get cosine similarity for the direction and orientation
+# Now get cosine similarity for the direction and orientation
 # This gives 1 if you're in same direction, -1 if opposite direction, 0 if perpendicular
 MergedData <- MergedData %>% 
   mutate(CosSimilarity_Orient_ToBC = cos(Rel_Orient_ToBC*pi/180),
