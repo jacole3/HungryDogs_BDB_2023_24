@@ -683,6 +683,39 @@ MergedData <- MergedData %>% select(-c("Rel_Orient_ToBC", "Rel_Dir_ToBC"))
 MergedData <- MergedData %>%
   mutate(Rel_Velocity_ToBC = s - (ball_carrier_speed * CosSimilarity_Dir_ToBC))
 
+# Now include the projections for each player's future distance (from distances_vectorized file)
+frame_length <- 0.5
+
+# Adding projections for each player's location going forward (by 0.5 seconds)
+MergedData <- MergedData %>%
+  mutate(X_proj = x + (s*frame_length*cos((90-dir)*pi/180)),
+         Y_proj = y + (s*frame_length*sin((90-dir)*pi/180)))
+
+# And, now, also add the ball-carrier's projected distance in 0.5 seconds
+BallCarrier_ProjDist <- MergedData %>% 
+  filter(IsBallCarrier > 0) %>% 
+  select(gameId, playId, frameId, s, a, o, dir, x, y) %>% 
+  rename(ball_carrier_speed = s, ball_carrier_acc = a,
+         ball_carrier_orient = o, ball_carrier_direction = dir,
+         ball_carrier_x = x, ball_carrier_y = y)
+BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
+  mutate(ball_carrier_X_proj = ball_carrier_x + (ball_carrier_speed*frame_length*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj = ball_carrier_y + (ball_carrier_speed*frame_length*sin((90-ball_carrier_direction)*pi/180)))
+BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
+  select(c("playId", "gameId", "frameId", "ball_carrier_X_proj", "ball_carrier_Y_proj"))
+MergedData <- MergedData %>% 
+  left_join(BallCarrier_ProjDist, by = c("playId", "gameId", "frameId"))
+
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(ball_carrier_X_proj = ball_carrier_X_proj,
+         ball_carrier_Y_proj = ball_carrier_Y_proj,
+         proj_dist_to_ball_carrier = calc_distance(X_proj, 
+                                              Y_proj, 
+                                              x_baseline = ball_carrier_X_proj, 
+                                              y_baseline = ball_carrier_Y_proj)) %>%
+  ungroup()
+
 # Incorporate the "blocking code" which was created in Python
 tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
 View(tracking_w1_blocked_info[1:10,])
@@ -860,7 +893,7 @@ plotly::ggplotly(
                                   "Defense" = "blue",
                                   "Football" = "brown")) +
     labs(x = "X (Standardized)", y = "Y (Standardized)") +
-    geom_hline(yintercept = 0, color = 'green', linetype = 'dashed') +
-    geom_hline(yintercept = 53.3, color = 'green', linetype = 'dashed') +
+    geom_hline(yintercept = 0, color = 'darkgreen', linetype = 'dashed') +
+    geom_hline(yintercept = 53.3, color = 'darkgreen', linetype = 'dashed') +
     facet_wrap(~frameId)
 )
