@@ -647,12 +647,15 @@ MergedData <- MergedData %>%
                                               y_baseline = Y_ball_carrier)) %>%
   ungroup()
 
+
 BallCarrier_Traits <- MergedData %>% 
   filter(IsBallCarrier > 0) %>% 
   select(gameId, playId, frameId, s, a, dis, o, dir, weight, height_inches, Season_MaxSpeed) %>% 
   rename(ball_carrier_speed = s, ball_carrier_acc = a, ball_carrier_dist_ran = dis,
          ball_carrier_orient = o, ball_carrier_direction = dir, ball_carrier_weight = weight,
          ball_carrier_height = height_inches, BC_Season_MaxSpeed = Season_MaxSpeed)
+BallCarrier_Traits <- BallCarrier_Traits %>% 
+  mutate(ball_carrier_momentum = ball_carrier_speed * ball_carrier_weight)
 
 MergedData <- MergedData %>% 
   left_join(BallCarrier_Traits, by = c("playId", "gameId", "frameId"))
@@ -661,7 +664,8 @@ MergedData <- MergedData %>%
   mutate(Rel_Speed_ToBC = s - ball_carrier_speed, Rel_Acc_ToBC = a - ball_carrier_acc,
          Rel_Weight_ToBC = weight - ball_carrier_weight, Rel_Height_ToBC = height_inches - ball_carrier_height,
          Rel_Orient_ToBC = o - ball_carrier_orient, Rel_Dir_ToBC = dir - ball_carrier_direction,
-         Rel_SeasonMaxSpeed_ToBC = Season_MaxSpeed - BC_Season_MaxSpeed)
+         Rel_SeasonMaxSpeed_ToBC = Season_MaxSpeed - BC_Season_MaxSpeed, Momentum = s * weight,
+         Rel_Momentum_ToBC = Momentum - ball_carrier_momentum)
 rm(BallCarrier_Traits)
 
 # Now get cosine similarity for the direction and orientation
