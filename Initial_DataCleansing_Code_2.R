@@ -201,7 +201,7 @@ rm(ball_df, Frame1_Ball_Location)
 # Likewise, add the ball's distance from goal line and sideline
 tracking_combined <- tracking_combined %>%
   mutate(Ball_DistFromGoalLine = 110 - ball_x,
-         Ball_DistFromSideline = min(ball_y, 53.3 - ball_y))
+         Ball_DistFromSideline = ifelse(ball_y >= 26.65, 53.3 - ball_y, ball_y))
 
 nflverse_pbp <- nflfastR::load_pbp(2022)
 nflverse_pbp <- nflverse_pbp %>% filter(week %in% 1:9)
