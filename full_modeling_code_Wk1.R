@@ -783,7 +783,7 @@ tracking_w1_blocked_info <- tracking_w1_blocked_info %>%
 
 MergedData_blockers <- MergedData %>%
   left_join(tracking_w1_blocked_info %>%
-              select(1:3, 5, 39:50), by = c("gameId", "playId", "nflId", "frameId"))
+              select(1:3, 5, 48:50), by = c("gameId", "playId", "nflId", "frameId"))
 rm(MergedData, tracking_w1_blocked_info)
 
 # View(MergedData_blockers[1:100,])
