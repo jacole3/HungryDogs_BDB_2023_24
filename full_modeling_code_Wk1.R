@@ -716,6 +716,63 @@ MergedData <- MergedData %>%
                                               y_baseline = ball_carrier_Y_proj)) %>%
   ungroup()
 
+## Calculating distances to closest players on opposing teams
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(min_dist_opp_player = map_dbl(.x=row_number(), ~min(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                y = y[which(club[.x]!=club & club!='football')],
+                                                                x_baseline = x[.x],
+                                                                y_baseline = y[.x]))),
+         num_opp_players_same_dist = map_dbl(.x=row_number(), ~11 - length(unique(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                    y = y[which(club[.x]!=club & club!='football')],
+                                                                                    x_baseline = x[.x],
+                                                                                    y_baseline = y[.x])))),
+         num_opp_players_same_dist = ifelse(displayName == 'football', 0, num_opp_players_same_dist),
+         min_dist_opp_index = map_dbl(.x=row_number(), ~which(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                      y = y[which(club[.x]!=club & club!='football')],
+                                                                      x_baseline = x[.x],
+                                                                      y_baseline = y[.x])== min(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                                                  y = y[which(club[.x]!=club & club!='football')],
+                                                                                                                  x_baseline = x[.x],
+                                                                                                                  y_baseline = y[.x])))[1]),
+         second_closest_dist_opp_player = map_dbl(.x=row_number(), ~Rfast::nth(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                  y = y[which(club[.x]!=club & club!='football')],
+                                                                                  x_baseline = x[.x],
+                                                                                  y_baseline = y[.x]), 2, descending = F)),
+         second_closest_opp_index = map_dbl(.x=row_number(), ~which(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                y = y[which(club[.x]!=club & club!='football')],
+                                                                                x_baseline = x[.x],
+                                                                                y_baseline = y[.x])== Rfast::nth(calc_distance(x = x[which(club[.x]!=club & club!='football')],
+                                                                                                                                   y = y[which(club[.x]!=club & club!='football')],
+                                                                                                                                   x_baseline = x[.x],
+                                                                                                                                   y_baseline = y[.x]),2,descending = F))[1]) # Where I account for duplicates
+  ) %>%
+  ungroup()
+
+# Adjusted Justin's code here to not include "football" (so 13 changes to 12, etc.)
+MergedData <- MergedData %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(
+    closest_opp_player_name = case_when(
+      row_number()<=11 ~ displayName[11+min_dist_opp_index],
+      row_number()>=12 ~ displayName[min_dist_opp_index]
+    ),
+    closest_opp_player_nflID = case_when(
+      row_number()<=11 ~ nflId[11+min_dist_opp_index],
+      row_number()>=12 ~ nflId[min_dist_opp_index]
+    ),
+    second_closest_opp_player_name = case_when(
+      row_number()<=11 ~ displayName[11+second_closest_opp_index],
+      row_number()>=12 ~ displayName[second_closest_opp_index]
+    ),
+    second_closest_opp_player_nflID = case_when(
+      row_number()<=11 ~ nflId[11+second_closest_opp_index],
+      row_number()>=12 ~ nflId[second_closest_opp_index]
+    )
+  ) %>%
+  ungroup()
+
+
 # Incorporate the "blocking code" which was created in Python
 tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
 View(tracking_w1_blocked_info[1:10,])
