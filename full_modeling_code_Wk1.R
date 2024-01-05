@@ -777,7 +777,9 @@ tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
 tracking_w1_blocked_info <- tracking_w1_blocked_info %>%
   rename(min_dist_opp_player  = min_dist, num_opp_players_same_dist  = num_same_dist,
          min_dist_opp_index = min_dist_pos, second_closest_dist_opp_player = second_closest_dist,
-         second_closest_opp_index = second_closest_pos)
+         second_closest_opp_index = second_closest_pos, closest_opp_player_name = closest_player_name,
+         closest_opp_player_nflID = closest_player_nflID, second_closest_opp_player_name = second_closest_player_name,
+         second_closest_opp_player_nflID = second_closest_player_nflID)
 
 MergedData_blockers <- MergedData %>%
   left_join(tracking_w1_blocked_info %>%
