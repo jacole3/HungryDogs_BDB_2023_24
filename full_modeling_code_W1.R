@@ -683,6 +683,7 @@ MergedData <- MergedData %>% select(-c("Rel_Orient_ToBC", "Rel_Dir_ToBC"))
 MergedData <- MergedData %>%
   mutate(Rel_Velocity_ToBC = s - (ball_carrier_speed * CosSimilarity_Dir_ToBC))
 
+# Incorporate the "blocking code" which was created in Python
 tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
 View(tracking_w1_blocked_info[1:10,])
 
@@ -707,7 +708,7 @@ View(MergedData_blockers[1:100,])
 dist <- 0.5
 frames <- 3
 MergedData_blockers <- MergedData_blockers %>%
-  mutate(within_dist_ofBC = ifelse(dist_to_ball_carrier<=0.5, 1, 0)) %>%
+  mutate(within_dist_ofBC = ifelse(dist_to_ball_carrier <= dist, 1, 0)) %>%
   group_by(gameId, playId, nflId) %>%
   mutate(within_dist_ofBC_frames_ahead = lead(within_dist_ofBC, frames)) %>%
   ungroup()
@@ -743,7 +744,7 @@ MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
 
 DesignedRuns_Merged <- MergedData_blockers %>% filter(pass == 0)
 Scrambles_Merged <- MergedData_blockers %>% filter(passResult == "R")
-AllRushes_Merged <- MergedData_blockers %>% filter(pass == 0 | passResult == "R")
+# AllRushes_Merged <- MergedData_blockers %>% filter(pass == 0 | passResult == "R"); likely not necessary
 Completions_Merged <- MergedData_blockers %>% filter(passResult == "C")
 
 # Getting rid of pre-snap frames for designed runs
