@@ -111,6 +111,31 @@ tracking_combined <- tracking_combined %>%
 tracking_combined <- tracking_combined %>%
   filter(gameId != 2022102307 | playId != 1505)
 
+# These plays have multiple "first_contact" events
+# View(tracking_combined %>% filter(gameId == 2022100209, playId == 1581, event == "first_contact"))
+# View(tracking_combined %>% filter(gameId == 2022103100, playId == 1689, event == "first_contact"))
+# View(tracking_combined %>% filter(gameId == 2022103004, playId == 2106, event == "first_contact"))
+FirstContact_Events <- tracking_combined %>% filter(event == "first_contact") %>%
+  group_by(gameId, playId, nflId) %>%
+  mutate(FirstContact_rank = rank(frameId, ties.method = "first")) %>%
+  ungroup()
+FirstContact_Events <- FirstContact_Events %>% 
+  select(c("gameId", "playId", "nflId", "displayName", "frameId", "FirstContact_rank"))
+MultiFirstContact_Plays <- FirstContact_Events %>% 
+  group_by(gameId, playId) %>% 
+  summarize(n = n(), Frames = n_distinct(frameId)) %>% arrange(desc(Frames))
+tracking_combined <- tracking_combined %>%
+  left_join(FirstContact_Events, by = c("gameId", "playId", "nflId", "displayName", "frameId"))
+
+table(tracking_combined$event)
+# For any "FirstContact_rank" bigger than 1, change the event name to NA
+tracking_combined <- tracking_combined %>% mutate(event =
+      ifelse(is.na(FirstContact_rank), event,
+             ifelse(FirstContact_rank > 1 & event == "first_contact", NA, event)))
+
+rm(FirstContact_Events, MultiFirstContact_Plays)
+tracking_combined <- tracking_combined %>% select(-"FirstContact_rank")
+
 # Note that o means orientation, and dir means direction, both scaled 0-360
 # In both cases, 0 is facing the visitor sideline (i.e. where Y = 53.3)
 # Thus, both 0 and 180 are parallel to the LOS when discussing o and dir
