@@ -829,7 +829,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"BoxSnaps")
 
 # Get rid of frames where ball-carrier doesn't have ball yet
 # For designed runs, we had to wait until after we defined all the gap alignments
-# Recall that we already did this for dropbacks in "data cleansing code" file
+# Recall that we already did this for dropbacks in "excluding early frames" file
 Frames_AtHandoff <- DesignedRuns_Merged %>%
   filter(event %in% c("run", "handoff", "lateral")) %>%
   select(gameId, playId, nflId, displayName, frameId) %>%
