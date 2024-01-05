@@ -844,7 +844,7 @@ plotly::ggplotly(
                              'Closest Opposing Player: ', closest_player_name, '\n',
                              'Closest Opposing Player Dist: ', round(min_dist,3), '\n',
                              'Distance to Ball: ', round(dist_to_ball_carrier,3), '\n',
-                             'Second Closest Opposing Player', second_closest_player_name, '\n',
+                             'Second Closest Opposing Player': , second_closest_player_name, '\n',
                              'Second Closest Opposing Player Dist: ', round(second_closest_dist,3), '\n',
                              'Blocked Score: ', round(BlockedScore, 3), '\n',
                              'prediction: ', round(pred, 3)
@@ -853,12 +853,13 @@ plotly::ggplotly(
     stat_voronoi(geom="path") +
     geom_point(aes(color = Player_Role)) +
     # geom_segment(aes(x = X_std, y = Y_std, xend = X_end,
-    #                  yend = Y_end, color=Player_Desc)) +
+    #                  yend = Y_end, color = Player_Desc)) +
     scale_color_manual(values = c("Ball Carrier" = "black", 
                                   "Offense" = "red",
                                   "Defense" = "blue",
-                                  "Football"="brown")) +
-    labs(x = "X (Standardized)", y = "Y (Stand=ardized)") +
-    geom_hline(yintercept = 0, color = 'red', linetype='dashed')+
+                                  "Football" = "brown")) +
+    labs(x = "X (Standardized)", y = "Y (Standardized)") +
+    geom_hline(yintercept = 0, color = 'green', linetype = 'dashed') +
+    geom_hline(yintercept = 53.3, color = 'green', linetype = 'dashed') +
     facet_wrap(~frameId)
 )
