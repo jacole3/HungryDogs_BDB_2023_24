@@ -745,7 +745,7 @@ MergedData <- MergedData %>%
   ) %>%
   ungroup()
 
-# Adjusted Justin's code here to not include "football" (so 13 changes to 12, etc.)
+# Because we don't have "football", use 12 instead of 13 here
 MergedData <- MergedData %>%
   group_by(gameId, playId, frameId) %>%
   mutate(
