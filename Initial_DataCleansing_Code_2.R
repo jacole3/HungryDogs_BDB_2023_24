@@ -273,6 +273,8 @@ Tackle_Multiples <- tackles %>%
 # Therefore we know "tackle" means solo tackle
 rm(Tackle_Multiples)
 
+max(tackles$pff_missedTackle) # no player had more than 1 MT on a play
+
 # Use all.y = TRUE, since we also want players who didn't make tackles
 TrackingWithTackles <- merge(x = tackles, y = tracking_combined,
                    by = c("gameId", "playId", "nflId"), all.y = TRUE)
@@ -281,8 +283,6 @@ TrackingWithTackles_PlayerNames <- merge(x = TrackingWithTackles, y = players,
                               by = c("nflId"))
 # If we wanted to keep club == "football", we could use all.x = TRUE here
 rm(players, tackles, tracking_combined, TrackingWithTackles)
-
-max(tackles$pff_missedTackle) # no player had more than 1 MT on a play
 
 # Check for name discrepancies again (all players, not just ball-carriers)
 # View(TrackingWithTackles_PlayerNames %>% filter(displayName.x != displayName.y))
