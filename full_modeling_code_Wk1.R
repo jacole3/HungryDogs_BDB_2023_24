@@ -772,7 +772,7 @@ MergedData <- MergedData %>%
 
 # Incorporate the "blocking code" which was created in Python
 tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
-View(tracking_w1_blocked_info[1:10,])
+# View(tracking_w1_blocked_info[1:10,])
 
 MergedData_blockers <- MergedData %>%
   left_join(tracking_w1_blocked_info %>%
@@ -782,8 +782,7 @@ MergedData_blockers <- MergedData %>%
                                     "frameId"))
 rm(MergedData, tracking_w1_blocked_info)
 
-
-View(MergedData_blockers[1:100,])
+# View(MergedData_blockers[1:100,])
 
 # Ideas for predictor variables of our models
 # Blocking scores
