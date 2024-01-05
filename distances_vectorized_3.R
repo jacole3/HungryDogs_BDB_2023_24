@@ -150,6 +150,7 @@ tracking_w1 <- tracking_w1 %>%
                                               x_baseline = ball_carrier_X_proj, 
                                               y_baseline = ball_carrier_Y_proj)) %>%
   ungroup()
+rm(BallCarrier_ProjDist)
 
 ## Here's a sample play and the corresponding voronoi diagram
 Zay_Jones_catch <- tracking_w1 %>%
@@ -399,6 +400,7 @@ MergedData <- MergedData %>%
                                               x_baseline = ball_carrier_X_proj, 
                                               y_baseline = ball_carrier_Y_proj)) %>%
   ungroup()
+rm(BallCarrier_ProjDist)
 
 ## Here's a sample play and the corresponding voronoi diagram
 McKenzie_catch <- MergedData %>%
