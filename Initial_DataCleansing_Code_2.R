@@ -198,6 +198,11 @@ tracking_combined <- tracking_combined %>%
          Y_AbsDistFromBall = abs(y - ball_y), X_AbsDistFromBall = abs(x - ball_x))
 rm(ball_df, Frame1_Ball_Location)
 
+# Likewise, add the ball's distance from goal line and sideline
+tracking_combined <- tracking_combined %>%
+  mutate(Ball_DistFromGoalLine = 110 - ball_x,
+         Ball_DistFromSideline = min(ball_y, 53.3 - ball_y))
+
 nflverse_pbp <- nflfastR::load_pbp(2022)
 nflverse_pbp <- nflverse_pbp %>% filter(week %in% 1:9)
 # This gives descriptions of NFLVerse columns: View(field_descriptions)
