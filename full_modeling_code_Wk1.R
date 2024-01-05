@@ -892,8 +892,11 @@ plotly::ggplotly(
                                   "Offense" = "red",
                                   "Defense" = "blue",
                                   "Football" = "brown")) +
-    labs(x = "X (Standardized)", y = "Y (Standardized)") +
-    geom_hline(yintercept = 0, color = 'darkgreen', linetype = 'dashed') +
-    geom_hline(yintercept = 53.3, color = 'darkgreen', linetype = 'dashed') +
-    facet_wrap(~frameId)
+  theme_bw() +
+  labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
+       title = "Frame-By-Frame Diagram of D. Singletary Rush (From Handoff to First Contact)") +
+  geom_hline(yintercept = 0, color = 'darkgreen', linetype = 'dashed') +
+  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype = 'dashed') +
+  facet_wrap(~frameId) +
+  theme(plot.title = element_text(size = 10, hjust = 0.5))
 )
