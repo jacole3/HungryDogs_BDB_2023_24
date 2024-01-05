@@ -785,12 +785,22 @@ rm(MergedData, tracking_w1_blocked_info)
 
 View(MergedData_blockers[1:100,])
 
+# Ideas for predictor variables of our models
 # Blocking scores
 # Distance to ball carrier
+# Projected future distance to ball carrier
+# Maybe X_DistFromBall and Y_DistFromBall separately as predictors? Being 3 yds to left is different than 3 yds behind
+# Likewise, maybe X_AbsDistFromBall, Y_AbsDistFromBall
 # number of blockers
-# CosSimilarity_Dir_ToBC
-# acceleration relative to the ball carrier
-# speed of defender relative to ball carrier
+# Perhaps the ranks of distance to ball-carrier (e.g., Player X is second-closest defender to the ball-carrier)
+# CosSimilarity_Dir_ToBC (i.e. is defender doing in same direction as ball-carrier)
+# Cosine similarity for orientation could be useful as well (at least test it out)
+# acceleration, and acceleration relative to the ball carrier
+# speed of defender, and speed relative to ball carrier (relative velocity)
+# yardline_100 (initial field position)
+# Ball-carrier distance from sideline, or goal line ... prob don't need both field pos and distance from GL
+
+# For tackling specifically, weight and momentum come into play
 
 dist <- 0.5
 frames <- 3
