@@ -266,16 +266,6 @@ PlaysAndGames_NFLVerse <- merge(x = PlaysAndGames, y = nflverse_pbp,
                                 by.y = c("old_game_id", "play_id",  "season", "week", "down")) 
 rm(games, plays, nflverse_pbp, PlaysAndGames)
 
-# Check if any play has multiple "tackle" instances, or none
-Tackle_Multiples <- tackles %>% 
-  group_by(gameId, playId) %>%
-  summarize(Players = n(), Tackles = sum(tackle), Assists = sum(assist)) %>% arrange(desc(Tackles))
-# View(Tackle_Multiples %>% arrange(Tackles))
-# One instance of multiple: View(plays %>% filter(gameId == 2022091107, playId == 1879)) - and that play had a forced fumble
-# But there are many instances of a play having no "tackles" but some "assists"
-# Therefore we know "tackle" means solo tackle
-rm(Tackle_Multiples)
-
 # Use all.y = TRUE, since we also want players who didn't make tackles
 TrackingWithTackles <- merge(x = tackles, y = tracking_combined,
                              by = c("gameId", "playId", "nflId"), all.y = TRUE)
