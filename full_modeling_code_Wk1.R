@@ -762,6 +762,7 @@ MergedData <- MergedData %>%
   ) %>%
   ungroup()
 
+# When building a model for designed runs specifically, "PreSnap_Alignment_Code" file can be useful
 
 # Incorporate the "blocking code" which was created in Python
 tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
