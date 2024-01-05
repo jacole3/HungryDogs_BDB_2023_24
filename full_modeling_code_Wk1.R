@@ -774,12 +774,14 @@ MergedData <- MergedData %>%
 tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
 # View(tracking_w1_blocked_info[1:10,])
 
+tracking_w1_blocked_info <- tracking_w1_blocked_info %>%
+  rename(min_dist_opp_player  = min_dist, num_opp_players_same_dist  = num_same_dist,
+         min_dist_opp_index = min_dist_pos, second_closest_dist_opp_player = second_closest_dist,
+         second_closest_opp_index = second_closest_pos)
+
 MergedData_blockers <- MergedData %>%
   left_join(tracking_w1_blocked_info %>%
-              select(1:3, 5, 39:50), by = c("gameId", 
-                                    "playId",
-                                    "nflId",
-                                    "frameId"))
+              select(1:3, 5, 39:50), by = c("gameId", "playId", "nflId", "frameId"))
 rm(MergedData, tracking_w1_blocked_info)
 
 # View(MergedData_blockers[1:100,])
