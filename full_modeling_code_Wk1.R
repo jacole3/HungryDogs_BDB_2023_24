@@ -886,6 +886,7 @@ Completions_Merged <- Completions_Merged %>% select(-c("Unnecessary_Early", "Fra
 
 final_merged_data <- rbind(DesignedRuns_Merged, Scrambles_Merged, Completions_Merged)
 rm(MergedData_blockers)
+final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameId)
 
 final_merged_data_sub <- final_merged_data %>%
   mutate(BlockedScore = BlockedScore + 1) %>%
