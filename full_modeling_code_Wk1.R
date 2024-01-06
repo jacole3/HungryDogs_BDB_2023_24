@@ -879,7 +879,7 @@ final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameI
 # Likewise, maybe X_AbsDistFromBall, Y_AbsDistFromBall
 # number of blockers
 # Perhaps the ranks of distance to ball-carrier (e.g., Player X is second-closest defender to the ball-carrier)
-# CosSimilarity_Dir_ToBC (i.e. is defender doing in same direction as ball-carrier)
+# CosSimilarity_Dir_ToBC (i.e. is defender going in same direction as ball-carrier)
 # Cosine similarity for orientation could be useful as well (at least test it out)
 # acceleration, and acceleration relative to the ball carrier
 # speed of defender, and speed relative to ball carrier (relative velocity)
