@@ -23,7 +23,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% group_by(gameId, playId, nflId) %
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% filter(Unnecessary_Early == FALSE)
 rm(Frames_AtSnap)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"Unnecessary_Early")
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-c("Unnecessary_Early", "FrameNumber_AtSnap"))
 
 # For dropbacks, get rid of frames where ball-carrier doesn't have ball yet
 # For designed runs, this will go in pre-snap alignment code file, b/c we need to define pre-snap gaps first
@@ -50,7 +50,7 @@ Scrambles_Merged <- Scrambles_Merged %>% group_by(gameId, playId, nflId) %>%
 
 Scrambles_Merged <- Scrambles_Merged %>% filter(Unnecessary_Early == FALSE)
 rm(Scrambles_StartOfRun)
-Scrambles_Merged <- Scrambles_Merged %>% select(-"Unnecessary_Early")
+Scrambles_Merged <- Scrambles_Merged %>% select(-c("Unnecessary_Early", "FrameNumber_AtStart"))
 
 Completions_Arrival <- Completions_Merged %>%
   filter(event %in% c("pass_outcome_caught")) %>%
@@ -67,7 +67,7 @@ Completions_Merged <- Completions_Merged %>% group_by(gameId, playId, nflId) %>%
 
 Completions_Merged <- Completions_Merged %>% filter(Unnecessary_Early == FALSE)
 rm(Completions_Arrival)
-Completions_Merged <- Completions_Merged %>% select(-"Unnecessary_Early")
+Completions_Merged <- Completions_Merged %>% select(-c("Unnecessary_Early", "FrameNumber_AtStart"))
 
 MergedData <- rbind(DesignedRuns_Merged, Scrambles_Merged, Completions_Merged)
 MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
