@@ -773,7 +773,7 @@ tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
 # View(tracking_w1_blocked_info[1:10,])
 
 tracking_w1_blocked_info <- tracking_w1_blocked_info %>%
-  rename(min_dist_opp_player  = min_dist, num_opp_players_same_dist  = num_same_dist,
+  rename(min_dist_opp_player = min_dist, num_opp_players_same_dist  = num_same_dist,
          min_dist_opp_index = min_dist_pos, second_closest_dist_opp_player = second_closest_dist,
          second_closest_opp_index = second_closest_pos, closest_opp_player_name = closest_player_name,
          closest_opp_player_nflID = closest_player_nflID, second_closest_opp_player_name = second_closest_player_name,
@@ -885,17 +885,17 @@ rm(MergedData_blockers)
 
 final_merged_data_sub <- final_merged_data %>%
   mutate(BlockedScore = BlockedScore + 1) %>%
-  filter(In_BallCarrier_Radius!=-1 & nflId!=ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier<=10) %>%
-  select(gameId, playId, frameId, nflId, displayName, closest_player_name, 
-         second_closest_dist, second_closest_player_name, second_closest_player_nflID, 
+  filter(In_BallCarrier_Radius!=-1 & nflId!=ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier <= 10) %>%
+  select(gameId, playId, frameId, nflId, displayName, closest_opp_player_name, 
+         second_closest_dist_opp_player, second_closest_opp_player_name, second_closest_opp_player_nflID, 
          x, y, dir, Player_Role,
-         BlockedScore, CosSimilarity_Dir_ToBC, min_dist,
+         BlockedScore, CosSimilarity_Dir_ToBC, min_dist_opp_player,
          Rel_Velocity_ToBC, Rel_Acc_ToBC,
          dist_to_ball_carrier, NumberOfBlockers,
          within_dist_ofBC_frames_ahead
          )
 mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
-            dist_to_ball_carrier +NumberOfBlockers + within_dist_ofBC_frames_ahead + 
+            dist_to_ball_carrier + NumberOfBlockers + within_dist_ofBC_frames_ahead + 
             dist_to_ball_carrier*BlockedScore, data = final_merged_data_sub, family = 'binomial')
 summary(mod1)
 
@@ -912,34 +912,34 @@ singletary_run <- final_merged_data %>%
 
 plotly::ggplotly(
   singletary_run %>%
-    filter(frameId>= 10 & frameId<=19) %>%
+    filter(frameId >= unique(frameId[which(event=='handoff')]), frameId <= unique(frameId[which(event=='first_contact')])) %>%
     ggplot(aes(x = x, y = y, 
                text = paste0('Dir: ', dir, '\n',
                              'Player Name: ',displayName, '\n',
-                             'Closest Opposing Player: ', closest_player_name, '\n',
-                             'Closest Opposing Player Dist: ', round(min_dist,3), '\n',
-                             'Distance to Ball: ', round(dist_to_ball_carrier,3), '\n',
-                             'Second Closest Opposing Player': , second_closest_player_name, '\n',
-                             'Second Closest Opposing Player Dist: ', round(second_closest_dist,3), '\n',
+                             'Closest Opposing Player: ', closest_opp_player_name, '\n',
+                             'Closest Opposing Player Dist: ', round(min_dist_opp_player, 3), '\n',
+                             'Distance to Ball: ', round(dist_to_ball_carrier, 3), '\n',
+                             'Second Closest Opposing Player: ',  second_closest_opp_player_name, '\n',
+                             'Second Closest Opposing Player Dist: ', round(second_closest_dist_opp_player, 3), '\n',
                              'Blocked Score: ', round(BlockedScore, 3), '\n',
                              'prediction: ', round(pred, 3)
                )
     )) +
-    stat_voronoi(geom="path") +
+    stat_voronoi(geom = "path") +
     geom_point(aes(color = Player_Role)) +
-    # geom_segment(aes(x = X_std, y = Y_std, xend = X_end,
-    #                  yend = Y_end, color = Player_Desc)) +
+    # geom_segment(aes(x = x, y = y, xend = X_proj,
+    #                  yend = Y_proj, color = Player_Role)) +
     scale_color_manual(values = c("Ball Carrier" = "black", 
                                   "Offense" = "red",
                                   "Defense" = "blue",
                                   "Football" = "brown")) +
-  theme_bw() +
-  labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
-       title = "Frame-By-Frame Diagram of D. Singletary Rush (From Handoff to First Contact)") +
-  geom_hline(yintercept = 0, color = 'darkgreen', linetype = 'dashed') +
-  geom_hline(yintercept = 53.3, color = 'darkgreen', linetype = 'dashed') +
-  facet_wrap(~frameId) +
-  theme(plot.title = element_text(size = 10, hjust = 0.5))
+    theme_bw() +
+    labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
+         title = "Frame-By-Frame Diagram of D. Singletary Rush (From Handoff to First Contact)") +
+    geom_hline(yintercept = 0, color = 'darkgreen', linetype = 'dashed') +
+    geom_hline(yintercept = 53.3, color = 'darkgreen', linetype = 'dashed') +
+    facet_wrap(~frameId) +
+    theme(plot.title = element_text(size = 10, hjust = 0.5))
 )
 
 # When building a model for designed runs specifically, "PreSnap_Alignment_Code" file must be used
