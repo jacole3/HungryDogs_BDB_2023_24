@@ -819,12 +819,12 @@ Completions_Merged <- MergedData_blockers %>% filter(passResult == "C")
 # Getting rid of pre-snap frames for designed runs
 # We must wait until after running the "pre-snap alignment code" to get rid of frames before handoff
 Frames_AtSnap <- DesignedRuns_Merged %>%
-  filter(event %in% c("ball_snap")) %>%
+  filter(event %in% c("ball_snap", "snap_direct")) %>%
   select(gameId, playId, nflId, displayName, frameId) %>%
   rename(FrameNumber_AtSnap = frameId)
 
 DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = Frames_AtSnap, 
-                             by = c("playId", "gameId", "nflId", "displayName"))
+                             by = c("playId", "gameId", "nflId", "displayName"), all.x = TRUE)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% group_by(gameId, playId, nflId) %>% 
