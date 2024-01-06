@@ -930,12 +930,337 @@ final_merged_data_sub <- final_merged_data %>%
          In_BallCarrier_Radius, NumberOfBlockers, within_dist_ofBC,
          within_dist_ofBC_frames_ahead)
 
-mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
-            dist_to_ball_carrier + NumberOfBlockers + within_dist_ofBC_frames_ahead + 
-            dist_to_ball_carrier*BlockedScore, data = final_merged_data_sub, family = 'binomial')
+mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + 
+              Rel_Velocity_ToBC + dist_to_ball_carrier + NumberOfBlockers + 
+              dist_to_ball_carrier*BlockedScore, 
+              data = final_merged_data_sub, family = 'binomial')
 summary(mod1)
-
 final_merged_data_sub$pred_within_dist_ofBC_1 <- predict(mod1, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_1 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_1)
+# Not bad overall, but interaction has very high p-value
+  
+# Try a model 2 without the interaction of BlockedScore*dist_to_ball_carrier
+mod2 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + 
+              Rel_Velocity_ToBC + dist_to_ball_carrier + NumberOfBlockers,
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod2)
+final_merged_data_sub$pred_within_dist_ofBC_2 <- predict(mod2, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_2 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_2)
+# This seems to be slightly better, BlockedScore gets lower (and significant) P-value 
+# Takeaway: that interaction likely won't be useful to us
+
+# Try a model 3 that adds projected future distance to ball-carrier
+mod3 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + 
+              Rel_Velocity_ToBC + dist_to_ball_carrier + NumberOfBlockers + 
+              proj_dist_to_ball_carrier, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod3)
+final_merged_data_sub$pred_within_dist_ofBC_3 <- predict(mod3, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_3 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_3)
+# proj_dist_to_ball_carrier has very low p-value, but it made CosSimilarity and BlockedScore p-value go up
+
+# Correlation matrix to detect collinearity between predictor variables
+# For obvious reasons, dist_to_ball_carrier and proj_dist_to_ball_carrier are very correlated
+final_merged_data_sub %>% 
+  select(within_dist_ofBC_frames_ahead, BlockedScore, CosSimilarity_Dir_ToBC, 
+           Rel_Velocity_ToBC, dist_to_ball_carrier, NumberOfBlockers,
+           proj_dist_to_ball_carrier) %>%
+  cor(use="complete.obs") %>%
+  round(2)
+# Takeaway: proj_dist_to_ball_carrier probably is worth considering, even with actual distance too
+
+# Try a model 4 that's very basic, excludes BlockedScore and CosSimilarity from model 3
+mod4 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + dist_to_ball_carrier +
+              NumberOfBlockers + proj_dist_to_ball_carrier, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod4)
+final_merged_data_sub$pred_within_dist_ofBC_4 <- predict(mod4, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_4 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_4)
+# All have extremely significant p-values
+# Takeaway: simple might be best
+# Especially b/c # of blockers and rel_velocity already account for some of CosSimilarity & BlockedScore
+
+# Try a model 5 that takes model 4, replaces dist_to_ball_carrier with the X and Y versions
+mod5 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + X_DistFromBall + Y_DistFromBall +
+              NumberOfBlockers + proj_dist_to_ball_carrier, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod5)
+final_merged_data_sub$pred_within_dist_ofBC_5 <- predict(mod5, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_5 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_5)
+# Takeaway: this is worse, don't use X/Y net distance from ball on their own
+
+# Try a model 6 that takes model 5, uses dist_to_ball_carrier along with the X and Y versions
+mod6 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + dist_to_ball_carrier + 
+              X_DistFromBall + Y_DistFromBall +
+              NumberOfBlockers + proj_dist_to_ball_carrier, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod6)
+final_merged_data_sub$pred_within_dist_ofBC_6 <- predict(mod6, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_6 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_6)
+# Takeaway: this is worth considering, now the X and Y have significant P-values
+
+# Try versions of models 5 and 6 with absolute distance from ball, rather than net distance
+mod7 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + X_AbsDistFromBall + Y_AbsDistFromBall +
+              NumberOfBlockers + proj_dist_to_ball_carrier, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod7)
+final_merged_data_sub$pred_within_dist_ofBC_7 <- predict(mod7, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_7 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_7)
+# Takeaway: this is very good, X_AbsDist and Y_AbsDist worth considering separately
+
+mod8 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + dist_to_ball_carrier + 
+              X_AbsDistFromBall + Y_AbsDistFromBall +
+              NumberOfBlockers + proj_dist_to_ball_carrier, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod8)
+final_merged_data_sub$pred_within_dist_ofBC_8 <- predict(mod8, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_8 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_8)
+# Takeaway: this is also worth considering, the X and Y absolute distances are significant
+# But since X coefficient is positive, and it shouldn't be, proceed with caution
+# Definitely would say models 6 or 7 are better than model 8 for that reason
+
+# Try a model 9 that takes out Rel_Velocity from model 4, adds Rel_Speed and CosSimilarity
+mod9 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+              NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod9)
+final_merged_data_sub$pred_within_dist_ofBC_9 <- predict(mod9, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_9 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_9)
+# All have extremely significant p-values, very strong
+# Takeaway: perhaps relative speed and CosSimilarity, separately, are at least as good as Rel_Velocity
+# Certainly at least one of CosSimilarity and Rel_Velo, if not both, will be included
+
+# Now try a model 10, which is model 4 plus CosSimilarity (equivalent to model 3 w/o BlockedScore)
+# Model 10 is model 9 with Rel_Velocity added
+mod10 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + dist_to_ball_carrier +
+              NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod10)
+final_merged_data_sub$pred_within_dist_ofBC_10 <- predict(mod10, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_10 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_10)
+# Takeaway: CosSimilarity has significant P-value, this is a strong option
+# At first glance, seems best to either have Rel_Velo, or the combo of CosSimilarity and Rel_Speed
+
+# Try model 11, which is model 3 plus BlockedScore (equivalent to model 4 w/o CosSimilarity)
+mod11 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + dist_to_ball_carrier +
+               NumberOfBlockers + proj_dist_to_ball_carrier + BlockedScore, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod11)
+final_merged_data_sub$pred_within_dist_ofBC_11 <- predict(mod11, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_11 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_11)
+# BlockedScore has very high p-value here, don't use
+# Takeaway: generally seems that BlockedScore doesn't have much value when proj distance is included
+
+# Try model 12, which is mdoel 10 plus X and Y net distances
+mod12 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + dist_to_ball_carrier +
+               X_DistFromBall + Y_DistFromBall +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod12)
+final_merged_data_sub$pred_within_dist_ofBC_12 <- predict(mod12, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_12 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_12)
+# Pretty good, but perhaps too many variables, though all are significant
+# Takeaway: Can probably get by without X & Y distance if we have tot dist, proj dist, and CosSimilarity
+
+# Try model 13 that's model 9 with min_dist_opp_player added
+mod13 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+              min_dist_opp_player + NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod13)
+final_merged_data_sub$pred_within_dist_ofBC_13 <- predict(mod13, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_13 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_13)
+# Takeaway: it does look like min_dist_opp_player has significant value
+# Among the best so far
+
+# Try model 14 that's model 9 with min_dist_opp_player replacing NumberOfBlockers
+mod14 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               min_dist_opp_player + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod14)
+final_merged_data_sub$pred_within_dist_ofBC_14 <- predict(mod14, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_14 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_14)
+# Takeaway: min_dist_opp_player has arguably even more significant value without NumberOfBlockers
+# This is also among the best so far
+
+# Try model 15 that's model 9 with TotDistFromBall_Rank_BySideOfBall added
+mod15 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+              TotDistFromBall_Rank_BySideOfBall +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+            data = final_merged_data_sub, family = 'binomial')
+summary(mod15)
+final_merged_data_sub$pred_within_dist_ofBC_15 <- predict(mod15, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_15 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_15)
+# Takeaway: the rank does appear to add very significant predictive value, this is strong
+
+# Try model 16 which is model 15, but with overall rank instead (rather than by side of ball)
+mod16 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod16)
+final_merged_data_sub$pred_within_dist_ofBC_16 <- predict(mod16, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_16 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_16)
+# Takeaway: extremely similar to model 15, probably worth using one of those ranks (OVR gives more info)
+
+# Try model 17 which is model 16, including CosSimilarity for orientation in addition to direction
+mod17 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + CosSimilarity_Orient_ToBC +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod17)
+final_merged_data_sub$pred_within_dist_ofBC_17 <- predict(mod17, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_17 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_17)
+# Takeaway: orientation is significant, but not as much as other predictors, probably could scrap
+
+# Try model 18 which is model 16, with CosSimilarity for orientation instead of the directional one
+mod18 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + CosSimilarity_Orient_ToBC +
+               NumberOfBlockers + proj_dist_to_ball_carrier, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod18)
+final_merged_data_sub$pred_within_dist_ofBC_18 <- predict(mod18, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_18 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_18)
+# Takeaway: now the orientation is very significant, so probably makes sense to include one of those
+# Would go with direction over orientation in that case
+
+# Try model 19 which is model 16 with defender acceleration added
+mod19 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + a +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod19)
+final_merged_data_sub$pred_within_dist_ofBC_19 <- predict(mod19, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_19 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_19)
+# Takeaway: acceleration is actually pretty significant on its own, this is a very strong model
+
+# Try model 20 which is model 19 with relative acceleration added
+mod20 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + a + Rel_Acc_ToBC +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod20)
+final_merged_data_sub$pred_within_dist_ofBC_20 <- predict(mod20, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_20 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_20)
+# Takeaway: Rel_Acc is not as valuable, don't use (at least in conjunction with defender acc)
+
+# Try model 21 which is model 19 with relative acceleration in place of defender acceleration
+mod21 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + Rel_Acc_ToBC +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod21)
+final_merged_data_sub$pred_within_dist_ofBC_21 <- predict(mod21, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_21 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_21)
+# Takeaway: Rel_Acc does have more significance when it's on its own, still probably can avoid
+
+# Try model 22 which is model 19 with defender speed added
+mod22 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + a + s +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod22)
+final_merged_data_sub$pred_within_dist_ofBC_22 <- predict(mod22, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_22 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_22)
+# Takeaway: speed has significance, this is a very strong model
+
+# Try model 23 which is model 22 without defender acceleration (equivalent to model 16 with defender speed)
+mod23 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + s +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod23)
+final_merged_data_sub$pred_within_dist_ofBC_23 <- predict(mod23, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_23 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_23)
+# Takeaway: speed still has significance, this is a very strong model
+
+# Try model 24 which is model 23 with field position added
+mod24 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + s + yardline_100 +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod24)
+final_merged_data_sub$pred_within_dist_ofBC_24 <- predict(mod24, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_24 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_24)
+# Takeaway: don't use, yardline_100 not significant
+
+# Try model 25 which is model 23 with goal_to_go added
+mod25 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + s + goal_to_go +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod25)
+final_merged_data_sub$pred_within_dist_ofBC_25 <- predict(mod25, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_25 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_25)
+# Takeaway: don't use, goal_to_go not significant
+
+# Try model 26 which is model 23 with distance from sideline added
+mod26 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + s + Ball_DistFromSideline +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod26)
+final_merged_data_sub$pred_within_dist_ofBC_26 <- predict(mod26, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_26 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_26)
+# Takeaway: distance from sideline has some significance, could use
+# Or could mutate a binary variable for "BallNearSideline"
+
+# Try model 27 which is model 23 with distance from goal line added
+mod27 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + s + Ball_DistFromGoalLine +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod27)
+final_merged_data_sub$pred_within_dist_ofBC_27 <- predict(mod27, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_27 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_27)
+# Takeaway: distance from goal line has some significance, could use
+# Or could mutate a binary variable for "BallNearSideline"
+
+# Try model 28 which is model 26 with the binary version of distance from sideline instead
+mod28 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + s + BallNearSideline +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod28)
+final_merged_data_sub$pred_within_dist_ofBC_28 <- predict(mod28, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_28 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_28)
+
+# Try model 29 which is model 27 with the binary version of distance from goal line instead
+mod29 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + s + BallNearGoalLine +
+               NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod29)
+final_merged_data_sub$pred_within_dist_ofBC_29 <- predict(mod29, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_error_29 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_29)
 
 mckenzie_catch <- final_merged_data %>%
   filter(gameId==2022090800 & playId==617) %>%
