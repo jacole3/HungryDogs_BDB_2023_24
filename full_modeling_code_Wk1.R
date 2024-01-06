@@ -427,6 +427,15 @@ MergedData <- MergedData %>%
                                    "offense",
                                    "defense"))
 
+# Get rid of some columns not needed for our specific models (can add back later if desired)
+MergedData <- MergedData %>% 
+  select(-c("season", "gameDate", "quarter", "yardlineSide", "preSnapHomeScore",
+            "preSnapVisitorScore", "preSnapHomeTeamWinProbability", "preSnapVisitorTeamWinProbability",
+            "homeTeamWinProbabilityAdded", "visitorTeamWinProbabilityAdded", "expectedPoints",
+            "quarter_seconds_remaining", "half_seconds_remaining", "game_seconds_remaining",
+            "no_huddle", "posteam_score", "defteam_score", "score_differential",
+            "cp", "cpoe", "qb_epa", "collegeName"))
+
 # Add distance ranks for each side of ball
 # E.G. who is closest to ball-carrier at any given point of the play
 MergedData <- MergedData %>%
