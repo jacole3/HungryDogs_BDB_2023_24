@@ -805,8 +805,8 @@ MergedData_blockers <- MergedData_blockers %>% arrange(gameId, playId, nflId, fr
 
 # View(MergedData_blockers[1:100,])
 
-dist <- 0.5
-frames <- 3
+dist <- 1
+frames <- 5
 MergedData_blockers <- MergedData_blockers %>%
   mutate(within_dist_ofBC = ifelse(dist_to_ball_carrier <= dist, 1, 0)) %>%
   group_by(gameId, playId, nflId) %>%
@@ -1252,6 +1252,7 @@ summary(mod28)
 final_merged_data_sub$pred_within_dist_ofBC_28 <- predict(mod28, final_merged_data_sub, type = 'response')
 final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_error_28 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_28)
+# Takeaway: ball near sideline has significance, probably can avoid though
 
 # Try model 29 which is model 27 with the binary version of distance from goal line instead
 mod29 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
@@ -1262,6 +1263,7 @@ summary(mod29)
 final_merged_data_sub$pred_within_dist_ofBC_29 <- predict(mod29, final_merged_data_sub, type = 'response')
 final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_error_29 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_29)
+# Takeaway: don't use, not as good as near sideline
 
 mckenzie_catch <- final_merged_data %>%
   filter(gameId==2022090800 & playId==617) %>%
