@@ -880,11 +880,10 @@ rm(Completions_Arrival)
 Completions_Merged <- Completions_Merged %>% select(-c("Unnecessary_Early", "FrameNumber_AtStart"))
 # rm(AllRushes_Merged)
 
-final_data <- rbind(DesignedRuns_Merged, Scrambles_Merged, Completions_Merged)
-rm(Completions_Merged, DesignedRuns_Merged, Scrambles_Merged)
+final_merged_data <- rbind(DesignedRuns_Merged, Scrambles_Merged, Completions_Merged)
 
-final_data_sub <- final_data %>%
-  mutate(BlockedScore=BlockedScore+1) %>%
+final_merged_data_sub <- final_merged_data %>%
+  mutate(BlockedScore = BlockedScore + 1) %>%
   filter(In_BallCarrier_Radius!=-1 & nflId!=ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier<=10) %>%
   select(gameId, playId, frameId, nflId, displayName,closest_player_name,second_closest_dist, second_closest_player_name,second_closest_player_nflID, x, y, dir, Player_Role,
          BlockedScore, CosSimilarity_Dir_ToBC, min_dist,
@@ -892,18 +891,18 @@ final_data_sub <- final_data %>%
          dist_to_ball_carrier, NumberOfBlockers,
          within_dist_ofBC_frames_ahead
          )
-mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + dist_to_ball_carrier +NumberOfBlockers + within_dist_ofBC_frames_ahead + dist_to_ball_carrier*BlockedScore, data = final_data_sub, family = 'binomial')
+mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + dist_to_ball_carrier +NumberOfBlockers + within_dist_ofBC_frames_ahead + dist_to_ball_carrier*BlockedScore, data = final_merged_data_sub, family = 'binomial')
 summary(mod1)
 
-final_data_sub$pred <- predict(mod1, final_data_sub, type = 'response')
+final_merged_data_sub$pred <- predict(mod1, final_merged_data_sub, type = 'response')
 
-mckenzie_catch <- final_data %>%
+mckenzie_catch <- final_merged_data %>%
   filter(gameId==2022090800 & playId==617) %>%
-  left_join(final_data_sub %>% select(pred, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
+  left_join(final_merged_data_sub %>% select(pred, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
 
-singletary_run <- final_data %>%
+singletary_run <- final_merged_data %>%
   filter(gameId==2022090800 & playId==101) %>%
-  left_join(final_data_sub %>% select(pred, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
+  left_join(final_merged_data_sub %>% select(pred, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
 
 
 plotly::ggplotly(
