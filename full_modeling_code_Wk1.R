@@ -1265,6 +1265,35 @@ final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_error_29 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_29)
 # Takeaway: don't use, not as good as near sideline
 
+# Use for loops to get SD, mean error, RMSE for our models
+# Number of columns
+n <- 29
+
+# Initialize empty vectors to store results
+mean_values <- numeric(n)
+sd_values <- numeric(n)
+rmse_values <- numeric(n)
+
+# Loop over columns
+for (i in 1:n) {
+  # Get column name dynamically
+  col_name <- paste("pred_error_", i, sep = "")
+  
+  # Calculate mean, standard deviation, and RMSE
+  mean_values[i] <- mean(final_merged_data_sub[[col_name]], na.rm = TRUE)
+  sd_values[i] <- sd(final_merged_data_sub[[col_name]], na.rm = TRUE)
+  rmse_values[i] <- sqrt(mean((final_merged_data_sub[[col_name]])^2, na.rm = TRUE))
+}
+
+# Create a data frame to store the results
+ErrorsDF <- data.frame(
+  pred_error_column = paste("pred_error_", 1:n, sep = ""),
+  Mean_Error = mean_values,
+  SD_Error = sd_values,
+  RMSE_Error = rmse_values
+)
+ErrorsDF
+
 mckenzie_catch <- final_merged_data %>%
   filter(gameId==2022090800 & playId==617) %>%
   left_join(final_merged_data_sub %>% select(pred_within_dist_ofBC_1, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
