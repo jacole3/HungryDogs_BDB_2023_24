@@ -389,4 +389,4 @@ NearbyBoxDefender_Stats_DesignedRuns <- StatsByPlay_DesignedRuns_NearDefender %>
             MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
             MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE)) %>%
   filter(Plays >= 5) %>% # insert your own number here
-  arrange(desc(SoloTkl_PerPlay))
+  arrange(desc(TotalTkl_PerPlay))
