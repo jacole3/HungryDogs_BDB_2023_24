@@ -790,23 +790,6 @@ MergedData_blockers <- MergedData_blockers %>% arrange(gameId, playId, nflId, fr
 
 # View(MergedData_blockers[1:100,])
 
-# Ideas for predictor variables of our models
-# Blocking scores
-# Distance to ball carrier
-# Projected future distance to ball carrier
-# Maybe X_DistFromBall and Y_DistFromBall separately as predictors? Being 3 yds to left is different than 3 yds behind
-# Likewise, maybe X_AbsDistFromBall, Y_AbsDistFromBall
-# number of blockers
-# Perhaps the ranks of distance to ball-carrier (e.g., Player X is second-closest defender to the ball-carrier)
-# CosSimilarity_Dir_ToBC (i.e. is defender doing in same direction as ball-carrier)
-# Cosine similarity for orientation could be useful as well (at least test it out)
-# acceleration, and acceleration relative to the ball carrier
-# speed of defender, and speed relative to ball carrier (relative velocity)
-# yardline_100 (initial field position)
-# Ball-carrier distance from sideline, or goal line ... prob don't need both field pos and distance from GL
-
-# For tackling specifically, weight and momentum come into play
-
 dist <- 0.5
 frames <- 3
 MergedData_blockers <- MergedData_blockers %>%
@@ -887,6 +870,23 @@ Completions_Merged <- Completions_Merged %>% select(-c("Unnecessary_Early", "Fra
 final_merged_data <- rbind(DesignedRuns_Merged, Scrambles_Merged, Completions_Merged)
 rm(MergedData_blockers)
 final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameId)
+
+# Ideas for predictor variables of our models
+# Blocking scores
+# Distance to ball carrier
+# Projected future distance to ball carrier
+# Maybe X_DistFromBall and Y_DistFromBall separately as predictors? Being 3 yds to left is different than 3 yds behind
+# Likewise, maybe X_AbsDistFromBall, Y_AbsDistFromBall
+# number of blockers
+# Perhaps the ranks of distance to ball-carrier (e.g., Player X is second-closest defender to the ball-carrier)
+# CosSimilarity_Dir_ToBC (i.e. is defender doing in same direction as ball-carrier)
+# Cosine similarity for orientation could be useful as well (at least test it out)
+# acceleration, and acceleration relative to the ball carrier
+# speed of defender, and speed relative to ball carrier (relative velocity)
+# yardline_100 (initial field position)
+# Ball-carrier distance from sideline, or goal line ... prob don't need both field pos and distance from GL
+
+# For tackling specifically, weight and momentum come into play
 
 final_merged_data_sub <- final_merged_data %>%
   mutate(BlockedScore = BlockedScore + 1) %>%
