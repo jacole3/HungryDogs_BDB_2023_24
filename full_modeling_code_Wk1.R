@@ -712,6 +712,9 @@ MergedData <- MergedData %>%
   ungroup()
 rm(BallCarrier_ProjDist)
 
+# Arrange in this order so that all 11 players on one team show up before other team
+MergedData <- MergedData %>% arrange(gameId, playId, frameId, club, nflId)
+
 ## Calculating distances to closest players on opposing teams
 MergedData <- MergedData %>%
   group_by(gameId, playId, frameId) %>%
@@ -783,6 +786,7 @@ MergedData_blockers <- MergedData %>%
   left_join(tracking_w1_blocked_info %>%
               select(1:3, 5, 48:50), by = c("gameId", "playId", "nflId", "frameId"))
 rm(MergedData, tracking_w1_blocked_info)
+MergedData_blockers <- MergedData_blockers %>% arrange(gameId, playId, nflId, frameId)
 
 # View(MergedData_blockers[1:100,])
 
