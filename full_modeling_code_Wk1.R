@@ -885,13 +885,17 @@ final_merged_data <- rbind(DesignedRuns_Merged, Scrambles_Merged, Completions_Me
 final_merged_data_sub <- final_merged_data %>%
   mutate(BlockedScore = BlockedScore + 1) %>%
   filter(In_BallCarrier_Radius!=-1 & nflId!=ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier<=10) %>%
-  select(gameId, playId, frameId, nflId, displayName,closest_player_name,second_closest_dist, second_closest_player_name,second_closest_player_nflID, x, y, dir, Player_Role,
+  select(gameId, playId, frameId, nflId, displayName, closest_player_name, 
+         second_closest_dist, second_closest_player_name, second_closest_player_nflID, 
+         x, y, dir, Player_Role,
          BlockedScore, CosSimilarity_Dir_ToBC, min_dist,
          Rel_Velocity_ToBC, Rel_Acc_ToBC,
          dist_to_ball_carrier, NumberOfBlockers,
          within_dist_ofBC_frames_ahead
          )
-mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + dist_to_ball_carrier +NumberOfBlockers + within_dist_ofBC_frames_ahead + dist_to_ball_carrier*BlockedScore, data = final_merged_data_sub, family = 'binomial')
+mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
+            dist_to_ball_carrier +NumberOfBlockers + within_dist_ofBC_frames_ahead + 
+            dist_to_ball_carrier*BlockedScore, data = final_merged_data_sub, family = 'binomial')
 summary(mod1)
 
 final_merged_data_sub$pred <- predict(mod1, final_merged_data_sub, type = 'response')
