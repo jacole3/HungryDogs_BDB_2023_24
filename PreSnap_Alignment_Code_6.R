@@ -14,7 +14,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-c("X_LOS_Approx", "X_dist
 # Add "x" pre-snap rank for each side of ball (e.g. who is closest to opposing end zone)
 DesignedRuns_AtSnap <- DesignedRuns_Merged %>%
   group_by(gameId, playId, PlayerSideOfBall) %>%
-  filter(event == "ball_snap") %>% 
+  filter(event %in% c("ball_snap", "snap_direct")) %>% 
   mutate(X_PreSnap_Rank = rank(-x, ties.method = "first")) %>%
   ungroup() %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, X_PreSnap_Rank, 
@@ -39,7 +39,7 @@ table(DesignedRuns_Merged$OL_Label)
 
 DesignedRuns_By_OL_Label <- DesignedRuns_Merged %>%
   group_by(gameId, playId, OL_Label) %>%
-  filter(event == "ball_snap") %>% 
+  filter(event %in% c("ball_snap", "snap_direct")) %>% 
   mutate(Y_PreSnap_Rank_By_OL_Label = rank(-y, ties.method = "first"),
          Y_PreSnap_Rank_ClosestOL_ToBall = rank(abs(Y_dist_FromBallFrame1), ties.method = "first"),
          DistFromBall_PreSnap_Rank_By_OL = rank(TotDistFromBall, ties.method = "first")) %>%
@@ -67,7 +67,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos_Box =
 # Will have to group_by() playId to do so
 DesignedRuns_Center_PreSnap <- DesignedRuns_Merged %>%
   group_by(gameId, playId, OL_Label) %>%
-  filter(event == "ball_snap") %>% 
+  filter(event %in% c("ball_snap", "snap_direct")) %>% 
   mutate(Y_PreSnap_Rank_By_OL_Label = rank(-y, ties.method = "first")) %>%
   ungroup() %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, 
@@ -146,7 +146,7 @@ rm(C_coordinates, LT_coordinates, LG_coordinates, RT_coordinates, RG_coordinates
 # E.G. LG would have is.na for AlignedPos_Box, and y barely higher than C's y, etc.
 DesignedRuns_LG_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
-         event == "ball_snap", y > yCenter, y <= 1.5 + yCenter, x >= xCenter - 1) %>%
+         event %in% c("ball_snap", "snap_direct"), y > yCenter, y <= 1.5 + yCenter, x >= xCenter - 1) %>%
   mutate(Is_LG = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_LG)
 
@@ -172,7 +172,7 @@ rm(LG_coordinates, DesignedRuns_LG_Identify_Snap)
 
 # Use group_by to see if any play has multiple players listed at same position
 LGNumbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "LG", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "LG", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(LGNumbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
@@ -185,7 +185,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 # Repeat the process for LT
 DesignedRuns_LT_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
-         event == "ball_snap", y > yLG, y <= 1.5 + yLG, x >= xCenter - 1) %>%
+         event %in% c("ball_snap", "snap_direct"), y > yLG, y <= 1.5 + yLG, x >= xCenter - 1) %>%
   mutate(Is_LT = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_LT)
 
@@ -211,7 +211,7 @@ rm(LT_coordinates, DesignedRuns_LT_Identify_Snap)
 
 # Use group_by to see if any play has multiple players listed at same position
 LTNumbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "LT", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "LT", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(LTNumbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
@@ -224,7 +224,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 # Repeat the process for RG
 DesignedRuns_RG_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
-         event == "ball_snap", y < yCenter, y >= yCenter - 1.5, x >= xCenter - 1) %>%
+         event %in% c("ball_snap", "snap_direct"), y < yCenter, y >= yCenter - 1.5, x >= xCenter - 1) %>%
   mutate(Is_RG = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_RG)
 
@@ -250,7 +250,7 @@ rm(RG_coordinates, DesignedRuns_RG_Identify_Snap)
 
 # Use group_by to see if any play has multiple players listed at same position
 RGNumbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "RG", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "RG", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(RGNumbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
@@ -263,7 +263,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 # Repeat the process for RT
 DesignedRuns_RT_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
-         event == "ball_snap", y < yRG, y >= yRG - 1.5, x >= xCenter - 1) %>%
+         event %in% c("ball_snap", "snap_direct"), y < yRG, y >= yRG - 1.5, x >= xCenter - 1) %>%
   mutate(Is_RT = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_RT)
 
@@ -289,7 +289,7 @@ rm(RT_coordinates, DesignedRuns_RT_Identify_Snap)
 
 # Use group_by to see if any play has multiple players listed at same position
 RTNumbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "RT", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "RT", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(RTNumbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
@@ -302,7 +302,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 # Now define TEs using Y and X coordinates
 DesignedRuns_TEL1_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos_Box),
-  event == "ball_snap", y > yLT, y <= 2 + yLT, x >= xLT - 1.25) %>%
+  event %in% c("ball_snap", "snap_direct"), y > yLT, y <= 2 + yLT, x >= xLT - 1.25) %>%
   mutate(Is_TEL1 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_TEL1)
 
@@ -350,14 +350,14 @@ rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Snap)
 
 # Run a final check to see if any play has multiple players listed at same position
 TEL1Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "TEL1", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "TEL1", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(TEL1Numbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
 # Now define TEL2
 DesignedRuns_TEL2_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos_Box),
-         event == "ball_snap", y > yTEL1, y <= 2 + yTEL1, x >= xLT - 1.25) %>%
+         event %in% c("ball_snap", "snap_direct"), y > yTEL1, y <= 2 + yTEL1, x >= xLT - 1.25) %>%
   mutate(Is_TEL2 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_TEL2)
 
@@ -403,14 +403,14 @@ rm(TEL2_coordinates, DesignedRuns_TEL2_Identify_Snap)
 
 # Run a final check to see if any play has multiple players listed at same position
 TEL2Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "TEL2", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "TEL2", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(TEL2Numbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
 # Now define TEL3
 DesignedRuns_TEL3_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos_Box),
-         event == "ball_snap", y > yTEL2, y <= 2 + yTEL2, x >= xLT - 1.25) %>%
+         event %in% c("ball_snap", "snap_direct"), y > yTEL2, y <= 2 + yTEL2, x >= xLT - 1.25) %>%
   mutate(Is_TEL3 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_TEL3)
 
@@ -456,14 +456,14 @@ rm(TEL3_coordinates, DesignedRuns_TEL3_Identify_Snap)
 
 # Run a final check to see if any play has multiple players listed at same position
 TEL3Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "TEL3", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "TEL3", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(TEL3Numbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
 # Now define TER1
 DesignedRuns_TER1_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos_Box),
-         event == "ball_snap", y < yRT, y >= yRT - 2, x >= xRT - 1.25) %>%
+         event %in% c("ball_snap", "snap_direct"), y < yRT, y >= yRT - 2, x >= xRT - 1.25) %>%
   mutate(Is_TER1 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_TER1)
 
@@ -509,14 +509,14 @@ rm(TER1_coordinates, DesignedRuns_TER1_Identify_Snap)
 
 # Run a final check to see if any play has multiple players listed at same position
 TER1Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "TER1", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "TER1", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(TER1Numbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
 # Now define TER2
 DesignedRuns_TER2_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos_Box),
-         event == "ball_snap", y < yTER1, y >= yTER1 - 2, x >= xRT - 1.25) %>%
+         event %in% c("ball_snap", "snap_direct"), y < yTER1, y >= yTER1 - 2, x >= xRT - 1.25) %>%
   mutate(Is_TER2 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_TER2)
 
@@ -562,14 +562,14 @@ rm(TER2_coordinates, DesignedRuns_TER2_Identify_Snap)
 
 # Run a final check to see if any play has multiple players listed at same position
 TER2Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "TER2", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "TER2", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(TER2Numbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
 # Now define TER3
 DesignedRuns_TER3_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", is.na(AlignedPos_Box),
-         event == "ball_snap", y < yTER2, y >= yTER2 - 2, x >= xRT - 1.25) %>%
+         event %in% c("ball_snap", "snap_direct"), y < yTER2, y >= yTER2 - 2, x >= xRT - 1.25) %>%
   mutate(Is_TER3 = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_TER3)
 
@@ -615,7 +615,7 @@ rm(TER3_coordinates, DesignedRuns_TER3_Identify_Snap)
 
 # Run a final check to see if any play has multiple players listed at same position
 TER3Numbers_ByPlay <- DesignedRuns_Merged %>% group_by(gameId, playId) %>% 
-  filter(AlignedPos_Box == "TER3", event == "ball_snap") %>% summarize(n = n()) %>% arrange(desc(n))
+  filter(AlignedPos_Box == "TER3", event %in% c("ball_snap", "snap_direct")) %>% summarize(n = n()) %>% arrange(desc(n))
 rm(TER3Numbers_ByPlay)
 table(DesignedRuns_Merged$AlignedPos_Box)
 
@@ -624,13 +624,13 @@ DesignedRuns_Merged <- unique(DesignedRuns_Merged)
 
 # Now classify how many total TEs there are on each play
 left_tes <- DesignedRuns_Merged %>% 
-  filter(event == "ball_snap",
+  filter(event %in% c("ball_snap", "snap_direct"),
          AlignedPos_Box %in% c("TEL1", "TEL2", "TEL3")) %>% 
   group_by(gameId, playId) %>% 
   summarize(num_left_tes = n())
 
 right_tes <- DesignedRuns_Merged %>% 
-  filter(event == "ball_snap",
+  filter(event %in% c("ball_snap", "snap_direct"),
          AlignedPos_Box %in% c("TER1", "TER2", "TER3")) %>% 
   group_by(gameId, playId) %>% 
   summarize(num_right_tes = n())
@@ -652,7 +652,7 @@ table(DesignedRuns_Merged$AlignedPos_Box)
 
 DesignedRuns_BoxEnd_Left <- DesignedRuns_Merged %>%
   group_by(gameId, playId) %>%
-  filter(event == "ball_snap" & !is.na(AlignedPos_Box)) %>% 
+  filter(event %in% c("ball_snap", "snap_direct") & !is.na(AlignedPos_Box)) %>% 
   mutate(FarLeft_Box = ifelse(PreSnap_y == max(PreSnap_y), TRUE, FALSE)) %>%
   ungroup() %>%
   select(gameId, playId, nflId, displayName, AlignedPos_Box, FarLeft_Box)
@@ -662,7 +662,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 
 DesignedRuns_BoxEnd_Right <- DesignedRuns_Merged %>%
   group_by(gameId, playId) %>%
-  filter(event == "ball_snap" & !is.na(AlignedPos_Box)) %>% 
+  filter(event %in% c("ball_snap", "snap_direct") & !is.na(AlignedPos_Box)) %>% 
   mutate(FarRight_Box = ifelse(PreSnap_y == min(PreSnap_y), TRUE, FALSE)) %>%
   ungroup() %>%
   select(gameId, playId, nflId, displayName, AlignedPos_Box, FarRight_Box)
@@ -672,7 +672,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 
 # create columns for where the edges of the box are (only y is relevant)
 FarLeft_Box_Location <- DesignedRuns_Merged %>%
-  filter(FarLeft_Box == TRUE, event == "ball_snap") %>%
+  filter(FarLeft_Box == TRUE, event %in% c("ball_snap", "snap_direct")) %>%
   select(gameId, playId, y) %>%
   rename(FarLeft_Box_Y_Snap = y)
 
@@ -680,7 +680,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(FarLeft_Box_Location, by = c("playId", "gameId"))
 
 FarRight_Box_Location <- DesignedRuns_Merged %>%
-  filter(FarRight_Box == TRUE, event == "ball_snap") %>%
+  filter(FarRight_Box == TRUE, event %in% c("ball_snap", "snap_direct")) %>%
   select(gameId, playId, y) %>%
   rename(FarRight_Box_Y_Snap = y)
 
@@ -694,7 +694,7 @@ rm(FarLeft_Box_Location, FarRight_Box_Location, DesignedRuns_BoxEnd_Left, Design
 # Example of why we stretch to 3.5 for EDGE: View(DesignedRuns_Merged %>% filter(playId == 101, displayName == "Justin Hollins"))
 DesignedRuns_Defenders_InBox <- DesignedRuns_Merged %>%
   group_by(gameId, playId, nflId) %>%
-  filter(event == "ball_snap", PlayerSideOfBall == "defense") %>% 
+  filter(event %in% c("ball_snap", "snap_direct"), PlayerSideOfBall == "defense") %>% 
   mutate(DefenderInBox = ifelse(x - Ball_X_Frame1 <= 1.5 & y <= FarLeft_Box_Y_Snap + 3.5 & y >= FarRight_Box_Y_Snap - 3.5, "Box_LOS",
                             ifelse(x - Ball_X_Frame1 <= 6 & y <= FarLeft_Box_Y_Snap + 2 & y >= FarRight_Box_Y_Snap - 2, "Box_OffBall", NA))) %>%
   ungroup() %>%
@@ -710,7 +710,7 @@ rm(DesignedRuns_Defenders_InBox)
 # Note that these gaps are based on offensive orientation (e.g. b/w C and LG is left A-gap)
 # And only the box defenders have gaps (e.g., weird to say FS 15 yards off-ball is in "B-gap")
 pre_snap_gaps <- DesignedRuns_Merged %>% 
-  filter(event == "ball_snap",
+  filter(event %in% c("ball_snap", "snap_direct"),
          PlayerSideOfBall == "defense", !is.na(DefenderInBox)) %>% 
   select(gameId, playId, nflId, displayName, position, AlignedPos_Box, DefenderInBox, 
          Ball_X_Frame1, X_dist_FromBallFrame1, Y_distFromMOF, x, y, yLT, yLG, 
@@ -808,7 +808,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(Box_IDLvsEDGE =
 
 # Do a group-by to create each player's "Primary_BoxPosition"
 # I.e. each player's general most-often played position, even if not on this specific play
-PrimPosition_Label <- DesignedRuns_Merged %>% filter(event == "ball_snap") %>%
+PrimPosition_Label <- DesignedRuns_Merged %>% filter(event %in% c("ball_snap", "snap_direct")) %>%
   group_by(nflId, displayName) %>%
   summarize(Plays = n(), 
             IDLSnaps = sum(Box_IDLvsEDGE == "IDL", na.rm = TRUE), IDLSnap_Rate = IDLSnaps / Plays,
