@@ -900,15 +900,31 @@ final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameI
 
 final_merged_data_sub <- final_merged_data %>%
   mutate(BlockedScore = BlockedScore + 1) %>%
-  filter(PlayerSideOfBall == "defense" & nflId!=ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier <= 10) %>%
-  select(gameId, playId, frameId, nflId, displayName, 
-         closest_opp_player_name, closest_opp_player_nflID, second_closest_dist_opp_player, 
-         second_closest_opp_player_name, second_closest_opp_player_nflID, x, y, dir, Player_Role,
-         BlockedScore, CosSimilarity_Dir_ToBC, min_dist_opp_player,
-         Rel_Velocity_ToBC, Rel_Acc_ToBC,
-         dist_to_ball_carrier, NumberOfBlockers,
-         within_dist_ofBC_frames_ahead
-  )
+  filter(PlayerSideOfBall == "defense" & nflId != ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier <= 10) %>%
+  select(gameId, playId, frameId, nflId, displayName, down, defendersInTheBox, yardline_100,
+         goal_to_go, ydstogo, run_location, run_gap, tackle, assist, forcedFumble, pff_missedTackle,
+         x, y, s, a, dis, o, dir, event, ball_x, ball_y, TotDistFromBall, X_DistFromBall, Y_DistFromBall,
+         X_AbsDistFromBall, Y_AbsDistFromBall, Ball_DistFromGoalLine, weight, Ball_DistFromSideline,
+         Temperature, TotDistFromBall_Rank_BySideOfBall, Y_AbsDistFromBall_Rank_BySide,
+         X_AbsDistFromBall_Rank_BySide, Y_NetDistFromBall_Rank_BySide, X_NetDistFromBall_Rank_BySide,
+         TotDistFromBall_Rank_OVR, Y_AbsDistFromBall_Rank_OVR,
+         X_AbsDistFromBall_Rank_OVR, Y_NetDistFromBall_Rank_OVR, X_NetDistFromBall_Rank_OVR,
+         IndivTackleAttempt, IndivTotTackles, Indiv_MadeTackle, IndivTackle_Penalized,
+         IndivTotTackle_Clean, IndivSoloTackle_FiveFramesAhead, IndivAssist_FiveFramesAhead,
+         IndivTotTackles_FiveFramesAhead, IndivSoloTackle_Within0.5Sec, IndivAssist_Within0.5Sec,
+         IndivTotTackles_Within0.5Sec, IndivSoloTackle_CurrentFrame, IndivAssist_CurrentFrame,
+         IndivTotTackles_CurrentFrame, Player_Role, X_ball_carrier, Y_ball_carrier,
+         dist_to_ball_carrier, ball_carrier_speed, ball_carrier_acc, ball_carrier_orient,
+         ball_carrier_direction, ball_carrier_weight, BC_Season_MaxSpeed, ball_carrier_momentum,
+         Rel_Speed_ToBC, Rel_Acc_ToBC, Rel_Weight_ToBC, Rel_SeasonMaxSpeed_ToBC, Rel_Momentum_ToBC,
+         Rel_Velocity_ToBC, X_proj, Y_proj, ball_carrier_X_proj, ball_carrier_Y_proj,
+         proj_dist_to_ball_carrier, min_dist_opp_player, second_closest_dist_opp_player,
+         closest_opp_player_name, closest_opp_player_nflID, 
+         second_closest_opp_player_name, second_closest_opp_player_nflID,
+         BlockedScore, CosSimilarity_Dir_ToBC, CosSimilarity_Orient_ToBC,
+         In_BallCarrier_Radius, NumberOfBlockers, within_dist_ofBC,
+         within_dist_ofBC_frames_ahead)
+
 mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
             dist_to_ball_carrier + NumberOfBlockers + within_dist_ofBC_frames_ahead + 
             dist_to_ball_carrier*BlockedScore, data = final_merged_data_sub, family = 'binomial')
@@ -956,6 +972,8 @@ plotly::ggplotly(
     facet_wrap(~frameId) +
     theme(plot.title = element_text(size = 10, hjust = 0.5))
 )
+
+###############################
 
 # When building a model for designed runs specifically, "PreSnap_Alignment_Code" file must be used
 # This is because we don't have "start of snap" data for the dropbacks
