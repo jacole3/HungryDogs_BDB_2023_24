@@ -768,8 +768,6 @@ MergedData <- MergedData %>%
   ) %>%
   ungroup()
 
-# When building a model for designed runs specifically, "PreSnap_Alignment_Code" file can be useful
-
 # Incorporate the "blocking code" which was created in Python
 tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
 # View(tracking_w1_blocked_info[1:10,])
@@ -813,41 +811,13 @@ MergedData_blockers <- MergedData_blockers %>%
   mutate(within_dist_ofBC_frames_ahead = lead(within_dist_ofBC, frames)) %>%
   ungroup()
 
-# Get rid of frames where ball-carrier doesn't have ball yet
-# For designed runs, we had to wait until after we defined all the gap alignments
-# Recall that we already did this for dropbacks in "data cleansing code" file
-Frames_AtHandoff <- MergedData_blockers %>%
-  filter(event %in% c("run", "handoff", "lateral")) %>%
-  select(gameId, playId, nflId, displayName, frameId) %>%
-  rename(FrameNumber_AtHandoff = frameId)
-
-# Account for plays that could have multiple of these events
-Frames_AtHandoff <- Frames_AtHandoff %>%
-  group_by(gameId, playId, nflId, displayName) %>%
-  mutate(Frame_Rank = rank(FrameNumber_AtHandoff, ties.method = "first")) %>%
-  ungroup() 
-Frames_AtHandoff <- Frames_AtHandoff %>% filter(Frame_Rank == 1)
-Frames_AtHandoff <- Frames_AtHandoff %>% select(-"Frame_Rank")
-
-DesignedRuns_Merged <- merge(x = MergedData_blockers, y = Frames_AtHandoff, 
-                             by = c("playId", "gameId", "nflId", "displayName"))
-DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
-
-DesignedRuns_Merged <- DesignedRuns_Merged %>% group_by(gameId, playId, nflId) %>% 
-  mutate(Unnecessary_Early = ifelse(frameId < FrameNumber_AtHandoff, TRUE, FALSE)) %>% 
-  ungroup()
-
-DesignedRuns_Merged <- DesignedRuns_Merged %>% filter(Unnecessary_Early == FALSE)
-rm(Frames_AtHandoff)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"Unnecessary_Early")
-MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
-
 DesignedRuns_Merged <- MergedData_blockers %>% filter(pass == 0)
 Scrambles_Merged <- MergedData_blockers %>% filter(passResult == "R")
 # AllRushes_Merged <- MergedData_blockers %>% filter(pass == 0 | passResult == "R"); likely not necessary
 Completions_Merged <- MergedData_blockers %>% filter(passResult == "C")
 
 # Getting rid of pre-snap frames for designed runs
+# We must wait until after running the "pre-snap alignment code" to get rid of frames before handoff
 Frames_AtSnap <- DesignedRuns_Merged %>%
   filter(event %in% c("ball_snap")) %>%
   select(gameId, playId, nflId, displayName, frameId) %>%
@@ -967,3 +937,34 @@ plotly::ggplotly(
   facet_wrap(~frameId) +
   theme(plot.title = element_text(size = 10, hjust = 0.5))
 )
+
+# When building a model for designed runs specifically, "PreSnap_Alignment_Code" file must be used
+
+# Get rid of frames where ball-carrier doesn't have ball yet
+# For designed runs, we had to wait until after we defined all the gap alignments
+# Recall that we already did this for dropbacks in "data cleansing code" file
+Frames_AtHandoff <- MergedData_blockers %>%
+  filter(event %in% c("run", "handoff", "lateral")) %>%
+  select(gameId, playId, nflId, displayName, frameId) %>%
+  rename(FrameNumber_AtHandoff = frameId)
+
+# Account for plays that could have multiple of these events
+Frames_AtHandoff <- Frames_AtHandoff %>%
+  group_by(gameId, playId, nflId, displayName) %>%
+  mutate(Frame_Rank = rank(FrameNumber_AtHandoff, ties.method = "first")) %>%
+  ungroup() 
+Frames_AtHandoff <- Frames_AtHandoff %>% filter(Frame_Rank == 1)
+Frames_AtHandoff <- Frames_AtHandoff %>% select(-"Frame_Rank")
+
+DesignedRuns_Merged <- merge(x = MergedData_blockers, y = Frames_AtHandoff, 
+                             by = c("playId", "gameId", "nflId", "displayName"))
+DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% group_by(gameId, playId, nflId) %>% 
+  mutate(Unnecessary_Early = ifelse(frameId < FrameNumber_AtHandoff, TRUE, FALSE)) %>% 
+  ungroup()
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% filter(Unnecessary_Early == FALSE)
+rm(Frames_AtHandoff)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"Unnecessary_Early")
+MergedData_blockers <- MergedData_blockers %>% arrange(gameId, playId, nflId, frameId)
