@@ -361,6 +361,7 @@ MergedData <- MergedData %>%
 MergedData <- MergedData %>% 
   mutate(Temperature = (str_extract(MergedData$weather, "\\b\\d+")))
 class(MergedData$Temperature) <- "numeric"
+MergedData <- MergedData %>% select(-"weather")
 
 # Similarly, change height into inches, rather than feet-inches
 convert_to_inches <- function(height) {
