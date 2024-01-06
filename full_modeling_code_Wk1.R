@@ -773,7 +773,7 @@ tracking_w1_blocked_info <- fread("TrackingWeek1_BlockedInfo.csv")
 # View(tracking_w1_blocked_info[1:10,])
 
 tracking_w1_blocked_info <- tracking_w1_blocked_info %>%
-  rename(min_dist_opp_player = min_dist, num_opp_players_same_dist  = num_same_dist,
+  rename(min_dist_opp_player = min_dist, num_opp_players_same_dist = num_same_dist,
          min_dist_opp_index = min_dist_pos, second_closest_dist_opp_player = second_closest_dist,
          second_closest_opp_index = second_closest_pos, closest_opp_player_name = closest_player_name,
          closest_opp_player_nflID = closest_player_nflID, second_closest_opp_player_name = second_closest_player_name,
@@ -885,15 +885,15 @@ rm(MergedData_blockers)
 
 final_merged_data_sub <- final_merged_data %>%
   mutate(BlockedScore = BlockedScore + 1) %>%
-  filter(In_BallCarrier_Radius!=-1 & nflId!=ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier <= 10) %>%
-  select(gameId, playId, frameId, nflId, displayName, closest_opp_player_name, 
-         second_closest_dist_opp_player, second_closest_opp_player_name, second_closest_opp_player_nflID, 
-         x, y, dir, Player_Role,
+  filter(In_BallCarrier_Radius != -1 & nflId!=ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier <= 10) %>%
+  select(gameId, playId, frameId, nflId, displayName, 
+         closest_opp_player_name, closest_opp_player_nflID, second_closest_dist_opp_player, 
+         second_closest_opp_player_name, second_closest_opp_player_nflID, x, y, dir, Player_Role,
          BlockedScore, CosSimilarity_Dir_ToBC, min_dist_opp_player,
          Rel_Velocity_ToBC, Rel_Acc_ToBC,
          dist_to_ball_carrier, NumberOfBlockers,
          within_dist_ofBC_frames_ahead
-         )
+  )
 mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
             dist_to_ball_carrier + NumberOfBlockers + within_dist_ofBC_frames_ahead + 
             dist_to_ball_carrier*BlockedScore, data = final_merged_data_sub, family = 'binomial')
