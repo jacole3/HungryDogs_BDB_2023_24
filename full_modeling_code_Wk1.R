@@ -910,6 +910,7 @@ final_merged_data_sub <- final_merged_data %>%
          goal_to_go, ydstogo, run_location, run_gap, tackle, assist, forcedFumble, pff_missedTackle,
          x, y, s, a, dis, o, dir, event, ball_x, ball_y, TotDistFromBall, X_DistFromBall, Y_DistFromBall,
          X_AbsDistFromBall, Y_AbsDistFromBall, Ball_DistFromGoalLine, weight, Ball_DistFromSideline,
+         BallNearSideline, BallNearGoalLine,
          Temperature, TotDistFromBall_Rank_BySideOfBall, Y_AbsDistFromBall_Rank_BySide,
          X_AbsDistFromBall_Rank_BySide, Y_NetDistFromBall_Rank_BySide, X_NetDistFromBall_Rank_BySide,
          TotDistFromBall_Rank_OVR, Y_AbsDistFromBall_Rank_OVR,
