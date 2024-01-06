@@ -384,7 +384,7 @@ MergedData <- MergedData %>% select(-"height")
 # MergedData <- MergedData %>% 
 #   mutate(Age_Days = NumericGameDate - NumericBirthDate)
 # MergedData <- MergedData %>% mutate(Age_Years = Age_Days / 365.25)
-# MergedData <- MergedData %>% select(-c("birthDate", "time", "Age_Days"))
+MergedData <- MergedData %>% select(-c("birthDate", "time")) # "Age_Days"
 # class(MergedData$Age_Years) <- "numeric"
 
 # Also code for each player's maximum speed
