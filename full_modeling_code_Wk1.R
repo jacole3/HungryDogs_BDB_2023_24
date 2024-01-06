@@ -877,7 +877,7 @@ final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameI
 # Projected future distance to ball carrier
 # Maybe X_DistFromBall and Y_DistFromBall separately as predictors? Being 3 yds to left is different than 3 yds behind
 # Likewise, maybe X_AbsDistFromBall, Y_AbsDistFromBall
-# number of blockers
+# number of blockers, and min distance to opposing player(s)
 # Perhaps the ranks of distance to ball-carrier (e.g., Player X is second-closest defender to the ball-carrier)
 # CosSimilarity_Dir_ToBC (i.e. is defender going in same direction as ball-carrier)
 # Cosine similarity for orientation could be useful as well (at least test it out)
