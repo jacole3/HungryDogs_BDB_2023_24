@@ -573,7 +573,7 @@ MergedData <- MergedData %>% group_by(gameId, playId, nflId) %>%
 
 MergedData <- MergedData %>% filter(Unnecessary_Late == FALSE)
 rm(Frames_EndOfPlay)
-MergedData <- MergedData %>% select(-"Unnecessary_Late")
+MergedData <- MergedData %>% select(-c("Unnecessary_Late", "FrameNumber_EndOfPlay"))
 
 # Use lead() to label when defense made a tackle five frames ahead
 MergedData <- MergedData %>% mutate(TeamTackle_FiveFramesAhead =
