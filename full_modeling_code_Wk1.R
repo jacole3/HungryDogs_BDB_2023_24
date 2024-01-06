@@ -807,10 +807,17 @@ MergedData_blockers <- MergedData_blockers %>% arrange(gameId, playId, nflId, fr
 
 dist <- 1
 frames <- 5
+dist <- 1
+frames <- 5
 MergedData_blockers <- MergedData_blockers %>%
   mutate(within_dist_ofBC = ifelse(dist_to_ball_carrier <= dist, 1, 0)) %>%
   group_by(gameId, playId, nflId) %>%
-  mutate(within_dist_ofBC_frames_ahead = lead(within_dist_ofBC, frames)) %>%
+  mutate(within_dist_ofBC_frames_ahead = ifelse(
+    (lead(within_dist_ofBC, frames) +
+       lead(within_dist_ofBC, 4) +
+       lead(within_dist_ofBC, 3) +
+       lead(within_dist_ofBC, 2) +
+       lead(within_dist_ofBC, 1)) >= 1, 1, 0)) %>%
   ungroup()
 
 DesignedRuns_Merged <- MergedData_blockers %>% filter(pass == 0)
@@ -904,7 +911,6 @@ final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameI
 # For tackling specifically, weight and momentum come into play
 
 final_merged_data_sub <- final_merged_data %>%
-  mutate(BlockedScore = BlockedScore + 1) %>%
   filter(PlayerSideOfBall == "defense" & nflId != ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier <= 10) %>%
   select(gameId, playId, frameId, nflId, displayName, down, defendersInTheBox, yardline_100,
          goal_to_go, ydstogo, run_location, run_gap, tackle, assist, forcedFumble, pff_missedTackle,
