@@ -900,7 +900,7 @@ final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameI
 
 final_merged_data_sub <- final_merged_data %>%
   mutate(BlockedScore = BlockedScore + 1) %>%
-  filter(In_BallCarrier_Radius != -1 & nflId!=ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier <= 10) %>%
+  filter(PlayerSideOfBall == "defense" & nflId!=ballCarrierId & !is.infinite(BlockedScore) & dist_to_ball_carrier <= 10) %>%
   select(gameId, playId, frameId, nflId, displayName, 
          closest_opp_player_name, closest_opp_player_nflID, second_closest_dist_opp_player, 
          second_closest_opp_player_name, second_closest_opp_player_nflID, x, y, dir, Player_Role,
