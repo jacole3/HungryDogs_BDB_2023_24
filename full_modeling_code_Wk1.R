@@ -206,6 +206,11 @@ tracking_combined <- tracking_combined %>%
   mutate(Ball_DistFromGoalLine = 110 - ball_x,
          Ball_DistFromSideline = ifelse(ball_y >= 26.65, 53.3 - ball_y, ball_y))
 
+# And mutate a binary variable for being near goal line or sideline
+tracking_combined <- tracking_combined %>% 
+  mutate(BallNearGoalLine = ifelse(Ball_DistFromGoalLine <= 3, 1, 0),
+         BallNearSideline = ifelse(Ball_DistFromSideline <= 3, 1, 0))
+
 nflverse_pbp <- nflfastR::load_pbp(2022)
 nflverse_pbp <- nflverse_pbp %>% filter(week == 1)
 # This gives descriptions of NFLVerse columns: View(field_descriptions)
