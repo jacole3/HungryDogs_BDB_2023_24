@@ -930,15 +930,15 @@ mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToB
             dist_to_ball_carrier*BlockedScore, data = final_merged_data_sub, family = 'binomial')
 summary(mod1)
 
-final_merged_data_sub$pred <- predict(mod1, final_merged_data_sub, type = 'response')
+final_merged_data_sub$pred_within_dist_ofBC_1 <- predict(mod1, final_merged_data_sub, type = 'response')
 
 mckenzie_catch <- final_merged_data %>%
   filter(gameId==2022090800 & playId==617) %>%
-  left_join(final_merged_data_sub %>% select(pred, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
+  left_join(final_merged_data_sub %>% select(pred_within_dist_ofBC_1, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
 
 singletary_run <- final_merged_data %>%
   filter(gameId==2022090800 & playId==101) %>%
-  left_join(final_merged_data_sub %>% select(pred, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
+  left_join(final_merged_data_sub %>% select(pred_within_dist_ofBC_1, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
 
 
 plotly::ggplotly(
@@ -953,7 +953,7 @@ plotly::ggplotly(
                              'Second Closest Opposing Player: ',  second_closest_opp_player_name, '\n',
                              'Second Closest Opposing Player Dist: ', round(second_closest_dist_opp_player, 3), '\n',
                              'Blocked Score: ', round(BlockedScore, 3), '\n',
-                             'prediction: ', round(pred, 3)
+                             'prediction: ', round(pred_within_dist_ofBC_1, 3)
                )
     )) +
     stat_voronoi(geom = "path") +
