@@ -945,7 +945,7 @@ summary(mod1)
 final_merged_data_sub$pred_within_dist_ofBC_1 <- predict(mod1, final_merged_data_sub, type = 'response')
 final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_error_1 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_1)
-# Not bad overall, but interaction has very high p-value
+# Not bad overall, but interaction has somewhat high p-value
   
 # Try a model 2 without the interaction of BlockedScore*dist_to_ball_carrier
 mod2 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + 
@@ -955,8 +955,8 @@ summary(mod2)
 final_merged_data_sub$pred_within_dist_ofBC_2 <- predict(mod2, final_merged_data_sub, type = 'response')
 final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_error_2 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_2)
-# This seems to be slightly better, BlockedScore gets lower (and significant) P-value 
-# Takeaway: that interaction likely won't be useful to us
+# This is pretty comparable, BlockedScore still does have somewhat significant P-value 
+# Takeaway: that interaction likely won't make a huge difference to us
 
 # Try a model 3 that adds projected future distance to ball-carrier
 mod3 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + 
