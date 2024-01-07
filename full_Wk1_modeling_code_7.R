@@ -199,7 +199,7 @@ tracking_combined <- tracking_combined %>%
 
 tracking_combined <- tracking_combined %>% 
   mutate(TotDistFromBall = sqrt((x - ball_x) ^ 2 + (y - ball_y) ^ 2),
-         Y_DistFromBall = (y - ball_y), X_DistFromBall = (x = ball_x),
+         Y_DistFromBall = (y - ball_y), X_DistFromBall = (x - ball_x),
          Y_AbsDistFromBall = abs(y - ball_y), X_AbsDistFromBall = abs(x - ball_x))
 rm(ball_df, Frame1_Ball_Location)
 
