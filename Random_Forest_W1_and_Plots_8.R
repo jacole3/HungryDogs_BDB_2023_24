@@ -81,7 +81,7 @@ mod1 <- glm(within_dist_ofBC_frames_ahead ~ CosSimilarity_Dir_ToBC + Rel_Velocit
 
 mod2 <- ranger(within_dist_ofBC_frames_ahead ~ CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
               dist_to_ball_carrier + proj_distance + NumberOfBlockers + BlockedScore,
-            data = defenders_data, ntree=100)
+            data = defenders_data, num.trees = 250)
 
 #rpart.plot(mod2)
 
