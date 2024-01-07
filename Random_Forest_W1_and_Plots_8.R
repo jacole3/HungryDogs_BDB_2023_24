@@ -61,12 +61,17 @@ modeling_data <- modeling_data %>%
                                        y_baseline = ball_carrier_Y_proj)) %>%
   arrange(gameId, playId, frameId, nflId) %>%
   group_by(gameId, playId, nflId) %>%
-  mutate(within_dist_ofBC_frames_ahead = ifelse(
-    sum((lead(within_dist_ofBC, frames) +
-           lead(within_dist_ofBC, 4) +
-           lead(within_dist_ofBC, 3)+
-           lead(within_dist_ofBC, 2)+
-           lead(within_dist_ofBC, 1)), na.rm = T) >=1, 1, 0)) %>%
+  mutate(within_dist_ofBC_frames_ahead = ifelse(club == possessionTeam, NA,
+    ifelse((lead(within_dist_ofBC) == 1 & playId == lead(playId) & nflId == lead(nflId)) |
+         (lead(within_dist_ofBC, 2) == 1 & playId == lead(playId, 2) & nflId == lead(nflId, 2)) |
+         (lead(within_dist_ofBC, 3) == 1 & playId == lead(playId, 3) & nflId == lead(nflId, 3)) | 
+         (lead(within_dist_ofBC, 4) == 1 & playId == lead(playId, 4) & nflId == lead(nflId, 4)) | 
+         (lead(within_dist_ofBC, frames) == 1 & playId == lead(playId, frames) & nflId == lead(nflId, frames)), 1,
+       ifelse((playId == lead(playId) & nflId == lead(nflId)) &
+                (playId == lead(playId, 2) & nflId == lead(nflId, 2)) &
+                (playId == lead(playId, 3) & nflId == lead(nflId, 3)) &
+                (playId == lead(playId, 4) & nflId == lead(nflId, 4)) &
+                (playId == lead(playId, frames) & nflId == lead(nflId, frames)), 0, NA)))) %>%
   ungroup()
 
 
