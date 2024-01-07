@@ -1323,7 +1323,7 @@ plotly::ggplotly(
                              'Second Closest Opposing Player: ',  second_closest_opp_player_name, '\n',
                              'Second Closest Opposing Player Dist: ', round(second_closest_dist_opp_player, 3), '\n',
                              'Blocked Score: ', round(BlockedScore, 3), '\n',
-                             'prediction: ', round(pred_within_dist_ofBC_1, 3)
+                             'Near Ball-Carrier Prediction: ', round(pred_within_dist_ofBC_1, 3)
                )
     )) +
     stat_voronoi(geom = "path") +
