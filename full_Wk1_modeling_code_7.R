@@ -1074,6 +1074,7 @@ final_merged_data_sub <- final_merged_data %>%
          Rel_Speed_ToBC, Rel_Acc_ToBC, Rel_Weight_ToBC, Rel_SeasonMaxSpeed_ToBC, Rel_Momentum_ToBC,
          Rel_Velocity_ToBC, X_proj_5, Y_proj_5, ball_carrier_X_proj_5, ball_carrier_Y_proj_5,
          min_proj_dist_to_ball_carrier, min_dist_opp_player, second_closest_dist_opp_player,
+         dir_of_closest_opp_player, dir_of_second_closest_opp_player,
          closest_opp_player_name, closest_opp_player_nflID, 
          second_closest_opp_player_name, second_closest_opp_player_nflID,
          BlockedScore, CosSimilarity_Dir_ToBC, CosSimilarity_Orient_ToBC,
