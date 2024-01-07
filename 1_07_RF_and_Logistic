@@ -247,10 +247,9 @@ plot(1-ranger.test.roc$specificities, ranger.test.roc$sensitivities, col="red", 
 defenders_data$pred <- predict(ranger_model,data =  defenders_data)$predictions
 
 ## Sample Logistic Regression
-logistic_mod <- glm(within_dist_ofBC_frames_ahead2 ~ Rel_Velocity_ToBC + dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
-                             NumberOfBlockers, 
-                             data = train_data, family = 'binomial')
-
+logistic_mod <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + NumberOfBlockers, 
+             data = final_merged_data_sub, family = 'binomial')
 summary(logistic_mod)
 
 logistic_train_preds <- predict(logistic_mod, data = train_data, type ='response')
