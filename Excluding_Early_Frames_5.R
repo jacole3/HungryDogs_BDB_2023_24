@@ -86,3 +86,4 @@ FirstFrames_WithBC <- FirstFrames_WithBC %>%
 MergedData <- merge(x = MergedData, y = FirstFrames_WithBC, 
                            by = c("playId", "gameId", "nflId", "displayName"))
 MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
+rm(FirstFrames_WithBC)
