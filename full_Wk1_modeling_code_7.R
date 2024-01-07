@@ -929,6 +929,10 @@ final_merged_data <- final_merged_data %>%
   ungroup() 
 final_merged_data <- final_merged_data %>% select(-"IndivDefender_InitialSurge")
 
+# Add code for the time length between the initial surge (if there is one) and end of play
+final_merged_data <- final_merged_data %>% mutate(Surge_To_EndOfPlay_Frames =
+      ifelse(is.na(FirstDefSurge_Frame), NA, FrameNumber_EndOfPlay - FirstDefSurge_Frame))
+
 # Also account for first frame of each play not necessarily being 1 anymore
 # I.e., now we start plays when the ball-carrier has the ball
 FirstFrames_WithBC <- final_merged_data %>%
