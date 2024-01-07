@@ -895,6 +895,38 @@ final_merged_data <- rbind(DesignedRuns_Merged, Scrambles_Merged, Completions_Me
 rm(MergedData_blockers)
 final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameId)
 
+# In final_merged_data, create code for "the first surge", i.e. first defender to get within a yard of BC
+# First, must identify the frame when the defense as a whole first got a "surge"
+final_merged_data <- final_merged_data %>% filter(defensiveTeam == club) %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(TeamDefSurge_InFrame = sum(within_dist_ofBC, na.rm = TRUE)) %>%
+  ungroup() 
+TeamDef_InitialSurges <- final_merged_data %>% filter(TeamDefSurge_InFrame > 0) %>%
+  group_by(gameId, playId, defensiveTeam) %>%
+  mutate(TeamDefSurge_QuickestFrame_Rank = rank(frameId, ties.method = "first")) %>%
+  ungroup()
+TeamDef_InitialSurges <- TeamDef_InitialSurges %>% filter(TeamDefSurge_QuickestFrame_Rank == 1)
+TeamDef_InitialSurges <- TeamDef_InitialSurges %>% 
+  select(c("gameId", "playId", "frameId"))
+TeamDef_InitialSurges <- TeamDef_InitialSurges %>%
+  rename(FirstDefSurge_Frame = frameId)
+
+final_merged_data <- merge(x = final_merged_data, y = TeamDef_InitialSurges, 
+                    by = c("gameId", "playId"))
+final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameId)
+
+# Now, add a column for when an individual player had a "surge" in said frame
+final_merged_data <- final_merged_data %>% mutate(IndivDefender_InitialSurge =
+     ifelse(is.na(FirstDefSurge_Frame) | is.na(within_dist_ofBC), NA, 
+            ifelse(frameId == FirstDefSurge_Frame & within_dist_ofBC > 0, 1, 0)))
+
+# And now make it so that defender gets credit for initial surge on each frame of that play
+final_merged_data <- final_merged_data %>%
+  group_by(gameId, playId, nflId, displayName) %>%
+  mutate(IndivDefender_InitialSurge_OnPlay = sum(IndivDefender_InitialSurge)) %>%
+  ungroup() 
+final_merged_data <- final_merged_data %>% select(-"IndivDefender_InitialSurge")
+
 # Ideas for predictor variables of our models
 # Blocking scores
 # Distance to ball carrier
