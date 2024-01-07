@@ -300,6 +300,22 @@ tracking_sub <- tracking_sub %>%
   ) %>%
   ungroup()
 
+## grabbing directions of first and second closest players on opposing teams:
+tracking_sub <- tracking_sub %>%
+  arrange(gameId, playId, frameId, club, nflId) %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(
+    dir_of_closest_opp_player = case_when(
+      row_number()<=11 ~ dir[11+min_dist_opp_index],
+      row_number()>=12 ~ dir[min_dist_opp_index]
+    ),
+    dir_of_second_closest_opp_player = case_when(
+      row_number()<=11 ~ dir[11+second_closest_opp_index],
+      row_number()>=12 ~ dir[second_closest_opp_index]
+    )
+  ) %>%
+  ungroup()
+
 ## View a sample play:
 View(tracking_sub %>%
        filter(gameId==2022090800 & playId==617))
@@ -582,6 +598,22 @@ MergedData <- MergedData %>%
     second_closest_opp_player_nflID = case_when(
       row_number()<=11 ~ nflId[11+second_closest_opp_index],
       row_number()>=12 ~ nflId[second_closest_opp_index]
+    )
+  ) %>%
+  ungroup()
+
+## grabbing directions of first and second closest players on opposing teams:
+MergedData <- MergedData %>%
+  arrange(gameId, playId, frameId, club, nflId) %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(
+    dir_of_closest_opp_player = case_when(
+      row_number()<=11 ~ dir[11+min_dist_opp_index],
+      row_number()>=12 ~ dir[min_dist_opp_index]
+    ),
+    dir_of_second_closest_opp_player = case_when(
+      row_number()<=11 ~ dir[11+second_closest_opp_index],
+      row_number()>=12 ~ dir[second_closest_opp_index]
     )
   ) %>%
   ungroup()
