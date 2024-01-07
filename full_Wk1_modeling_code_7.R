@@ -928,6 +928,22 @@ final_merged_data <- final_merged_data %>%
   ungroup() 
 final_merged_data <- final_merged_data %>% select(-"IndivDefender_InitialSurge")
 
+# Also account for first frame of each play not necessarily being 1 anymore
+# I.e., now we start plays when the ball-carrier has the ball
+FirstFrames_WithBC <- final_merged_data %>%
+  group_by(gameId, playId, nflId, displayName) %>%
+  mutate(Frame_Rank = rank(frameId, ties.method = "first")) %>%
+  ungroup() 
+FirstFrames_WithBC <- FirstFrames_WithBC %>% filter(Frame_Rank == 1)
+FirstFrames_WithBC <- FirstFrames_WithBC %>% 
+  select(c("gameId", "playId", "nflId", "displayName", "frameId")) %>%
+  rename(FirstFrame_WithBC = frameId)
+
+final_merged_data <- merge(x = final_merged_data, y = FirstFrames_WithBC, 
+                               by = c("playId", "gameId", "nflId", "displayName"))
+final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameId)
+rm(FirstFrames_WithBC)
+
 # Ideas for predictor variables of our models
 # Blocking scores
 # Distance to ball carrier
