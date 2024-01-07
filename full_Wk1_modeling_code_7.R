@@ -113,6 +113,10 @@ tracking_combined <- tracking_combined %>%
 tracking_combined <- tracking_combined %>%
   filter(gameId != 2022102307 | playId != 1505)
 
+# View(tracking_combined %>% filter(gameId == 2022091801, playId == 63))
+tracking_combined <- tracking_combined %>%
+  filter(gameId != 2022091801 | playId != 63)
+
 # These plays have multiple "first_contact" events
 # View(tracking_combined %>% filter(gameId == 2022100209, playId == 1581, event == "first_contact"))
 # View(tracking_combined %>% filter(gameId == 2022103100, playId == 1689, event == "first_contact"))
