@@ -699,12 +699,20 @@ MergedData <- MergedData %>%
 # Now include the projections for each player's future distance (from distances_vectorized file)
 frame_length <- 0.5
 
-# Adding projections for each player's location going forward (by 0.5 seconds)
+# Adding projections for each player's location going forward (span of next 0.5 seconds)
 MergedData <- MergedData %>%
-  mutate(X_proj = x + (s*frame_length*cos((90-dir)*pi/180)),
-         Y_proj = y + (s*frame_length*sin((90-dir)*pi/180)))
+  mutate(X_proj_1 = x + (s*1*cos((90-dir)*pi/180)),
+         X_proj_2 = x + (s*2*cos((90-dir)*pi/180)),
+         X_proj_3 = x + (s*3*cos((90-dir)*pi/180)),
+         X_proj_4 = x + (s*4*cos((90-dir)*pi/180)),
+         X_proj_5 = x + (s*5*cos((90-dir)*pi/180)),
+         Y_proj_1 = y + (s*1*sin((90-dir)*pi/180)),
+         Y_proj_2 = y + (s*2*sin((90-dir)*pi/180)),
+         Y_proj_3 = y + (s*3*sin((90-dir)*pi/180)),
+         Y_proj_4 = y + (s*4*sin((90-dir)*pi/180)),
+         Y_proj_5 = y + (s*5*sin((90-dir)*pi/180)))
 
-# And, now, also add the ball-carrier's projected distance in 0.5 seconds
+# And, now, also add the ball-carrier's projected location within the next 0.5 seconds
 BallCarrier_ProjDist <- MergedData %>% 
   filter(IsBallCarrier > 0) %>% 
   select(gameId, playId, frameId, s, a, o, dir, x, y) %>% 
@@ -712,23 +720,65 @@ BallCarrier_ProjDist <- MergedData %>%
          ball_carrier_orient = o, ball_carrier_direction = dir,
          ball_carrier_x = x, ball_carrier_y = y)
 BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
-  mutate(ball_carrier_X_proj = ball_carrier_x + (ball_carrier_speed*frame_length*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj = ball_carrier_y + (ball_carrier_speed*frame_length*sin((90-ball_carrier_direction)*pi/180)))
+  mutate(ball_carrier_X_proj_1 = ball_carrier_x + (ball_carrier_speed*1*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_2 = ball_carrier_x + (ball_carrier_speed*2*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_3 = ball_carrier_x + (ball_carrier_speed*3*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_4 = ball_carrier_x + (ball_carrier_speed*4*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_5 = ball_carrier_x + (ball_carrier_speed*5*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_1 = ball_carrier_y + (ball_carrier_speed*1*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_2 = ball_carrier_y + (ball_carrier_speed*2*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_3 = ball_carrier_y + (ball_carrier_speed*3*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_4 = ball_carrier_y + (ball_carrier_speed*4*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_5 = ball_carrier_y + (ball_carrier_speed*5*sin((90-ball_carrier_direction)*pi/180)))
 BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
-  select(c("playId", "gameId", "frameId", "ball_carrier_X_proj", "ball_carrier_Y_proj"))
+  select(c("playId", "gameId", "frameId", "ball_carrier_X_proj_1", 
+           "ball_carrier_X_proj_2", "ball_carrier_X_proj_3", "ball_carrier_X_proj_4",
+           "ball_carrier_X_proj_5", "ball_carrier_Y_proj_1", "ball_carrier_Y_proj_2",
+           "ball_carrier_Y_proj_3", "ball_carrier_Y_proj_4", "ball_carrier_Y_proj_5"))
 MergedData <- MergedData %>% 
   left_join(BallCarrier_ProjDist, by = c("playId", "gameId", "frameId"))
 
 MergedData <- MergedData %>%
   group_by(gameId, playId, frameId) %>%
-  mutate(ball_carrier_X_proj = ball_carrier_X_proj,
-         ball_carrier_Y_proj = ball_carrier_Y_proj,
-         proj_dist_to_ball_carrier = calc_distance(X_proj, 
-                                              Y_proj, 
-                                              x_baseline = ball_carrier_X_proj, 
-                                              y_baseline = ball_carrier_Y_proj)) %>%
+  mutate(ball_carrier_X_proj_1 = ball_carrier_X_proj_1,
+         ball_carrier_X_proj_2 = ball_carrier_X_proj_2,
+         ball_carrier_X_proj_3 = ball_carrier_X_proj_3,
+         ball_carrier_X_proj_4 = ball_carrier_X_proj_4,
+         ball_carrier_X_proj_5 = ball_carrier_X_proj_5,
+         ball_carrier_Y_proj_1 = ball_carrier_Y_proj_1,
+         ball_carrier_Y_proj_2 = ball_carrier_Y_proj_2,
+         ball_carrier_Y_proj_3 = ball_carrier_Y_proj_3,
+         ball_carrier_Y_proj_4 = ball_carrier_Y_proj_4,
+         ball_carrier_Y_proj_5 = ball_carrier_Y_proj_5,
+         proj_dist_to_ball_carrier_1 = calc_distance(X_proj_1, 
+                                                   Y_proj_1, 
+                                                   x_baseline = ball_carrier_X_proj_1, 
+                                                   y_baseline = ball_carrier_Y_proj_1),
+         proj_dist_to_ball_carrier_2 = calc_distance(X_proj_2, 
+                                                     Y_proj_2, 
+                                                     x_baseline = ball_carrier_X_proj_2, 
+                                                     y_baseline = ball_carrier_Y_proj_2),
+         proj_dist_to_ball_carrier_3 = calc_distance(X_proj_3, 
+                                                     Y_proj_3, 
+                                                     x_baseline = ball_carrier_X_proj_3, 
+                                                     y_baseline = ball_carrier_Y_proj_3),
+         proj_dist_to_ball_carrier_4 = calc_distance(X_proj_4, 
+                                                     Y_proj_4, 
+                                                     x_baseline = ball_carrier_X_proj_4, 
+                                                     y_baseline = ball_carrier_Y_proj_4),
+         proj_dist_to_ball_carrier_5 = calc_distance(X_proj_5, 
+                                                     Y_proj_5, 
+                                                     x_baseline = ball_carrier_X_proj_5, 
+                                                     y_baseline = ball_carrier_Y_proj_5)) %>%
   ungroup()
 rm(BallCarrier_ProjDist)
+
+# Now mutate for the minimum projected distance to ball-carrier over the next 0.5 seconds
+MergedData <- MergedData %>% mutate(min_proj_dist_to_ball_carrier =
+    pmin(proj_dist_to_ball_carrier_1, proj_dist_to_ball_carrier_2, proj_dist_to_ball_carrier_3,
+        proj_dist_to_ball_carrier_4, proj_dist_to_ball_carrier_5))
+MergedData <- MergedData %>% select(c(-"proj_dist_to_ball_carrier_1", -"proj_dist_to_ball_carrier_2", 
+        -"proj_dist_to_ball_carrier_3", -"proj_dist_to_ball_carrier_4", -"proj_dist_to_ball_carrier_5"))
 
 # Arrange in this order so that all 11 players on one team show up before other team
 MergedData <- MergedData %>% arrange(gameId, playId, frameId, club, nflId)
