@@ -1147,7 +1147,7 @@ final_merged_data_sub <- final_merged_data_sub %>%
 # BlockedScore has very high p-value here, don't use
 # Takeaway: generally seems that BlockedScore doesn't have much value when proj distance is included
 
-# Try model 12, which is mdoel 10 plus X and Y net distances
+# Try model 12, which is model 10 plus X and Y net distances
 mod12 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + dist_to_ball_carrier +
                X_DistFromBall + Y_DistFromBall +
                NumberOfBlockers + proj_dist_to_ball_carrier + CosSimilarity_Dir_ToBC, 
