@@ -71,3 +71,18 @@ Completions_Merged <- Completions_Merged %>% select(-c("Unnecessary_Early", "Fra
 
 MergedData <- rbind(DesignedRuns_Merged, Scrambles_Merged, Completions_Merged)
 MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
+
+# Also account for first frame of each play not necessarily being 1 anymore
+# I.e., now we start plays when the ball-carrier has the ball
+FirstFrames_WithBC <- MergedData %>%
+  group_by(gameId, playId, nflId, displayName) %>%
+  mutate(Frame_Rank = rank(frameId, ties.method = "first")) %>%
+  ungroup() 
+FirstFrames_WithBC <- FirstFrames_WithBC %>% filter(Frame_Rank == 1)
+FirstFrames_WithBC <- FirstFrames_WithBC %>% 
+  select(c("gameId", "playId", "nflId", "displayName", "frameId")) %>%
+  rename(FirstFrame_WithBC = frameId)
+
+MergedData <- merge(x = MergedData, y = FirstFrames_WithBC, 
+                           by = c("playId", "gameId", "nflId", "displayName"))
+MergedData <- MergedData %>% arrange(gameId, playId, nflId, frameId)
