@@ -945,6 +945,26 @@ final_merged_data <- merge(x = final_merged_data, y = FirstFrames_WithBC,
 final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameId)
 rm(FirstFrames_WithBC)
 
+# Make the modifications to standardize BlockedScore on 0 to 1 scale
+FixingBlockingScore <- function(final_merged_data) {
+  final_merged_dataTemp <- final_merged_data[final_merged_data$BlockedScore != 0 & final_merged_data$BlockedScore != 25 & final_merged_data$a >= 1, ]
+  final_merged_dataTemp2 <- final_merged_data[final_merged_data$BlockedScore != 0 & final_merged_data$BlockedScore != 25 & final_merged_data$a < 1, ]
+  
+  final_merged_dataTemp2$BlockedScore <- final_merged_dataTemp2$BlockedScore * final_merged_dataTemp2$s
+  final_merged_dataTemp$BlockedScore <- (final_merged_dataTemp$BlockedScore / final_merged_dataTemp$a) * final_merged_dataTemp$s
+  
+  final_merged_dataTempWhole <- rbind(final_merged_dataTemp, final_merged_dataTemp2)
+  final_merged_data <- merge(final_merged_data, final_merged_dataTempWhole, by = names(final_merged_dataTempWhole), all.x = TRUE)
+  
+  final_merged_data$BlockedScore[final_merged_data$BlockedScore == 25] <- NA
+  
+  return(final_merged_data)
+} 
+final_merged_data <- FixingBlockingScore(final_merged_data)
+
+final_merged_data <- final_merged_data %>% mutate(BlockedScore =
+      ifelse(is.na(BlockedScore), NA, BlockedScore / max(final_merged_data$BlockedScore, na.rm = TRUE)))
+
 # Ideas for predictor variables of our models
 # Blocking scores
 # Distance to ball carrier
