@@ -83,74 +83,88 @@ tracking_w1 %>%
   geom_density(fill = 'dodgerblue') +
   facet_wrap(~IsPlayerOnOffense)
 
-# Adding projections for each player's location going forward (by 0.5 seconds)
+# Adding projections for each player's location going forward (span of next 0.5 seconds)
 # Note that we tested a kinematics-based approach (incorporating acceleration) in addition to the "speed*frame_length" approach
 # Turned out the simpler approach (without acceleration) was more accurate in projecting future distances
 tracking_w1 <- tracking_w1 %>%
-  mutate(X_proj_1 = X_std + ((s*frame_length + 0.5*a*(frame_length)^2)*cos((90-dir)*pi/180)),
-         Y_proj_1 = Y_std + ((s*frame_length + 0.5*a*(frame_length)^2)*sin((90-dir)*pi/180)),
-         X_proj_2 = X_std + (s*frame_length*cos((90-dir)*pi/180)),
-         Y_proj_2 = Y_std + (s*frame_length*sin((90-dir)*pi/180)))
+  mutate(X_proj_1 = x + (s*1*cos((90-dir)*pi/180)),
+         X_proj_2 = x + (s*2*cos((90-dir)*pi/180)),
+         X_proj_3 = x + (s*3*cos((90-dir)*pi/180)),
+         X_proj_4 = x + (s*4*cos((90-dir)*pi/180)),
+         X_proj_5 = x + (s*5*cos((90-dir)*pi/180)),
+         Y_proj_1 = y + (s*1*sin((90-dir)*pi/180)),
+         Y_proj_2 = y + (s*2*sin((90-dir)*pi/180)),
+         Y_proj_3 = y + (s*3*sin((90-dir)*pi/180)),
+         Y_proj_4 = y + (s*4*sin((90-dir)*pi/180)),
+         Y_proj_5 = y + (s*5*sin((90-dir)*pi/180)))
 
-# Figure out which approach is more accurate (physics-based, or just speed * time)
-AccuracyTest <- tracking_w1 %>% mutate(X_Actual_0.5SecAhead = 
-   ifelse(displayName == lead(displayName, 5), lead(X_std, 5), NA))
-AccuracyTest <- AccuracyTest %>% mutate(Y_Actual_0.5SecAhead = 
-   ifelse(displayName == lead(displayName, 5), lead(Y_std, 5), NA))
-
-AccuracyTest <- AccuracyTest %>%
-  mutate(X_proj_Error1 = X_proj_1 - X_Actual_0.5SecAhead,
-         X_proj_Error2 = X_proj_2 - X_Actual_0.5SecAhead,
-         Y_proj_Error1 = Y_proj_1 - Y_Actual_0.5SecAhead,
-         Y_proj_Error2 = Y_proj_2 - Y_Actual_0.5SecAhead)
-
-sd(AccuracyTest$X_proj_Error1, na.rm = TRUE)
-sd(AccuracyTest$X_proj_Error2, na.rm = TRUE)
-sd(AccuracyTest$Y_proj_Error1, na.rm = TRUE)
-sd(AccuracyTest$Y_proj_Error2, na.rm = TRUE)
-
-mean(AccuracyTest$X_proj_Error1, na.rm = TRUE)
-mean(AccuracyTest$X_proj_Error2, na.rm = TRUE)
-mean(AccuracyTest$Y_proj_Error1, na.rm = TRUE)
-mean(AccuracyTest$Y_proj_Error2, na.rm = TRUE)
-
-sqrt(mean((AccuracyTest$X_proj_Error1)^2, na.rm = TRUE))
-sqrt(mean((AccuracyTest$X_proj_Error2)^2, na.rm = TRUE))
-sqrt(mean((AccuracyTest$Y_proj_Error1)^2, na.rm = TRUE))
-sqrt(mean((AccuracyTest$Y_proj_Error2)^2, na.rm = TRUE))
-# Method 2 (non-physics approach) has significantly lower RMSE
-
-# So, get rid of first version
-tracking_w1 <- tracking_w1 %>% select(-c("X_proj_1", "Y_proj_1"))
-tracking_w1 <- tracking_w1 %>% 
-  rename(X_proj = X_proj_2, Y_proj = Y_proj_2)
-rm(AccuracyTest)
-
-# And, now, also add the ball-carrier's projected distance in 0.5 seconds
+# And, now, also add the ball-carrier's projected location within the next 0.5 seconds
 BallCarrier_ProjDist <- tracking_w1 %>% 
   filter(IsBallCarrier > 0) %>% 
-  select(gameId, playId, frameId, s, a, o, dir, X_std, Y_std) %>% 
+  select(gameId, playId, frameId, s, a, o, dir, x, y) %>% 
   rename(ball_carrier_speed = s, ball_carrier_acc = a,
          ball_carrier_orient = o, ball_carrier_direction = dir,
-         ball_carrier_x = X_std, ball_carrier_y = Y_std)
+         ball_carrier_x = x, ball_carrier_y = y)
 BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
-  mutate(ball_carrier_X_proj = ball_carrier_x + (ball_carrier_speed*frame_length*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj = ball_carrier_y + (ball_carrier_speed*frame_length*sin((90-ball_carrier_direction)*pi/180)))
+  mutate(ball_carrier_X_proj_1 = ball_carrier_x + (ball_carrier_speed*1*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_2 = ball_carrier_x + (ball_carrier_speed*2*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_3 = ball_carrier_x + (ball_carrier_speed*3*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_4 = ball_carrier_x + (ball_carrier_speed*4*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_5 = ball_carrier_x + (ball_carrier_speed*5*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_1 = ball_carrier_y + (ball_carrier_speed*1*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_2 = ball_carrier_y + (ball_carrier_speed*2*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_3 = ball_carrier_y + (ball_carrier_speed*3*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_4 = ball_carrier_y + (ball_carrier_speed*4*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_5 = ball_carrier_y + (ball_carrier_speed*5*sin((90-ball_carrier_direction)*pi/180)))
 BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
-  select(c("playId", "gameId", "frameId", "ball_carrier_X_proj", "ball_carrier_Y_proj"))
+  select(c("playId", "gameId", "frameId", "ball_carrier_X_proj_1", 
+           "ball_carrier_X_proj_2", "ball_carrier_X_proj_3", "ball_carrier_X_proj_4",
+           "ball_carrier_X_proj_5", "ball_carrier_Y_proj_1", "ball_carrier_Y_proj_2",
+           "ball_carrier_Y_proj_3", "ball_carrier_Y_proj_4", "ball_carrier_Y_proj_5"))
 tracking_w1 <- tracking_w1 %>% 
   left_join(BallCarrier_ProjDist, by = c("playId", "gameId", "frameId"))
 
 tracking_w1 <- tracking_w1 %>%
   group_by(gameId, playId, frameId) %>%
-  mutate(ball_carrier_X_proj = ball_carrier_X_proj,
-         ball_carrier_Y_proj = ball_carrier_Y_proj,
-         proj_dist_to_ball_carrier = calc_distance(X_proj, 
-                                              Y_proj, 
-                                              x_baseline = ball_carrier_X_proj, 
-                                              y_baseline = ball_carrier_Y_proj)) %>%
+  mutate(ball_carrier_X_proj_1 = ball_carrier_X_proj_1,
+         ball_carrier_X_proj_2 = ball_carrier_X_proj_2,
+         ball_carrier_X_proj_3 = ball_carrier_X_proj_3,
+         ball_carrier_X_proj_4 = ball_carrier_X_proj_4,
+         ball_carrier_X_proj_5 = ball_carrier_X_proj_5,
+         ball_carrier_Y_proj_1 = ball_carrier_Y_proj_1,
+         ball_carrier_Y_proj_2 = ball_carrier_Y_proj_2,
+         ball_carrier_Y_proj_3 = ball_carrier_Y_proj_3,
+         ball_carrier_Y_proj_4 = ball_carrier_Y_proj_4,
+         ball_carrier_Y_proj_5 = ball_carrier_Y_proj_5,
+         proj_dist_to_ball_carrier_1 = calc_distance(X_proj_1, 
+                                                   Y_proj_1, 
+                                                   x_baseline = ball_carrier_X_proj_1, 
+                                                   y_baseline = ball_carrier_Y_proj_1),
+         proj_dist_to_ball_carrier_2 = calc_distance(X_proj_2, 
+                                                     Y_proj_2, 
+                                                     x_baseline = ball_carrier_X_proj_2, 
+                                                     y_baseline = ball_carrier_Y_proj_2),
+         proj_dist_to_ball_carrier_3 = calc_distance(X_proj_3, 
+                                                     Y_proj_3, 
+                                                     x_baseline = ball_carrier_X_proj_3, 
+                                                     y_baseline = ball_carrier_Y_proj_3),
+         proj_dist_to_ball_carrier_4 = calc_distance(X_proj_4, 
+                                                     Y_proj_4, 
+                                                     x_baseline = ball_carrier_X_proj_4, 
+                                                     y_baseline = ball_carrier_Y_proj_4),
+         proj_dist_to_ball_carrier_5 = calc_distance(X_proj_5, 
+                                                     Y_proj_5, 
+                                                     x_baseline = ball_carrier_X_proj_5, 
+                                                     y_baseline = ball_carrier_Y_proj_5)) %>%
   ungroup()
 rm(BallCarrier_ProjDist)
+
+# Now mutate for the minimum projected distance to ball-carrier over the next 0.5 seconds
+tracking_w1 <- tracking_w1 %>% mutate(min_proj_dist_to_ball_carrier =
+    pmin(proj_dist_to_ball_carrier_1, proj_dist_to_ball_carrier_2, proj_dist_to_ball_carrier_3,
+        proj_dist_to_ball_carrier_4, proj_dist_to_ball_carrier_5))
+tracking_w1 <- tracking_w1 %>% select(c(-"proj_dist_to_ball_carrier_1", -"proj_dist_to_ball_carrier_2", 
+        -"proj_dist_to_ball_carrier_3", -"proj_dist_to_ball_carrier_4", -"proj_dist_to_ball_carrier_5"))
 
 ## Here's a sample play and the corresponding voronoi diagram
 Zay_Jones_catch <- tracking_w1 %>%
