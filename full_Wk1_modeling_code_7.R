@@ -1157,7 +1157,7 @@ summary(mod6)
 final_merged_data_sub$pred_within_dist_ofBC_6 <- predict(mod6, final_merged_data_sub, type = 'response')
 final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_near_BC_error_6 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_6)
-# Takeaway: this is worth considering, now the X and Y have significant P-values
+# Takeaway: don't use, X and Y aren't as valuable on their own
 
 # Try versions of models 5 and 6 with absolute distance from ball, rather than net distance
 mod7 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Velocity_ToBC + X_AbsDistFromBall + Y_AbsDistFromBall +
@@ -1177,9 +1177,7 @@ summary(mod8)
 final_merged_data_sub$pred_within_dist_ofBC_8 <- predict(mod8, final_merged_data_sub, type = 'response')
 final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_near_BC_error_8 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_8)
-# Takeaway: this is also worth considering, the X and Y absolute distances are significant
-# But since X coefficient is positive, and it shouldn't be, proceed with caution
-# Definitely would say models 6 or 7 are better than model 8 for that reason
+# Takeaway: this is not as good, X and Y don't matter as much with overall distance included
 
 # Try a model 9 that takes out Rel_Velocity from model 4, adds Rel_Speed and CosSimilarity
 mod9 <- glm(within_dist_ofBC_frames_ahead ~ Rel_Speed_ToBC + dist_to_ball_carrier +
@@ -1577,9 +1575,46 @@ final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_near_BC_error_44 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_44)
 # Takeaway: interaction b/w current dist and projected dist is great, very strong model
 
+# Try model 45, which is model 44 without Rel_Velo
+mod45 <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + NumberOfBlockers, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod45)
+final_merged_data_sub$pred_within_dist_ofBC_45 <- predict(mod45, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_near_BC_error_45 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_45)
+# Takeaway: interaction b/w current dist and projected dist is great, very strong model
+
+# Try model 46, which is model 45 with another interaction (BlockedScore and proj dist)
+mod46 <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + NumberOfBlockers + min_proj_dist_to_ball_carrier*BlockedScore, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(mod46)
+final_merged_data_sub$pred_within_dist_ofBC_46 <- predict(mod46, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_near_BC_error_46 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_46)
+
+# Test ranger() random forest model against these
+mod47 <- ranger(!is.na(within_dist_ofBC_frames_ahead) ~ CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
+         dist_to_ball_carrier + min_proj_dist_to_ball_carrier + NumberOfBlockers + BlockedScore,
+       data = final_merged_data_sub, num.trees = 250)
+summary(mod47)
+final_merged_data_sub$pred_within_dist_ofBC_47 <- predict(mod47, data = final_merged_data_sub)$predictions
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_near_BC_error_47 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_47)
+
+# Also try ranger() model with fewer features
+mod48 <- ranger(!is.na(within_dist_ofBC_frames_ahead) ~ Rel_Velocity_ToBC + 
+                  dist_to_ball_carrier + min_proj_dist_to_ball_carrier + NumberOfBlockers,
+                data = final_merged_data_sub, num.trees = 250)
+summary(mod48)
+final_merged_data_sub$pred_within_dist_ofBC_48 <- predict(mod48, data = final_merged_data_sub)$predictions
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_near_BC_error_48 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_48)
+
 # Use for loops to get SD, mean error, RMSE for our models
 # Number of columns
-n <- 44
+n <- 48
 
 # Initialize empty vectors to store results
 mean_values <- numeric(n)
