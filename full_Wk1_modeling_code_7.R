@@ -907,8 +907,7 @@ TeamDef_InitialSurges <- final_merged_data %>% filter(TeamDefSurge_InFrame > 0) 
   ungroup()
 TeamDef_InitialSurges <- TeamDef_InitialSurges %>% filter(TeamDefSurge_QuickestFrame_Rank == 1)
 TeamDef_InitialSurges <- TeamDef_InitialSurges %>% 
-  select(c("gameId", "playId", "frameId"))
-TeamDef_InitialSurges <- TeamDef_InitialSurges %>%
+  select(c("gameId", "playId", "frameId")) %>%
   rename(FirstDefSurge_Frame = frameId)
 
 final_merged_data <- merge(x = final_merged_data, y = TeamDef_InitialSurges, 
