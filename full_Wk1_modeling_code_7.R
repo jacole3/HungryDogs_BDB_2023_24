@@ -937,7 +937,8 @@ final_merged_data_sub <- final_merged_data %>%
          second_closest_opp_player_name, second_closest_opp_player_nflID,
          BlockedScore, CosSimilarity_Dir_ToBC, CosSimilarity_Orient_ToBC,
          In_BallCarrier_Radius, NumberOfBlockers, within_dist_ofBC,
-         within_dist_ofBC_frames_ahead)
+         within_dist_ofBC_frames_ahead, TeamDefSurge_InFrame,
+         FirstDefSurge_Frame, IndivDefender_InitialSurge_OnPlay)
 
 mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + 
               Rel_Velocity_ToBC + dist_to_ball_carrier + NumberOfBlockers + 
