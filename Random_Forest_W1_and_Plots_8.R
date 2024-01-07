@@ -83,6 +83,11 @@ mod2 <- ranger(within_dist_ofBC_frames_ahead ~ CosSimilarity_Dir_ToBC + Rel_Velo
               dist_to_ball_carrier + proj_distance + NumberOfBlockers + BlockedScore,
             data = defenders_data, num.trees = 250)
 
+# If that version of mod2 gives an error, run the following:
+# mod2 <- ranger(sum(!is.na(within_dist_ofBC_frames_ahead)) ~ CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
+#              dist_to_ball_carrier + proj_distance + NumberOfBlockers + BlockedScore,
+#            data = defenders_data, num.trees = 250)
+
 #rpart.plot(mod2)
 
 defenders_data$pred <- predict(mod2,data =  defenders_data)$predictions
