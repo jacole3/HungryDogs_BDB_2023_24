@@ -1012,7 +1012,8 @@ final_merged_data_sub <- final_merged_data %>%
          BlockedScore, CosSimilarity_Dir_ToBC, CosSimilarity_Orient_ToBC,
          In_BallCarrier_Radius, NumberOfBlockers, within_dist_ofBC,
          within_dist_ofBC_frames_ahead, TeamDefSurge_InFrame,
-         FirstDefSurge_Frame, IndivDefender_InitialSurge_OnPlay, FirstFrame_WithBC)
+         FirstDefSurge_Frame, IndivDefender_InitialSurge_OnPlay, FirstFrame_WithBC,
+         Surge_To_EndOfPlay_Frames)
 
 mod1 <- glm(within_dist_ofBC_frames_ahead ~ BlockedScore + CosSimilarity_Dir_ToBC + 
               Rel_Velocity_ToBC + dist_to_ball_carrier + NumberOfBlockers + 
