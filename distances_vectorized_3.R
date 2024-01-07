@@ -87,16 +87,16 @@ tracking_w1 %>%
 # Note that we tested a kinematics-based approach (incorporating acceleration) in addition to the "speed*frame_length" approach
 # Turned out the simpler approach (without acceleration) was more accurate in projecting future distances
 tracking_w1 <- tracking_w1 %>%
-  mutate(X_proj_1 = x + (s*1*cos((90-dir)*pi/180)),
-         X_proj_2 = x + (s*2*cos((90-dir)*pi/180)),
-         X_proj_3 = x + (s*3*cos((90-dir)*pi/180)),
-         X_proj_4 = x + (s*4*cos((90-dir)*pi/180)),
-         X_proj_5 = x + (s*5*cos((90-dir)*pi/180)),
-         Y_proj_1 = y + (s*1*sin((90-dir)*pi/180)),
-         Y_proj_2 = y + (s*2*sin((90-dir)*pi/180)),
-         Y_proj_3 = y + (s*3*sin((90-dir)*pi/180)),
-         Y_proj_4 = y + (s*4*sin((90-dir)*pi/180)),
-         Y_proj_5 = y + (s*5*sin((90-dir)*pi/180)))
+  mutate(X_proj_1 = x + (s*.1*cos((90-dir)*pi/180)),
+         X_proj_2 = x + (s*.2*cos((90-dir)*pi/180)),
+         X_proj_3 = x + (s*.3*cos((90-dir)*pi/180)),
+         X_proj_4 = x + (s*.4*cos((90-dir)*pi/180)),
+         X_proj_5 = x + (s*.5*cos((90-dir)*pi/180)),
+         Y_proj_1 = y + (s*.1*sin((90-dir)*pi/180)),
+         Y_proj_2 = y + (s*.2*sin((90-dir)*pi/180)),
+         Y_proj_3 = y + (s*.3*sin((90-dir)*pi/180)),
+         Y_proj_4 = y + (s*.4*sin((90-dir)*pi/180)),
+         Y_proj_5 = y + (s*.5*sin((90-dir)*pi/180)))
 
 # And, now, also add the ball-carrier's projected location within the next 0.5 seconds
 BallCarrier_ProjDist <- tracking_w1 %>% 
@@ -106,16 +106,16 @@ BallCarrier_ProjDist <- tracking_w1 %>%
          ball_carrier_orient = o, ball_carrier_direction = dir,
          ball_carrier_x = x, ball_carrier_y = y)
 BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
-  mutate(ball_carrier_X_proj_1 = ball_carrier_x + (ball_carrier_speed*1*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_X_proj_2 = ball_carrier_x + (ball_carrier_speed*2*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_X_proj_3 = ball_carrier_x + (ball_carrier_speed*3*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_X_proj_4 = ball_carrier_x + (ball_carrier_speed*4*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_X_proj_5 = ball_carrier_x + (ball_carrier_speed*5*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_1 = ball_carrier_y + (ball_carrier_speed*1*sin((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_2 = ball_carrier_y + (ball_carrier_speed*2*sin((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_3 = ball_carrier_y + (ball_carrier_speed*3*sin((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_4 = ball_carrier_y + (ball_carrier_speed*4*sin((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_5 = ball_carrier_y + (ball_carrier_speed*5*sin((90-ball_carrier_direction)*pi/180)))
+  mutate(ball_carrier_X_proj_1 = ball_carrier_x + (ball_carrier_speed*.1*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_2 = ball_carrier_x + (ball_carrier_speed*.2*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_3 = ball_carrier_x + (ball_carrier_speed*.3*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_4 = ball_carrier_x + (ball_carrier_speed*.4*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_5 = ball_carrier_x + (ball_carrier_speed*.5*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_1 = ball_carrier_y + (ball_carrier_speed*.1*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_2 = ball_carrier_y + (ball_carrier_speed*.2*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_3 = ball_carrier_y + (ball_carrier_speed*.3*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_4 = ball_carrier_y + (ball_carrier_speed*.4*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_5 = ball_carrier_y + (ball_carrier_speed*.5*sin((90-ball_carrier_direction)*pi/180)))
 BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
   select(c("playId", "gameId", "frameId", "ball_carrier_X_proj_1", 
            "ball_carrier_X_proj_2", "ball_carrier_X_proj_3", "ball_carrier_X_proj_4",
@@ -405,16 +405,16 @@ MergedData <- MergedData %>% select(-c("X_proj_A", "Y_proj_A", "X_proj_B", "Y_pr
 rm(AccuracyTest)
 
 MergedData <- MergedData %>%
-  mutate(X_proj_1 = x + (s*1*cos((90-dir)*pi/180)),
-         X_proj_2 = x + (s*2*cos((90-dir)*pi/180)),
-         X_proj_3 = x + (s*3*cos((90-dir)*pi/180)),
-         X_proj_4 = x + (s*4*cos((90-dir)*pi/180)),
-         X_proj_5 = x + (s*5*cos((90-dir)*pi/180)),
-         Y_proj_1 = y + (s*1*sin((90-dir)*pi/180)),
-         Y_proj_2 = y + (s*2*sin((90-dir)*pi/180)),
-         Y_proj_3 = y + (s*3*sin((90-dir)*pi/180)),
-         Y_proj_4 = y + (s*4*sin((90-dir)*pi/180)),
-         Y_proj_5 = y + (s*5*sin((90-dir)*pi/180)))
+  mutate(X_proj_1 = x + (s*.1*cos((90-dir)*pi/180)),
+         X_proj_2 = x + (s*.2*cos((90-dir)*pi/180)),
+         X_proj_3 = x + (s*.3*cos((90-dir)*pi/180)),
+         X_proj_4 = x + (s*.4*cos((90-dir)*pi/180)),
+         X_proj_5 = x + (s*.5*cos((90-dir)*pi/180)),
+         Y_proj_1 = y + (s*.1*sin((90-dir)*pi/180)),
+         Y_proj_2 = y + (s*.2*sin((90-dir)*pi/180)),
+         Y_proj_3 = y + (s*.3*sin((90-dir)*pi/180)),
+         Y_proj_4 = y + (s*.4*sin((90-dir)*pi/180)),
+         Y_proj_5 = y + (s*.5*sin((90-dir)*pi/180)))
 
 # And, now, also add the ball-carrier's projected location within the next 0.5 seconds
 BallCarrier_ProjDist <- MergedData %>% 
@@ -424,16 +424,16 @@ BallCarrier_ProjDist <- MergedData %>%
          ball_carrier_orient = o, ball_carrier_direction = dir,
          ball_carrier_x = x, ball_carrier_y = y)
 BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
-  mutate(ball_carrier_X_proj_1 = ball_carrier_x + (ball_carrier_speed*1*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_X_proj_2 = ball_carrier_x + (ball_carrier_speed*2*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_X_proj_3 = ball_carrier_x + (ball_carrier_speed*3*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_X_proj_4 = ball_carrier_x + (ball_carrier_speed*4*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_X_proj_5 = ball_carrier_x + (ball_carrier_speed*5*cos((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_1 = ball_carrier_y + (ball_carrier_speed*1*sin((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_2 = ball_carrier_y + (ball_carrier_speed*2*sin((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_3 = ball_carrier_y + (ball_carrier_speed*3*sin((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_4 = ball_carrier_y + (ball_carrier_speed*4*sin((90-ball_carrier_direction)*pi/180)),
-         ball_carrier_Y_proj_5 = ball_carrier_y + (ball_carrier_speed*5*sin((90-ball_carrier_direction)*pi/180)))
+  mutate(ball_carrier_X_proj_1 = ball_carrier_x + (ball_carrier_speed*.1*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_2 = ball_carrier_x + (ball_carrier_speed*.2*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_3 = ball_carrier_x + (ball_carrier_speed*.3*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_4 = ball_carrier_x + (ball_carrier_speed*.4*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_5 = ball_carrier_x + (ball_carrier_speed*.5*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_1 = ball_carrier_y + (ball_carrier_speed*.1*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_2 = ball_carrier_y + (ball_carrier_speed*.2*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_3 = ball_carrier_y + (ball_carrier_speed*.3*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_4 = ball_carrier_y + (ball_carrier_speed*.4*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_5 = ball_carrier_y + (ball_carrier_speed*.5*sin((90-ball_carrier_direction)*pi/180)))
 BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
   select(c("playId", "gameId", "frameId", "ball_carrier_X_proj_1", 
            "ball_carrier_X_proj_2", "ball_carrier_X_proj_3", "ball_carrier_X_proj_4",
