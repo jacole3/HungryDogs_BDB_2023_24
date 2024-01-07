@@ -853,4 +853,5 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>% group_by(gameId, playId, nflId) %
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% filter(Unnecessary_Early == FALSE)
 rm(Frames_AtHandoff)
-DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"Unnecessary_Early")
+DesignedRuns_Merged <- DesignedRuns_Merged %>% select(c(-"Unnecessary_Early", "FirstFrame_WithBC"))
+
