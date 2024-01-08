@@ -10,14 +10,15 @@ library(rpart.plot)
 library(tree)
 library(randomForest)
 library(ranger)
+library(pROC)
 
 ## Distance Formula
 calc_distance <- function(x, y, x_baseline = 0, y_baseline = 0) {
   sqrt((x-x_baseline)^2 + (y - y_baseline)^2)
 }
 
+# This is a Week 1 version of the full_merged_data DF created in the full_Wk1_modeling_code file, in CSV form
 full_dat <- data.table::fread("full_data_modeling_w1.csv")
-
 
 ## selecting fairly large subset of our data:
 modeling_data <- full_dat %>%
@@ -51,6 +52,7 @@ modeling_data <- modeling_data %>%
   ) %>%
   ungroup()
 
+## Had to fix the within distance into the future measure
 dist <- 1
 frames <- 5
 modeling_data <- modeling_data %>%
@@ -61,7 +63,9 @@ modeling_data <- modeling_data %>%
                                        y_baseline = ball_carrier_Y_proj)) %>%
   arrange(gameId, playId, frameId, nflId) %>%
   group_by(gameId, playId, nflId) %>%
-  mutate(within_dist_ofBC_frames_ahead = ifelse(club == possessionTeam, NA,
+    mutate(within_dist_ofBC = ifelse(dist_to_ball_carrier <= dist, 1, 0)) %>%
+  group_by(gameId, playId, nflId) %>%
+  mutate(within_dist_ofBC_frames_ahead = ifelse(PlayerSideOfBall != "defense", NA,
     ifelse((lead(within_dist_ofBC) == 1 & playId == lead(playId) & nflId == lead(nflId)) |
          (lead(within_dist_ofBC, 2) == 1 & playId == lead(playId, 2) & nflId == lead(nflId, 2)) |
          (lead(within_dist_ofBC, 3) == 1 & playId == lead(playId, 3) & nflId == lead(nflId, 3)) | 
@@ -75,32 +79,196 @@ modeling_data <- modeling_data %>%
   ungroup()
 
 
+## Further cleaning to the blocked score:
+FixingBlockingScore <- function(final_merged_data) {
+  final_merged_dataTemp <- final_merged_data[final_merged_data$BlockedScore != 0 & final_merged_data$BlockedScore != 25 & final_merged_data$a >= 1, ]
+  final_merged_dataTemp2 <- final_merged_data[final_merged_data$BlockedScore != 0 & final_merged_data$BlockedScore != 25 & final_merged_data$a < 1, ]
+  
+  final_merged_dataTemp2$BlockedScore <- final_merged_dataTemp2$BlockedScore * final_merged_dataTemp2$s
+  final_merged_dataTemp$BlockedScore <- (final_merged_dataTemp$BlockedScore / final_merged_dataTemp$a) * final_merged_dataTemp$s
+  
+  final_merged_dataTempWhole <- rbind(final_merged_dataTemp, final_merged_dataTemp2)
+  final_merged_data <- merge(final_merged_data, final_merged_dataTempWhole, by = names(final_merged_dataTempWhole), all.x = TRUE)
+  
+  final_merged_data$BlockedScore[final_merged_data$BlockedScore == 25] <- NA
+  
+  return(final_merged_data)
+} 
+
+modeling_data <- FixingBlockingScore(final_merged_data = modeling_data)
+
+modeling_data <- modeling_data %>% mutate(BlockedScore =
+                                                    ifelse(is.na(BlockedScore), NA, BlockedScore / max(modeling_data$BlockedScore, na.rm = TRUE)))
+
+
+#Projections Using Ryan's Method:
+modeling_data <- modeling_data %>%
+  mutate(X_proj_1 = x + (s*.1*cos((90-dir)*pi/180)),
+         X_proj_2 = x + (s*.2*cos((90-dir)*pi/180)),
+         X_proj_3 = x + (s*.3*cos((90-dir)*pi/180)),
+         X_proj_4 = x + (s*.4*cos((90-dir)*pi/180)),
+         X_proj_5 = x + (s*.5*cos((90-dir)*pi/180)),
+         Y_proj_1 = y + (s*.1*sin((90-dir)*pi/180)),
+         Y_proj_2 = y + (s*.2*sin((90-dir)*pi/180)),
+         Y_proj_3 = y + (s*.3*sin((90-dir)*pi/180)),
+         Y_proj_4 = y + (s*.4*sin((90-dir)*pi/180)),
+         Y_proj_5 = y + (s*.5*sin((90-dir)*pi/180)))
+
+# And, now, also add the ball-carrier's projected location within the next 0.5 seconds
+BallCarrier_ProjDist <- modeling_data %>% 
+  filter(nflId==ballCarrierId) %>% 
+  select(gameId, playId, frameId, s, a, o, dir, x, y) %>% 
+  rename(ball_carrier_speed = s, ball_carrier_acc = a,
+         ball_carrier_orient = o, ball_carrier_direction = dir,
+         ball_carrier_x = x, ball_carrier_y = y)
+BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
+  mutate(ball_carrier_X_proj_1 = ball_carrier_x + (ball_carrier_speed*.1*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_2 = ball_carrier_x + (ball_carrier_speed*.2*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_3 = ball_carrier_x + (ball_carrier_speed*.3*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_4 = ball_carrier_x + (ball_carrier_speed*.4*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_X_proj_5 = ball_carrier_x + (ball_carrier_speed*.5*cos((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_1 = ball_carrier_y + (ball_carrier_speed*.1*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_2 = ball_carrier_y + (ball_carrier_speed*.2*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_3 = ball_carrier_y + (ball_carrier_speed*.3*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_4 = ball_carrier_y + (ball_carrier_speed*.4*sin((90-ball_carrier_direction)*pi/180)),
+         ball_carrier_Y_proj_5 = ball_carrier_y + (ball_carrier_speed*.5*sin((90-ball_carrier_direction)*pi/180)))
+
+BallCarrier_ProjDist <- BallCarrier_ProjDist %>% 
+  select(c("playId", "gameId", "frameId", "ball_carrier_X_proj_1", 
+           "ball_carrier_X_proj_2", "ball_carrier_X_proj_3", "ball_carrier_X_proj_4",
+           "ball_carrier_X_proj_5", "ball_carrier_Y_proj_1", "ball_carrier_Y_proj_2",
+           "ball_carrier_Y_proj_3", "ball_carrier_Y_proj_4", "ball_carrier_Y_proj_5"))
+modeling_data <- modeling_data %>% 
+  left_join(BallCarrier_ProjDist, by = c("playId", "gameId", "frameId"))
+
+modeling_data <- modeling_data %>%
+  group_by(gameId, playId, frameId) %>%
+  mutate(ball_carrier_X_proj_1 = ball_carrier_X_proj_1,
+         ball_carrier_X_proj_2 = ball_carrier_X_proj_2,
+         ball_carrier_X_proj_3 = ball_carrier_X_proj_3,
+         ball_carrier_X_proj_4 = ball_carrier_X_proj_4,
+         ball_carrier_X_proj_5 = ball_carrier_X_proj_5,
+         ball_carrier_Y_proj_1 = ball_carrier_Y_proj_1,
+         ball_carrier_Y_proj_2 = ball_carrier_Y_proj_2,
+         ball_carrier_Y_proj_3 = ball_carrier_Y_proj_3,
+         ball_carrier_Y_proj_4 = ball_carrier_Y_proj_4,
+         ball_carrier_Y_proj_5 = ball_carrier_Y_proj_5,
+         proj_dist_to_ball_carrier_1 = calc_distance(X_proj_1, 
+                                                     Y_proj_1, 
+                                                     x_baseline = ball_carrier_X_proj_1, 
+                                                     y_baseline = ball_carrier_Y_proj_1),
+         proj_dist_to_ball_carrier_2 = calc_distance(X_proj_2, 
+                                                     Y_proj_2, 
+                                                     x_baseline = ball_carrier_X_proj_2, 
+                                                     y_baseline = ball_carrier_Y_proj_2),
+         proj_dist_to_ball_carrier_3 = calc_distance(X_proj_3, 
+                                                     Y_proj_3, 
+                                                     x_baseline = ball_carrier_X_proj_3, 
+                                                     y_baseline = ball_carrier_Y_proj_3),
+         proj_dist_to_ball_carrier_4 = calc_distance(X_proj_4, 
+                                                     Y_proj_4, 
+                                                     x_baseline = ball_carrier_X_proj_4, 
+                                                     y_baseline = ball_carrier_Y_proj_4),
+         proj_dist_to_ball_carrier_5 = calc_distance(X_proj_5, 
+                                                     Y_proj_5, 
+                                                     x_baseline = ball_carrier_X_proj_5, 
+                                                     y_baseline = ball_carrier_Y_proj_5)) %>%
+  ungroup()
+rm(BallCarrier_ProjDist)
+
+# Now mutate for the minimum projected distance to ball-carrier over the next 0.5 seconds
+modeling_data <- modeling_data %>% mutate(min_proj_dist_to_ball_carrier =
+                                      pmin(proj_dist_to_ball_carrier_1, proj_dist_to_ball_carrier_2, proj_dist_to_ball_carrier_3,
+                                           proj_dist_to_ball_carrier_4, proj_dist_to_ball_carrier_5))
+modeling_data <- modeling_data %>% select(c(-"proj_dist_to_ball_carrier_1", -"proj_dist_to_ball_carrier_2", 
+                                      -"proj_dist_to_ball_carrier_3", -"proj_dist_to_ball_carrier_4", -"proj_dist_to_ball_carrier_5"))
+
+######################################
+## Now, we have our cleaned data
+## Let's do a train-test split
+modeling_data <- modeling_data %>%
+  mutate(game_play_combination = paste0(gameId, '-', playId))
+
+set.seed(44)
+unique_plays <- unique(modeling_data$game_play_combination)
+train_indices <- sample(1:length(unique_plays), 0.8*length(unique_plays))
+train_plays <- unique_plays[train_indices]
+test_plays <- unique_plays[-train_indices]
+
+## MODELING:
+## first filtering to only inlude defenders and players within 10 yards of the ball carrier
 defenders_data <- modeling_data %>%
   filter(club!=possessionTeam) %>%
-  filter(!is.infinite(BlockedScore))
+  filter(!is.infinite(BlockedScore), dist_to_ball_carrier<=10)
 
-mod1 <- glm(within_dist_ofBC_frames_ahead ~ CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
-              dist_to_ball_carrier + proj_distance + NumberOfBlockers,
-            data = defenders_data, family = 'binomial')
+## Train/test data:
+train_data <- defenders_data %>%
+  filter(game_play_combination %in% train_plays)
+
+test_data <- defenders_data %>%
+  filter(game_play_combination %in% test_plays)
+
+ranger_model <- ranger(within_dist_ofBC_frames_ahead ~ 
+                 dist_to_ball_carrier + 
+                 min_proj_dist_to_ball_carrier + 
+                 NumberOfBlockers + BlockedScore,
+            data = train_data, num.tree=500, importance = "impurity")
+
+pred.train <- predict(ranger_model, train_data, type = "response") 
+pred.test <- predict(ranger_model,test_data, type = "response") 
 
 
-mod2 <- ranger(within_dist_ofBC_frames_ahead ~ CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
-              dist_to_ball_carrier + proj_distance + NumberOfBlockers + BlockedScore,
-            data = defenders_data, num.trees = 250)
+train_error <- data.frame(true_outcome = train_data$within_dist_ofBC_frames_ahead, train_prob = pred.train$predictions) 
+train_error <- train_error %>%
+  mutate(prediction = ifelse(train_prob >= 0.5, 1, 0),
+         match = ifelse(prediction==true_outcome, 1, 0))
+mean(train_error$true_outcome != train_error$prediction) #training error
 
-# If that version of mod2 gives an error, run the following:
-# mod2 <- ranger(sum(!is.na(within_dist_ofBC_frames_ahead)) ~ CosSimilarity_Dir_ToBC + Rel_Velocity_ToBC + 
-#              dist_to_ball_carrier + proj_distance + NumberOfBlockers + BlockedScore,
-#            data = defenders_data, num.trees = 250)
+ranger_model$prediction.error #oob error
+
+
+test_error <- data.frame(true_outcome = test_data$within_dist_ofBC_frames_ahead, test_preds = pred.test$predictions)
+test_error <- test_error %>%
+  mutate(prediction = ifelse(test_preds >= 0.5, 1, 0))
+mean(test_error$prediction != test_error$true_outcome)
+
+ranger.test.roc <- roc(test_data$within_dist_ofBC_frames_ahead, pred.test$predictions)
+plot(1-ranger.test.roc$specificities, ranger.test.roc$sensitivities, col="red", pch=16,
+                   xlab="False Positive", 
+                   ylab="Sensitivity")
 
 #rpart.plot(mod2)
 
-defenders_data$pred <- predict(mod2,data =  defenders_data)$predictions
+
+defenders_data$pred <- predict(ranger_model,data =  defenders_data)$predictions
+
+## Sample Logistic Regression
+logistic_mod <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
+               TotDistFromBall_Rank_OVR + NumberOfBlockers, 
+             data = final_merged_data_sub, family = 'binomial')
+summary(logistic_mod)
+
+logistic_train_preds <- predict(logistic_mod, data = train_data, type ='response')
+logistic_test_preds <- predict(logistic_mod, newdata = test_data, type ='response')
+
+train_error_logistic <- data.frame(true_outcome = train_data$within_dist_ofBC_frames_ahead, train_prob = logistic_train_preds) 
+train_error_logistic <- train_error_logistic %>%
+  mutate(prediction = ifelse(train_prob >= 0.5, 1, 0),
+         match = ifelse(prediction==true_outcome, 1, 0))
+mean(train_error_logistic$true_outcome != train_error_logistic$prediction) #training error logistic
+
+test_error_logistic <- data.frame(true_outcome = test_data$within_dist_ofBC_frames_ahead, test_prob = logistic_test_preds) 
+test_error_logistic <- test_error_logistic %>%
+  mutate(prediction = ifelse(test_prob >= 0.5, 1, 0),
+         match = ifelse(prediction==true_outcome, 1, 0))
+mean(test_error_logistic$true_outcome != test_error_logistic$prediction) #training error
+
+defenders_data$pred_logistic <- predict(logistic_mod, newdata = defenders_data, type = 'response')
 
 modeling_data <- modeling_data %>%
-  left_join(defenders_data %>% select(pred, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
+  left_join(defenders_data %>% select(pred, pred_logistic, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
 
-rm(defenders_data)
+#rm(defenders_data)
 
 mckenzie_catch <- modeling_data %>%
   filter(gameId==2022090800 & playId==617)
@@ -112,16 +280,16 @@ singletary_run <- modeling_data %>%
 View(singletary_run %>%
        filter(club==defensiveTeam) %>%
        arrange(displayName, frameId) %>%
-       select(frameId, club, displayName, Player_Role,  dist_to_ball_carrier, within_dist_ofBC, within_dist_ofBC_frames_ahead, pred))
+       select(frameId, club, displayName, Player_Role, event,  dist_to_ball_carrier, within_dist_ofBC, within_dist_ofBC_frames_ahead, within_lead1:within_lead5, within_dist_ofBC_frames_ahead))
 
 plotly::ggplotly(
   singletary_run %>%
-    #filter(frameId >= unique(frameId[which(event=='handoff')]), frameId <= unique(frameId[which(event=='first_contact')])) %>%
-    filter(frameId>=34, frameId<=40) %>%
+    filter(frameId >= unique(frameId[which(event=='handoff')]), frameId <= unique(frameId[which(event=='first_contact')])) %>%
+    # filter(frameId >= 38, frameId < 45) %>%
     ggplot(aes(x = x, y = y, 
-               text = paste0('Prediction: ', pred,
-                 'Dir: ', dir, '\n',
-                             'Player Name: ',displayName, '\n',
+               text = paste0('Ranger Prediction: ', pred,
+                             'Logistic Prediction: ', pred_logistic, '\n', 
+                             'Player Name: ', displayName, '\n',
                              'Closest Opposing Player: ', closest_opp_player_name, '\n',
                              'Closest Opposing Player Dist: ', round(min_dist_opp_player, 3), '\n',
                              'Distance to Ball: ', round(dist_to_ball_carrier, 3), '\n',
@@ -149,23 +317,66 @@ plotly::ggplotly(
     theme(plot.title = element_text(size = 10, hjust = 0.5))
 )
 
+plot(defenders_data$pred_logistic, defenders_data$pred)
+
+#ranger:
+MLmetrics::LogLoss(test_error$test_preds, test_error$true_outcome)
+#logistic:
+MLmetrics::LogLoss(test_error_logistic$test_prob, test_error_logistic$true_outcome)
+
+#d <- AmesHousing::make_ames()
+#
+# nt <- seq(1, 501, 10)
+# 
+# oob_mse <- vector("numeric", length(nt))
+# 
+# for(i in 1:length(nt)){
+#   rf <- ranger(within_dist_ofBC_frames_ahead ~ 
+#                  dist_to_ball_carrier + 
+#                  min_proj_dist_to_ball_carrier + 
+#                  NumberOfBlockers + BlockedScore,
+#                data = defenders_data, num.trees = nt[i], write.forest = FALSE)
+#   oob_mse[i] <- rf$prediction.error
+#   print(i)
+# }
+# 
+# 
+# plot(x = nt, y = oob_mse, col = "red", type = "l")
+# 
+# summary(mod2)
+# v<-as.vector(mod2$variable.importance$Importance)
+# w<-(as.vector((row.names(df))))
+# DF<-cbind(w,v)
+# DF<-as.data.frame(DF)
+#  DF
 
 ##line charts
 library(viridis)
 singletary_run %>%
   filter(dist_to_ball_carrier<=10 & club==defensiveTeam) %>%
   mutate(time_in_secs = frameId*0.1) %>%
-  ggplot( aes(x=time_in_secs, y=pred, group=displayName, color=displayName)) +
+  ggplot(aes(x=time_in_secs, y = pred, group=displayName, color=displayName)) +
   geom_line() +
   geom_point() +
   scale_color_viridis(discrete = TRUE) +
   ggtitle("Player's Probability of Being within 1 Yard of Ball Carrier \n
-          Five Frames into the Future") +
+          Five Frames into the Future, via Random Forest Model") +
   #theme_ipsum() +
   ylab("Probability") +
   transition_reveal(time_in_secs)
 
-
+singletary_run %>%
+  filter(dist_to_ball_carrier<=10 & club==defensiveTeam) %>%
+  mutate(time_in_secs = frameId*0.1) %>%
+  ggplot(aes(x=time_in_secs, y = pred_logistic, group=displayName, color=displayName)) +
+  geom_line() +
+  geom_point() +
+  scale_color_viridis(discrete = TRUE) +
+  ggtitle("Player's Probability of Being within 1 Yard of Ball Carrier \n
+          Five Frames into the Future, via Logistic Regression Model") +
+  #theme_ipsum() +
+  ylab("Probability") +
+  transition_reveal(time_in_secs)
 
 
 #############
@@ -178,13 +389,6 @@ plays <- read.csv('plays.csv')
 #  mutate(x = ifelse(playDirection == "left", 120-x, x),
 #         y = ifelse(playDirection == "left", 160/3 - y, y))
 #View(df_tracking[1,])
-
-
-
-
-
-
-
 
 
 #Sample plays and corresponding visualizations
@@ -215,9 +419,8 @@ example_play <- modeling_data %>%
 plot_title <- str_trim(gsub("\\s*\\([^\\)]+\\)","",as.character(example_play$playDescription[1])))
 
 
-
 xmin <- 0
-xmax <- 160/3
+xmax <- 53.3
 hash.right <- 38.35
 hash.left <- 12
 hash.width <- 3.3
@@ -299,3 +502,36 @@ ggplot() +
   transition_time(frameId)  +
   ease_aes('linear') + 
   NULL
+
+FixingBlockingScore <- function(DF) {
+  DFTemp <- DF[DF$BlockedScore != 0 & DF$BlockedScore != 25 & DF$a >= 1, ]
+  DFTemp2 <- DF[DF$BlockedScore != 0 & DF$BlockedScore != 25 & DF$a < 1, ]
+  
+  DFTemp2$BlockedScore <- DFTemp2$BlockedScore * DFTemp2$s
+  DFTemp$BlockedScore <- (DFTemp$BlockedScore / DFTemp$a) * DFTemp$s
+  
+  DFTempWhole <- rbind(DFTemp, DFTemp2)
+  DF <- merge(DF, DFTempWhole, by = names(DFTempWhole), all.x = TRUE)
+  
+  DF$BlockedScore[DF$BlockedScore == 25] <- NA
+  
+  return(DF)
+}
+
+modeling_data$blocking_Score_new <- FixingBlockingScore(modeling_data)
+
+# 
+# def FixingBlockingScore(DF):
+#   DFTemp=DF.loc[(DF.BlockedScore!=0) & (DF.BlockedScore!=25)&(DF.a>=1)]
+# DFTemp2=DF.loc[(DF.BlockedScore!=0) & (DF.BlockedScore!=25)&(DF.a<1)]
+# DFTemp2.BlockedScore=DFTemp2.BlockedScore*DFTemp2.s
+# DFTemp.BlockedScore=(DFTemp.BlockedScore/DFTemp.a)*DFTemp.s
+# DFTempWhole=pd.concat([DFTemp,DFTemp2],ignore_index=True)
+# DF=DF.merge(DFTempWhole, on=list(DFTempWhole.columns),how='left')
+# DF.BlockedScore.replace(25,np.nan,inplace=True)
+# return DF
+
+
+
+
+
