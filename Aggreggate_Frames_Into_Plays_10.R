@@ -1,9 +1,4 @@
-# Recall that DesignedRuns_Merged was originally made in the "DataCleansing_Code" file
-# And then it was further mutated in the PreSnap_Alignment_Code file
-
-# View(StatsByPlay_DesignedRuns %>% filter(IndivTackle == 0 & IndivAssist == 0 & Indiv_MissedTackle == 0))
-# This is empty, i.e. it's impossible to have a 0 in all three columns
-# In other words, players who didn't have a "tackle attempt" simply have NA in all three
+# Recall that final_merged_data came from the PreSnap_Alignment_Code file
 
 # Note that "Frame1" refers to actual start of tracking data
 # NOT just the frames where the ball-carrier already has ball
