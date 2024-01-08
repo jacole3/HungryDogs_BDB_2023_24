@@ -80,6 +80,9 @@ setwd("C:/Users/justi/OneDrive/Penn/BigDataBowl")
 # # Delete package tarball
 # unlink(pkgFile)
 
+options(digits = 4)
+options(scipen = 999) 
+
 games <- fread("games.csv")
 players <- fread("players.csv")
 plays <- fread("plays.csv")
