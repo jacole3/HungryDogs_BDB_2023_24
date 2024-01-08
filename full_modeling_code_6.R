@@ -389,6 +389,7 @@ convert_to_inches <- function(height) {
 MergedData <- MergedData %>% 
   mutate(height_inches = sapply(height, convert_to_inches))
 MergedData <- MergedData %>% select(-"height")
+class(MergedData$height_inches) <- numeric
 
 # If needed, calculate player age by using birth date and game date
 # MergedData <- MergedData %>% 
@@ -975,7 +976,7 @@ final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameI
 # In final_merged_data, create code for "the first surge", i.e. first defender to get within a yard of BC
 # First, must identify the frame when the defense as a whole first got a "surge"
 final_merged_data <- final_merged_data %>%
-  group_by(gameId, playId, frameId) %>% filter(possessionTeam != club) %>%
+  group_by(gameId, playId, frameId) %>% 
   mutate(TeamDefSurge_InFrame = sum(within_dist_ofBC, na.rm = TRUE)) %>%
   ungroup() 
 TeamDef_InitialSurges <- final_merged_data %>% filter(TeamDefSurge_InFrame > 0) %>%
