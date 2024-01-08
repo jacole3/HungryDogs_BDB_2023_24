@@ -244,8 +244,8 @@ defenders_data$pred <- predict(ranger_model,data =  defenders_data)$predictions
 
 ## Sample Logistic Regression
 logistic_mod <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
-               TotDistFromBall_Rank_OVR + NumberOfBlockers, 
-             data = final_merged_data_sub, family = 'binomial')
+                      TotDistFromBall_Rank_OVR + NumberOfBlockers + min_proj_dist_to_ball_carrier*BlockedScore, 
+                    data = final_merged_data_sub, family = 'binomial')
 summary(logistic_mod)
 
 logistic_train_preds <- predict(logistic_mod, data = train_data, type ='response')
