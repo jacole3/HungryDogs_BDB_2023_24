@@ -10,7 +10,7 @@
 # But, everything "Initial" refers just to frames when ball-carrier has ball
 
 # Stats by play for all plays in data set
-StatsByPlay_MergedData <- MergedData %>% 
+StatsByPlay_final_merged_data <- final_merged_data %>% 
   group_by(gameId, playId, nflId, displayName) %>%
   summarize(Frames = n(), down = max(down), distance = max(ydstogo), Team = max(club),
             PlayerSideOfBall = PlayerSideOfBall[1], HomeTeam = max(homeTeamAbbr), AwayTeam = max(visitorTeamAbbr),
@@ -77,19 +77,28 @@ StatsByPlay_MergedData <- MergedData %>%
             PlayEPASuccess_TackleAttemptOnly = max(PlayEPASuccess_TackleAttemptOnly),
             PlayEPASuccess_TacklerOnly = max(PlayEPASuccess_TacklerOnly),
             PlayWPASuccess_TackleAttemptOnly = max(PlayWPASuccess_TackleAttemptOnly),
-            PlayWPASuccess_TacklerOnly = max(PlayWPASuccess_TacklerOnly))
+            PlayWPASuccess_TacklerOnly = max(PlayWPASuccess_TacklerOnly),
+            Surge = ifelse(is.na(max(within_dist_ofBC), NA, ifelse(max(within_dist_ofBC)))),
+            Surge_Prob_Logistic = ifelse(is.na(max(within_dist_ofBC), NA,
+                      ifelse(max(within_dist_ofBC) == 0, max(pred_within_dist_ofBC_logistic), max_pred_near_BC_FiveFramesEarly))),
+            Tackle_Prob_Logistic = ifelse(is.na(max(IndivTotTackles), NA,
+                      ifelse(max(IndivTotTackles) == 0, max(pred_tackle_logistic), max_pred_tackle_FiveFramesEarly))))
+
+StatsByPlay_final_merged_data <- StatsByPlay_final_merged_data %>% 
+  mutate(Surges_OE_Logistic = Surge - Surge_Prob_Logistic,
+         Tackles_OE_Logistic = IndivTotTackles - Tackle_Prob_Logistic)
 
 # Mutate a variable for missing a tackle on a play that still was successful for defense
 # Recall EPSuccess and WPSuccess are from offense's point of view (so defense wants them to be 0)
-StatsByPlay_MergedData <- StatsByPlay_MergedData %>% mutate(IndivMT_DefEPSuccess =
+StatsByPlay_final_merged_data <- StatsByPlay_final_merged_data %>% mutate(IndivMT_DefEPSuccess =
     ifelse(Indiv_MissedTackle > 0 & EPSuccess == 0, 1,
            ifelse(Indiv_MissedTackle > 0 & EPSuccess > 0, 0, NA)))
-StatsByPlay_MergedData <- StatsByPlay_MergedData %>% mutate(IndivMT_DefWPSuccess =
+StatsByPlay_final_merged_data <- StatsByPlay_final_merged_data %>% mutate(IndivMT_DefWPSuccess =
     ifelse(Indiv_MissedTackle > 0 & WPSuccess == 0, 1,
            ifelse(Indiv_MissedTackle > 0 & WPSuccess > 0, 0, NA)))
 
-# Example of seeing who has most missed tackles that still were on good plays for defense
-IndivStats_MergedData <- StatsByPlay_MergedData %>%
+# Example of seeing who has highest surge rate in general (no play type or position filters)
+IndivStats_final_merged_data <- StatsByPlay_final_merged_data %>%
   group_by(nflId, displayName) %>%
   summarize(Plays = n(), TackleAttempts = sum(Indiv_TackleAttempt, na.rm = TRUE),
             SoloTkl_PerPlay = sum(IndivSoloTackle, na.rm = TRUE) / Plays,
@@ -104,10 +113,16 @@ IndivStats_MergedData <- StatsByPlay_MergedData %>%
             WPASuccessRate_TackleAttemptsOnly = mean(PlayWPASuccess_TackleAttemptOnly, na.rm = TRUE),
             WPASuccessRate_TacklesOnly = mean(PlayWPASuccess_TacklerOnly, na.rm = TRUE),
             MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
-            MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE)) %>%
-  filter(TackleAttempts >= 1) %>% # insert your own number here
-  arrange(desc(MissedTackles_DefEPASuccess)) %>%
-  select(1:4, "MissedTackles_DefEPASuccess", "MissedTackles_DefWPASuccess", 5:15)
+            MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE),
+            Surges = sum(Surge, na.rm = TRUE),
+            Surges_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE),
+            SurgeRate = sum(Surge, na.rm = TRUE) / Plays,
+            SurgeRate_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE) / Plays,
+            Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
+            TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
+  filter(Plays >= 5) %>% # insert your own number here
+  arrange(desc(SurgeRate)) %>%
+  select(1:4, "SurgeRate", "SurgeRate_OverExpected", 5:21)
 
 # Stats by play for completions
 StatsByPlay_Completions <- Completions_Merged %>% 
