@@ -345,6 +345,157 @@ TacklesPerSurge_Leaders <- IndivStats_DefenderHasSurge %>%
   select(1:4, "TacklesPerSurge", "Avg_Surge_To_EndOfPlay_Frames", "AvgTotalEPA", "TotalTackles") %>%
   rename(Surges = Plays)
 
+# Use tab_options() w/ gt package for fancy table for tackles per surge and lowest team EPA on surges
+class(TacklesPerSurge_Leaders) <- "data.frame"
+TacklesPerSurge_FancyTable <- TacklesPerSurge_Leaders %>%
+  select(c("displayName", "Surges", "TotalTackles", "TacklesPerSurge")) %>%
+  head(20) %>%
+  mutate(Rank = row_number(desc(TacklesPerSurge))) %>%
+  select("Rank", 1:4)
+
+TacklesPerSurge_FancyTable <- TacklesPerSurge_FancyTable |>
+  # filter(officialPosition %in% c("OLB", "DE")) |> 
+  # mutate(rank = row_number()) |> 
+  # select(1:4, "Surges", "TotalTackles", "TacklesPerSurge") |> 
+  head(20) |> 
+  gt() |>
+  tab_options(
+    table.border.top.color = "white",
+    row.striping.include_table_body = FALSE
+  ) |>
+  opt_table_font(
+    font = list(
+      google_font("Chivo"),
+      default_fonts()
+    )
+  ) |>
+  fmt_number(
+    columns = c(TacklesPerSurge),
+    decimals = 2,
+  ) |>
+  data_color(
+    columns = c(TacklesPerSurge),
+    colors = scales::col_numeric(
+      palette = c("#FEE0D2", "#67000D"),
+      domain = NULL
+    )
+  ) |> 
+  cols_label(
+    Rank = md("**Rank**"), # the md is what makes the headers show up as bold
+    displayName = md("**Player**"),
+    # team = md("**Team**"),
+    # officialPosition = md("**Position**"),
+    Surges = md("**Surges**"),
+    TotalTackles = md("**Surge Tkls**"),
+    TacklesPerSurge = html('<span style="text-decoration:overline; font-weight:bold">Tackles Per Surge</span>')
+  ) |> 
+  cols_align(
+    align = "center",
+    columns = Surges:TacklesPerSurge
+  ) |> 
+  tab_header(md("**Top 20 Players in Tackles Per Surge**"),
+             md("(Minimum XXX Surges; Weeks 1-9, 2022)")) |> # don't forget to adjust your minimum
+  tab_style(style = cell_borders(sides = "top"),
+            locations = cells_title("title")) |> 
+  tab_options(
+    table.border.top.style = "a"
+  ) |> 
+  tab_footnote(
+    footnote = "Surge: Getting Within 1 Yard of Ball-Carrier",
+    locations = cells_column_labels(
+      columns = TacklesPerSurge
+    )
+  )
+
+gtsave(TacklesPerSurge_FancyTable, "TacklesPerSurge_FancyTable.png")
+
+class(LowestEPA_OnSurges_Leaders) <- "data.frame"
+LowestSurgeEPA_FancyTable <- LowestEPA_OnSurges_Leaders %>%
+  select(c("displayName", "Surges", "TacklesPerSurge", "AvgTotalEPA")) %>%
+  head(20) %>%
+  mutate(Rank = row_number(AvgTotalEPA)) %>%
+  select("Rank", 1:5)
+
+LowestSurgeEPA_FancyTable <- LowestSurgeEPA_FancyTable |>
+  # filter(officialPosition %in% c("OLB", "DE")) |> 
+  # mutate(rank = row_number()) |> 
+  # select(1:4, "Surges", "TacklesPerSurge", "AvgTotalEPA") |> 
+  head(20) |> 
+  gt() |>
+  tab_options(
+    table.border.top.color = "white",
+    row.striping.include_table_body = FALSE
+  ) |>
+  opt_table_font(
+    font = list(
+      google_font("Chivo"),
+      default_fonts()
+    )
+  ) |>
+  fmt_number(
+    columns = c(AvgTotalEPA),
+    decimals = 2,
+  ) |>
+  data_color(
+    columns = c(AvgTotalEPA),
+    colors = scales::col_numeric(
+      palette = c("#FEE0D2", "#67000D"),
+      domain = NULL
+    )
+  ) |> 
+  cols_label(
+    Rank = md("**Rank**"), # the md is what makes the headers show up as bold
+    displayName = md("**Player**"),
+    # team = md("**Team**"),
+    # officialPosition = md("**Position**"),
+    Surges = md("**Surges**"),
+    TacklesPerSurge = md("**Tackles Per Surge**"),
+    AvgTotalEPA = html('<span style="text-decoration:overline; font-weight:bold">Avg EPA Allowed</span>')
+  ) |> 
+  cols_align(
+    align = "center",
+    columns = Surges:AvgTotalEPA
+  ) |> 
+  tab_header(md("**Top 20 Players with Lowest Team EPA on Their Surges**"),
+             md("(Minimum XXX Surges; Weeks 1-9, 2022)")) |> # don't forget to adjust your minimum
+  tab_style(style = cell_borders(sides = "top"),
+            locations = cells_title("title")) |> 
+  tab_options(
+    table.border.top.style = "a"
+  ) |> 
+  tab_footnote(
+    footnote = "EPA: Expected Points Added, from Offense's Perspective",
+    locations = cells_column_labels(
+      columns = AvgTotalEPA
+    )
+  )
+
+gtsave(LowestSurgeEPA_FancyTable, "LowestSurgeEPA_FancyTable.png")
+
+# combine tables
+library(magick)
+image_append(c(image_read("TacklesPerSurge_FancyTable.png"), image_read("LowestSurgeEPA_FancyTable.png")))
+# Create function to combine two images
+image_append_combine <- function(images) {
+  combined_image <- image_append(images)
+  return(combined_image)
+}
+
+# Image file paths
+TacklesPerSurge_FancyTable_path <- "~/Desktop/TacklesPerSurge_FancyTable.png"
+LowestSurgeEPA_FancyTable_path <- "~/Desktop/LowestSurgeEPA_FancyTable.png"
+
+# Read images
+TacklesPerSurge_FancyTable_Image <- image_read(TacklesPerSurge_FancyTable_path)
+LowestSurgeEPA_FancyTable_Image <- image_read(LowestSurgeEPA_FancyTable_path)
+
+# Combine images using your function
+combined_StatsOnSurges_image <- image_append_combine(c(TacklesPerSurge_FancyTable_Image, LowestSurgeEPA_FancyTable_Image))
+
+# Save the combined image to your desktop
+combined_StatsOnSurges_image_path <- "~/Desktop/combined_StatsOnSurges_image.png"  # Change the filename or extension as needed
+image_write(combined_StatsOnSurges_image, path = combined_StatsOnSurges_image_path)
+
 # Stats by play for completions
 StatsByPlay_Completions <- Completions_Merged %>% 
   group_by(gameId, playId, nflId, displayName) %>% 
