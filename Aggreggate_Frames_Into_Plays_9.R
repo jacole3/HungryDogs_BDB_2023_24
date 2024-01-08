@@ -70,6 +70,7 @@ StatsByPlay_final_merged_data <- final_merged_data %>%
             PlayEPASuccess_TacklerOnly = max(PlayEPASuccess_TacklerOnly),
             PlayWPASuccess_TackleAttemptOnly = max(PlayWPASuccess_TackleAttemptOnly),
             PlayWPASuccess_TacklerOnly = max(PlayWPASuccess_TacklerOnly),
+            Surge_To_EndOfPlay_Frames = max(Surge_To_EndOfPlay_Frames),
             Surge = ifelse(PlayerSideOfBall == "offense", NA, max(within_dist_ofBC)),
             Surge_Prob_Logistic = ifelse(PlayerSideOfBall == "offense", NA,
                       ifelse(max(within_dist_ofBC) == 0, max(pred_within_dist_ofBC_logistic), max_pred_near_BC_FiveFramesEarly)),
@@ -96,6 +97,8 @@ IndivStats_final_merged_data <- StatsByPlay_final_merged_data %>%
             SoloTkl_PerPlay = sum(IndivSoloTackle, na.rm = TRUE) / Plays,
             TotalTkl_PerPlay = sum(IndivTotTackles, na.rm = TRUE) / Plays,
             MissedTackleRate = sum(Indiv_MissedTackle, na.rm = TRUE) / sum(Indiv_TackleAttempt, na.rm = TRUE),
+            AvgTotalEPA = mean(EPA, na.rm = TRUE),
+            AvgTotalDefWPA = mean(DefWPA, na.rm = TRUE),
             AvgTotalEPA_TackleAttemptsOnly = mean(PlayEPA_TackleAttemptOnly, na.rm = TRUE),
             AvgTotalEPA_TacklesOnly = mean(PlayEPA_TacklerOnly, na.rm = TRUE),
             AvgDefWPA_TackleAttemptsOnly = mean(PlayDefWPA_TackleAttemptOnly, na.rm = TRUE),
@@ -110,11 +113,12 @@ IndivStats_final_merged_data <- StatsByPlay_final_merged_data %>%
             Surges_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE),
             SurgeRate = sum(Surge, na.rm = TRUE) / Plays,
             SurgeRate_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE) / Plays,
+            Avg_Surge_To_EndOfPlay_Frames = mean(Surge_To_EndOfPlay_Frames, na.rm = TRUE),
             Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
             TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
   filter(Plays >= 5) %>% # insert your own number here
   arrange(desc(SurgeRate)) %>%
-  select(1:4, "SurgeRate", "SurgeRate_OverExpected", 5:21)
+  select(1:4, "SurgeRate", "SurgeRate_OverExpected", 5:24)
 
 # Stats by play for completions
 StatsByPlay_Completions <- Completions_Merged %>% 
