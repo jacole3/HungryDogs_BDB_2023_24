@@ -137,9 +137,9 @@ TackleRateOE_AllPlays_Leaders <- IndivStats_final_merged_data %>%
   arrange(desc(TackleRate_OverExpected)) %>% select(1:4, "TackleRate_OverExpected", "TotalTackles", "Tackles_OverExpected", "TotalTkl_PerPlay")
 # Get weighted mean to help scale the metric
 TacklesOE_Constant_AllPlays <- weighted.mean(TackleRateOE_AllPlays_Leaders$TackleRate_OverExpected, w = (c(TackleRateOE_AllPlays_Leaders$Plays)))
-TacklesOE_Constant_Mean <- mean(TackleRateOE_AllPlays_Leaders$Plays)
+TacklesOE_Constant_Plays_Mean <- mean(TackleRateOE_AllPlays_Leaders$Plays)
 TackleRateOE_AllPlays_Leaders <- TackleRateOE_AllPlays_Leaders %>%
-  mutate(TackleRate_OverExpected = TackleRate_OverExpected - (TacklesOE_Constant_AllPlays * Plays / TacklesOE_Constant_Mean))
+  mutate(TackleRate_OverExpected = TackleRate_OverExpected - (TacklesOE_Constant_AllPlays * Plays / TacklesOE_Constant_Plays_Mean))
 TackleRateOE_AllPlays_Leaders <- TackleRateOE_AllPlays_Leaders %>% arrange(desc(TackleRate_OverExpected))
 
 # Get the stats when the defender in question has a surge
