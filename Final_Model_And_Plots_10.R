@@ -1,3 +1,5 @@
+# Each of these CSVs were built from the "full_modeling_code" file
+# I.e. that file was one-week sample of how we built the model, this file combines all weeks for the final product
 week_1 <- read_csv('Final Week 1.csv')
 week_2 <- read_csv('Final Week 2.csv')
 week_3 <- read_csv('Final Week 3.csv')
