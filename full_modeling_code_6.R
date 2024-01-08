@@ -885,7 +885,8 @@ MergedData_blockers <- MergedData_blockers %>% arrange(gameId, playId, nflId, fr
 dist <- 1
 frames <- 5
 MergedData_blockers <- MergedData_blockers %>%
-  mutate(within_dist_ofBC = ifelse(dist_to_ball_carrier <= dist, 1, 0)) %>%
+  mutate(within_dist_ofBC = ifelse(PlayerSideOfBall == "offense", NA, 
+                                   ifelse(dist_to_ball_carrier <= dist, 1, 0))) %>%
   group_by(gameId, playId, nflId) %>%
   mutate(within_dist_ofBC_frames_ahead = ifelse(PlayerSideOfBall != "defense", NA,
     ifelse((lead(within_dist_ofBC) == 1 & playId == lead(playId) & nflId == lead(nflId)) |
