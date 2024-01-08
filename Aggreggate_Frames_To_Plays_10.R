@@ -809,6 +809,70 @@ SurgeRate_NearbyRuns_Leaders <- NearbyBoxDefender_Stats_DesignedRuns %>%
 arrange(desc(SurgeRate)) %>%
 select(1:4, "SurgeRate", "SurgeRate_OverExpected", "Surges", "TotalTackles", "TotalTkl_PerPlay")
 
+# Use tab_options() w/ gt package for fancy table for highest surge rate on nearby runs
+class(SurgeRate_NearbyRuns_Leaders) <- "data.frame"
+SurgeRate_NearbyRuns_FancyTable <- SurgeRate_NearbyRuns_Leaders %>%
+  select(c("displayName", "Plays", "Surges", "SurgeRate")) %>%
+  head(20) %>%
+  mutate(Rank = row_number(desc(SurgeRate))) %>%
+  select("Rank", 1:5)
+
+SurgeRate_NearbyRuns_FancyTable <- SurgeRate_NearbyRuns_FancyTable |>
+  # filter(officialPosition %in% c("OLB", "DE")) |> 
+  # mutate(rank = row_number()) |> 
+  # select(1:4,  "Plays", "Surges", "SurgeRate") |> 
+  head(20) |> 
+  gt() |>
+  tab_options(
+    table.border.top.color = "white",
+    row.striping.include_table_body = FALSE
+  ) |>
+  opt_table_font(
+    font = list(
+      google_font("Chivo"),
+      default_fonts()
+    )
+  ) |>
+  fmt_number(
+    columns = c(SurgeRate),
+    decimals = 2,
+  ) |>
+  data_color(
+    columns = c(SurgeRate),
+    colors = scales::col_numeric(
+      palette = c("#FEE0D2", "#67000D"),
+      domain = NULL
+    )
+  ) |> 
+  cols_label(
+    Rank = md("**Rank**"), # the md is what makes the headers show up as bold
+    displayName = md("**Player**"),
+    # team = md("**Team**"),
+    # officialPosition = md("**Position**"),
+    Plays = md("**Nearby Runs**"),
+    Surges = md("**Surges**"),
+    SurgeRate = html('<span style="text-decoration:overline; font-weight:bold">Surge Rate</span>')
+  ) |> 
+  cols_align(
+    align = "center",
+    columns = Plays:SurgeRate
+  ) |> 
+  tab_header(md("**Top 20 Players in Surge Rate on Nearby Runs**"),
+             md("(Minimum XXX Nearby Runs; Weeks 1-9, 2022)")) |> # don't forget to adjust your minimum
+  tab_style(style = cell_borders(sides = "top"),
+            locations = cells_title("title")) |> 
+  tab_options(
+    table.border.top.style = "a"
+  ) |> 
+  tab_footnote(
+    footnote = "Nearby Runs: Within One Gap of Defender's Pre-Snap Alignment",
+    locations = cells_column_labels(
+      columns = SurgeRate
+    )
+  )
+
+gtsave(SurgeRate_NearbyRuns_FancyTable, "SurgeRate_NearbyRuns_FancyTable.png")
+
 StatsByPlay_DesignedRuns_NearDefender_PrimIDL <- StatsByPlay_DesignedRuns_NearDefender %>%
   filter(Primary_BoxPosition == "IDL")
 Nearby_Stats_DesignedRuns_PrimIDL <- StatsByPlay_DesignedRuns_NearDefender_PrimIDL %>%
