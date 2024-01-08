@@ -94,6 +94,8 @@ tracking_week_1 <- fread("tracking_week_1.csv")
 # tracking_week_8 <- fread("tracking_week_8.csv")
 # tracking_week_9 <- fread("tracking_week_9.csv")
 
+# For this file, we only include Week 1 so it would run faster on the average laptop, but a strong enough computer should run this for all weeks
+
 tracking_combined <- rbind(tracking_week_1)
                            # , tracking_week_2, tracking_week_3,
                            # tracking_week_4, tracking_week_5, tracking_week_6,
