@@ -1099,6 +1099,15 @@ final_merged_data_sub$pred_within_dist_ofBC_logistic <- predict(mod_logistic, fi
 final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_near_BC_error_logistic = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_logistic)
 
+# Build logistic model for tackle probability too in case it's needed
+tackle_mod1 <- glm(Indiv_MadeTackle ~ Rel_Velocity_ToBC + dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
+                     TotDistFromBall_Rank_OVR + NumberOfBlockers + Rel_Momentum_ToBC, 
+                   data = final_merged_data_sub, family = 'binomial')
+summary(tackle_mod1)
+final_merged_data_sub$pred_tackle_1 <- predict(tackle_mod1, final_merged_data_sub, type = 'response')
+final_merged_data_sub <- final_merged_data_sub %>%
+  mutate(pred_tackle_1 = Indiv_MadeTackle - pred_tackle_1)
+
 mckenzie_catch <- final_merged_data %>%
   filter(gameId==2022090800 & playId==617) %>%
   left_join(final_merged_data_sub %>% select(pred_within_dist_ofBC_1, gameId, playId, nflId, frameId), by = c("gameId", "playId", "nflId", 'frameId'))
