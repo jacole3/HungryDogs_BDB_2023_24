@@ -1099,8 +1099,8 @@ final_merged_data_sub <- final_merged_data %>%
 # We tested dozens of models, including logistic regression and random forest
 # Other models we tested can be seen at the bottom of this file, along with the "RandomFor_vs_Logit" GitHub file
 mod_logistic <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
-               TotDistFromBall_Rank_OVR + NumberOfBlockers, 
-             data = final_merged_data_sub, family = 'binomial')
+                      TotDistFromBall_Rank_OVR + NumberOfBlockers + min_proj_dist_to_ball_carrier*BlockedScore, 
+                    data = final_merged_data_sub, family = 'binomial')
 summary(mod_logistic)
 final_merged_data_sub$pred_within_dist_ofBC_logistic <- predict(mod_logistic, final_merged_data_sub, type = 'response')
 final_merged_data_sub <- final_merged_data_sub %>%
