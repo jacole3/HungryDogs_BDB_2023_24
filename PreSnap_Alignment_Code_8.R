@@ -1,4 +1,4 @@
-# All of this start off where we left off after full_Wk1_modeling_code
+# All of this start off where we left off after the full_modeling_code file
 
 # First, get each player's "maximum" probabilities, excluding the final five frames before play ended
 # Premise: if player X makes tackle on frame 40, tackle probability will inherently be high on frame 39
