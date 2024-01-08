@@ -118,7 +118,7 @@ IndivStats_final_merged_data <- StatsByPlay_final_merged_data %>%
             TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
   filter(Plays >= 5) %>% # insert your own number here
   arrange(desc(SurgeRate)) %>%
-  select(1:4, "SurgeRate", "SurgeRate_OverExpected", 5:24)
+  select(1:4, "SurgeRate", "SurgeRate_OverExpected", 5:26)
 
 # Stats by play for completions
 StatsByPlay_Completions <- Completions_Merged %>% 
