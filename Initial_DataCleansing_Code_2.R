@@ -394,6 +394,7 @@ convert_to_inches <- function(height) {
 MergedData <- MergedData %>% 
   mutate(height_inches = sapply(height, convert_to_inches))
 MergedData <- MergedData %>% select(-"height")
+class(MergedData$height_inches) <- numeric
 
 # If we want, can calculate player age by using birth date and game date
 # MergedData <- MergedData %>% 
