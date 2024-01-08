@@ -79,7 +79,7 @@ StatsByPlay_final_merged_data <- final_merged_data %>%
 
 StatsByPlay_final_merged_data <- StatsByPlay_final_merged_data %>% 
   mutate(Surges_OE_Logistic = Surge - Surge_Prob_Logistic,
-         Tackles_OE_Logistic = IndivTotTackles - Tackle_Prob_Logistic)
+         Tackles_OE_Logistic = Indiv_MadeTackle - Tackle_Prob_Logistic)
 
 # Mutate a variable for missing a tackle on a play that still was successful for defense
 # Recall EPSuccess and WPSuccess are from offense's point of view (so defense wants them to be 0)
