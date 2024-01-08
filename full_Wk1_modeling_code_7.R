@@ -971,11 +971,11 @@ final_merged_data <- final_merged_data %>% arrange(gameId, playId, nflId, frameI
 
 # In final_merged_data, create code for "the first surge", i.e. first defender to get within a yard of BC
 # First, must identify the frame when the defense as a whole first got a "surge"
-TeamDef_InitialSurges <- final_merged_data %>% filter(defensiveTeam == club) %>%
+final_merged_data <- final_merged_data %>
   group_by(gameId, playId, frameId) %>%
   mutate(TeamDefSurge_InFrame = sum(within_dist_ofBC, na.rm = TRUE)) %>%
   ungroup() 
-TeamDef_InitialSurges <- TeamDef_InitialSurges %>% filter(TeamDefSurge_InFrame > 0) %>%
+TeamDef_InitialSurges <- final_merged_data %>% filter(TeamDefSurge_InFrame > 0) %>%
   group_by(gameId, playId, defensiveTeam) %>%
   mutate(TeamDefSurge_QuickestFrame_Rank = rank(frameId, ties.method = "first")) %>%
   ungroup()
