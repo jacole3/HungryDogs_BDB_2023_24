@@ -1,4 +1,4 @@
-# Recall that final_merged_data came from the PreSnap_Alignment_Code file
+# Recall that final_merged_data came from the end of the "Final_Model_And_Plots" file
 
 # Note that "Frame1" refers to actual start of tracking data
 # NOT just the frames where the ball-carrier already has ball
