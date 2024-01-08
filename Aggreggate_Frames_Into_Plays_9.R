@@ -94,7 +94,9 @@ IndivStats_final_merged_data <- StatsByPlay_final_merged_data %>%
   group_by(nflId, displayName) %>% filter(PlayerSideOfBall == "defense") %>%
   summarize(Plays = n(), TackleAttempts = sum(Indiv_TackleAttempt, na.rm = TRUE),
             SoloTkl_PerPlay = sum(IndivSoloTackle, na.rm = TRUE) / Plays,
+            SoloTackles = sum(IndivSoloTackle, na.rm = TRUE),
             TotalTkl_PerPlay = sum(IndivTotTackles, na.rm = TRUE) / Plays,
+            TotalTackles = sum(IndivTotTackles, na.rm = TRUE),
             MissedTackleRate = sum(Indiv_MissedTackle, na.rm = TRUE) / sum(Indiv_TackleAttempt, na.rm = TRUE),
             AvgTotalEPA = mean(EPA, na.rm = TRUE),
             AvgTotalDefWPA = mean(DefWPA, na.rm = TRUE),
@@ -116,19 +118,74 @@ IndivStats_final_merged_data <- StatsByPlay_final_merged_data %>%
             Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
             TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
   filter(Plays >= 5) # insert your own number here
-  
+
 # Leaderboard for highest surge rate on all plays  
 SurgeRate_AllPlays_Leaders <- IndivStats_final_merged_data %>%
   arrange(desc(SurgeRate)) %>%
-  select(1:4, "SurgeRate", "SurgeRate_OverExpected", 6:26)
+  select(1:4, "SurgeRate", "SurgeRate_OverExpected", "Surges", "TotalTackles")
 
 # Leaderboard for most total surges
 TotSurges_AllPlays_Leaders <- IndivStats_final_merged_data %>%
-  arrange(desc(Surges)) %>% select(1:4, "Surges", "SurgeRate", "SurgeRate_OverExpected", 7:26)
+  arrange(desc(Surges)) %>% select(1:4, "Surges", "SurgeRate", "SurgeRate_OverExpected", "TotalTackles")
+
+# Leaderboard for highest surge rate over expected
+SurgeRateOE_AllPlays_Leaders <- IndivStats_final_merged_data %>%
+  arrange(desc(SurgeRate_OverExpected)) %>% select(1:4, "SurgeRate_OverExpected", "Surges", "SurgeRate", "TotalTackles")
+
+# Leaderboard for highest tackle rate over expected
+TackleRateOE_AllPlays_Leaders <- IndivStats_final_merged_data %>%
+  arrange(desc(TackleRate_OverExpected)) %>% select(1:4, "TackleRate_OverExpected", "TotalTackles", "Tackles_OverExpected", "TotalTkl_PerPlay")
+# Get weighted mean to help scale the metric
+TacklesOE_Constant_AllPlays <- weighted.mean(TackleRateOE_AllPlays_Leaders$TackleRate_OverExpected, w = (c(TackleRateOE_AllPlays_Leaders$Plays)))
+TacklesOE_Constant_Mean <- mean(TackleRateOE_AllPlays_Leaders$Plays)
+TackleRateOE_AllPlays_Leaders <- TackleRateOE_AllPlays_Leaders %>%
+  mutate(TackleRate_OverExpected = TackleRate_OverExpected - (TacklesOE_Constant_AllPlays * Plays / TacklesOE_Constant_Mean))
+TackleRateOE_AllPlays_Leaders <- TackleRateOE_AllPlays_Leaders %>% arrange(desc(TackleRate_OverExpected))
+
+# Get the stats when the defender in question has a surge
+StatsByPlay_DefenderHasSurge = StatsByPlay_final_merged_data %>%
+  filter(!is.na(Surge) & Surge > 0)
+
+IndivStats_DefenderHasSurge <-  StatsByPlay_DefenderHasSurge %>%
+  group_by(nflId, displayName) %>% 
+  summarize(Plays = n(), TackleAttempts = sum(Indiv_TackleAttempt, na.rm = TRUE),
+            SoloTkl_PerPlay = sum(IndivSoloTackle, na.rm = TRUE) / Plays,
+            SoloTackles = sum(IndivSoloTackle, na.rm = TRUE),
+            TotalTkl_PerPlay = sum(IndivTotTackles, na.rm = TRUE) / Plays,
+            TotalTackles = sum(IndivTotTackles, na.rm = TRUE),
+            MissedTackleRate = sum(Indiv_MissedTackle, na.rm = TRUE) / sum(Indiv_TackleAttempt, na.rm = TRUE),
+            AvgTotalEPA = mean(EPA, na.rm = TRUE),
+            AvgTotalDefWPA = mean(DefWPA, na.rm = TRUE),
+            AvgTotalEPA_TackleAttemptsOnly = mean(PlayEPA_TackleAttemptOnly, na.rm = TRUE),
+            AvgTotalEPA_TacklesOnly = mean(PlayEPA_TacklerOnly, na.rm = TRUE),
+            AvgDefWPA_TackleAttemptsOnly = mean(PlayDefWPA_TackleAttemptOnly, na.rm = TRUE),
+            AvgDefWPA_TacklesOnly = mean(PlayDefWPA_TacklerOnly, na.rm = TRUE),
+            EPASuccessRate_TackleAttemptsOnly = mean(PlayEPASuccess_TackleAttemptOnly, na.rm = TRUE),
+            EPASuccessRate_TacklesOnly = mean(PlayEPASuccess_TacklerOnly, na.rm = TRUE),
+            WPASuccessRate_TackleAttemptsOnly = mean(PlayWPASuccess_TackleAttemptOnly, na.rm = TRUE),
+            WPASuccessRate_TacklesOnly = mean(PlayWPASuccess_TacklerOnly, na.rm = TRUE),
+            MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
+            MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE),
+            Avg_Surge_To_EndOfPlay_Frames = mean(Surge_To_EndOfPlay_Frames, na.rm = TRUE),
+            Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
+            TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
+  filter(Plays >= 5) # insert your own number here
+
+# Leaderboard for lowest offensive EPA/play when the given defensive player has a surge
+LowestEPA_OnSurges_Leaders <- IndivStats_DefenderHasSurge %>%
+  arrange(AvgTotalEPA) %>%
+  select(1:4, "AvgTotalEPA", "Avg_Surge_To_EndOfPlay_Frames", "TotalTackles") %>%
+  rename(Surges = Plays)
+
+# Leaderboard for lowest time remaining to end of snap when the given defensive player has a surge
+LowestTimeToEnd_OnSurges_Leaders <- IndivStats_DefenderHasSurge %>%
+  arrange(Avg_Surge_To_EndOfPlay_Frames) %>%
+  select(1:4, "Avg_Surge_To_EndOfPlay_Frames", "AvgTotalEPA", "TotalTackles") %>%
+  rename(Surges = Plays)
 
 # Stats by play for completions
 StatsByPlay_Completions <- Completions_Merged %>% 
-  group_by(gameId, playId, nflId, displayName) %>%
+  group_by(gameId, playId, nflId, displayName) %>% 
   summarize(Frames = n(), down = max(down), distance = max(ydstogo), Team = max(club),
             PlayerSideOfBall = PlayerSideOfBall[1], HomeTeam = max(homeTeamAbbr), AwayTeam = max(visitorTeamAbbr),
             BallCarrierID = max(ballCarrierId), BallCarrierName = max(ballCarrierDisplayName),
@@ -139,8 +196,6 @@ StatsByPlay_Completions <- Completions_Merged %>%
             YdsBeforeContact = max(YdsBeforeContact), YdsAfterContact = max(YdsAfterContact),
             OffFormation = max(offenseFormation), TeamDefendersInBox = max(defendersInTheBox),
             EPA = max(expectedPointsAdded),
-            foulName1 = max(foulName1), foulName2 = max(foulName2),
-            foulNFLId1 = max(foulNFLId1), foulNFLId2 = max(foulNFLId2),
             posteam_type = max(posteam_type), yardline_100 = max(yardline_100),
             sp = max(sp), goal_to_go = max(goal_to_go), 
             air_yards = max(air_yards), yards_after_catch = max(yards_after_catch), 
@@ -154,16 +209,12 @@ StatsByPlay_Completions <- Completions_Merged %>%
             TeamQBHit = max(qb_hit),
             td_team = max(td_team), td_player_name = max(td_player_name),
             td_player_id = max(td_player_id), WPA = max(wpa), DefWPA = max(DefWPA),
-            DefTeam_SoloTackle = max(solo_tackle), DefTeam_Safety = max(safety),
+            DefTeam_SoloTackle = max(solo_tackle), 
             DefTeam_TFL = max(tackled_for_loss), DefTeam_MissedTackles = max(TeamMT_FullPlay),
             TeamTouchdown = max(touchdown),
             TeamReturnTD = max(return_touchdown), OffTeam_Fumble = max(fumble),
             DefTeam_Assist_Tackle = max(assist_tackle),
             DefTeam_Penalized_Tackle = max(TeamDef_Tkl_Pen), TeamDef_Tackle_Clean = max(TeamDef_Tackle_Clean),
-            TFL_player_id_1 = max(tackle_for_loss_1_player_id),
-            TFL_player_name_1 = max(tackle_for_loss_1_player_name),
-            TFL_player_id_2 = max(tackle_for_loss_2_player_id),
-            TFL_player_name_2 = max(tackle_for_loss_2_player_name),
             penalty_team = max(penalty_team), penalty_type = max(penalty_type),
             Temperature = max(Temperature), roof = max(roof),
             surface = max(surface), EPSuccess = max(success),
@@ -191,7 +242,17 @@ StatsByPlay_Completions <- Completions_Merged %>%
             PlayEPASuccess_TackleAttemptOnly = max(PlayEPASuccess_TackleAttemptOnly),
             PlayEPASuccess_TacklerOnly = max(PlayEPASuccess_TacklerOnly),
             PlayWPASuccess_TackleAttemptOnly = max(PlayWPASuccess_TackleAttemptOnly),
-            PlayWPASuccess_TacklerOnly = max(PlayWPASuccess_TacklerOnly))
+            PlayWPASuccess_TacklerOnly = max(PlayWPASuccess_TacklerOnly),
+            Surge_To_EndOfPlay_Frames = max(Surge_To_EndOfPlay_Frames),
+            Surge = ifelse(PlayerSideOfBall == "offense", NA, max(within_dist_ofBC)),
+            Surge_Prob_Logistic = ifelse(PlayerSideOfBall == "offense", NA,
+                                         ifelse(max(within_dist_ofBC) == 0, max(pred_within_dist_ofBC_logistic), max_pred_near_BC_FiveFramesEarly)),
+            Tackle_Prob_Logistic = ifelse(PlayerSideOfBall == "offense", NA,
+                                          ifelse(max(IndivTotTackles) == 0, max(pred_tackle_logistic), max_pred_tackle_FiveFramesEarly)))
+
+StatsByPlay_Completions <- StatsByPlay_final_Completions %>% 
+  mutate(Surges_OE_Logistic = Surge - Surge_Prob_Logistic,
+         Tackles_OE_Logistic = Indiv_MadeTackle - Tackle_Prob_Logistic)
 
 # Mutate a variable for missing a tackle on a play that still was successful for defense
 # Recall EPSuccess and WPSuccess are from offense's point of view (so defense wants them to be 0)
@@ -206,10 +267,12 @@ StatsByPlay_Completions <- StatsByPlay_Completions %>% mutate(IndivMT_DefWPSucce
 StatsByPlay_Completions_BehindLOS = StatsByPlay_Completions %>%
   filter(air_yards < 0)
 IndivStats_Completions_BehindLOS <- StatsByPlay_Completions_BehindLOS %>%
-  group_by(nflId, displayName) %>%
+  group_by(nflId, displayName) %>% filter(PlayerSideOfBall == "defense") %>%
   summarize(Plays = n(), TackleAttempts = sum(Indiv_TackleAttempt, na.rm = TRUE),
             SoloTkl_PerPlay = sum(IndivSoloTackle, na.rm = TRUE) / Plays,
+            SoloTackles = sum(IndivSoloTackle, na.rm = TRUE),
             TotalTkl_PerPlay = sum(IndivTotTackles, na.rm = TRUE) / Plays,
+            TotalTackles = sum(IndivTotTackles, na.rm = TRUE),
             MissedTackleRate = sum(Indiv_MissedTackle, na.rm = TRUE) / sum(Indiv_TackleAttempt, na.rm = TRUE),
             AvgTotalEPA_TackleAttemptsOnly = mean(PlayEPA_TackleAttemptOnly, na.rm = TRUE),
             AvgTotalEPA_TacklesOnly = mean(PlayEPA_TacklerOnly, na.rm = TRUE),
@@ -220,7 +283,14 @@ IndivStats_Completions_BehindLOS <- StatsByPlay_Completions_BehindLOS %>%
             WPASuccessRate_TackleAttemptsOnly = mean(PlayWPASuccess_TackleAttemptOnly, na.rm = TRUE),
             WPASuccessRate_TacklesOnly = mean(PlayWPASuccess_TacklerOnly, na.rm = TRUE),
             MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
-            MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE)) %>%
+            MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE),
+            Surges = sum(Surge, na.rm = TRUE),
+            Surges_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE),
+            SurgeRate = sum(Surge, na.rm = TRUE) / Plays,
+            SurgeRate_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE) / Plays,
+            Avg_Surge_To_EndOfPlay_Frames = mean(Surge_To_EndOfPlay_Frames, na.rm = TRUE),
+            Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
+            TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
   filter(TackleAttempts >= 2) %>% # insert your own number here
   arrange(MissedTackleRate)
 
@@ -245,26 +315,19 @@ StatsByPlay_Scrambles <- Scrambles_Merged %>%
             YdsBeforeContact = max(YdsBeforeContact), YdsAfterContact = max(YdsAfterContact),
             OffFormation = max(offenseFormation), TeamDefendersInBox = max(defendersInTheBox),
             EPA = max(expectedPointsAdded),
-            foulName1 = max(foulName1), foulName2 = max(foulName2),
-            foulNFLId1 = max(foulNFLId1), foulNFLId2 = max(foulNFLId2),
             posteam_type = max(posteam_type), yardline_100 = max(yardline_100),
             sp = max(sp), goal_to_go = max(goal_to_go),
             TeamQBHit = max(qb_hit),
             run_location = max(run_location), run_gap = max(run_gap),
             td_team = max(td_team), td_player_name = max(td_player_name),
             td_player_id = max(td_player_id), WPA = max(wpa), DefWPA = max(DefWPA),
-            DefTeam_SoloTackle = max(solo_tackle), DefTeam_Safety = max(safety),
+            DefTeam_SoloTackle = max(solo_tackle), 
             DefTeam_TFL = max(tackled_for_loss), DefTeam_MissedTackles = max(TeamMT_FullPlay),
             TeamTouchdown = max(touchdown), TeamRushTD = max(rush_touchdown),
             TeamReturnTD = max(return_touchdown), OffTeam_Fumble = max(fumble),
             DefTeam_Assist_Tackle = max(assist_tackle),
             DefTeam_Penalized_Tackle = max(TeamDef_Tkl_Pen), TeamDef_Tackle_Clean = max(TeamDef_Tackle_Clean),
-            TFL_player_id_1 = max(tackle_for_loss_1_player_id),
-            TFL_player_name_1 = max(tackle_for_loss_1_player_name),
-            TFL_player_id_2 = max(tackle_for_loss_2_player_id),
-            TFL_player_name_2 = max(tackle_for_loss_2_player_name),
             penalty_team = max(penalty_team), penalty_type = max(penalty_type),
-            safety_player_name = max(safety_player_name), safety_player_id = max(safety_player_id),
             Temperature = max(Temperature), roof = max(roof),
             surface = max(surface), EPSuccess = max(success),
             first_down = max(first_down), out_of_bounds = max(out_of_bounds),
@@ -292,7 +355,17 @@ StatsByPlay_Scrambles <- Scrambles_Merged %>%
             PlayEPASuccess_TackleAttemptOnly = max(PlayEPASuccess_TackleAttemptOnly),
             PlayEPASuccess_TacklerOnly = max(PlayEPASuccess_TacklerOnly),
             PlayWPASuccess_TackleAttemptOnly = max(PlayWPASuccess_TackleAttemptOnly),
-            PlayWPASuccess_TacklerOnly = max(PlayWPASuccess_TacklerOnly))
+            PlayWPASuccess_TacklerOnly = max(PlayWPASuccess_TacklerOnly),
+            Surge_To_EndOfPlay_Frames = max(Surge_To_EndOfPlay_Frames),
+            Surge = ifelse(PlayerSideOfBall == "offense", NA, max(within_dist_ofBC)),
+            Surge_Prob_Logistic = ifelse(PlayerSideOfBall == "offense", NA,
+                                         ifelse(max(within_dist_ofBC) == 0, max(pred_within_dist_ofBC_logistic), max_pred_near_BC_FiveFramesEarly)),
+            Tackle_Prob_Logistic = ifelse(PlayerSideOfBall == "offense", NA,
+                                          ifelse(max(IndivTotTackles) == 0, max(pred_tackle_logistic), max_pred_tackle_FiveFramesEarly)))
+
+StatsByPlay_Scrambles <- StatsByPlay_Scrambles %>% 
+  mutate(Surges_OE_Logistic = Surge - Surge_Prob_Logistic,
+         Tackles_OE_Logistic = Indiv_MadeTackle - Tackle_Prob_Logistic)
 
 # Mutate a variable for missing a tackle on a play that still was successful for defense
 # Recall EPSuccess and WPSuccess are from offense's point of view (so defense wants them to be 0)
@@ -316,25 +389,17 @@ StatsByPlay_DesignedRuns <- DesignedRuns_Merged %>%
             YdsBeforeContact = max(YdsBeforeContact), YdsAfterContact = max(YdsAfterContact),
             OffFormation = max(offenseFormation), TeamDefendersInBox = max(defendersInTheBox),
             EPA = max(expectedPointsAdded),
-            foulName1 = max(foulName1), foulName2 = max(foulName2),
-            foulNFLId1 = max(foulNFLId1), foulNFLId2 = max(foulNFLId2),
             posteam_type = max(posteam_type), yardline_100 = max(yardline_100),
-            sp = max(sp), goal_to_go = max(goal_to_go),
+            sp = max(sp), goal_to_go = max(goal_to_go), 
             run_location = max(run_location), run_gap = max(run_gap),
-            td_team = max(td_team), td_player_name = max(td_player_name),
-            td_player_id = max(td_player_id), WPA = max(wpa), DefWPA = max(DefWPA),
-            DefTeam_SoloTackle = max(solo_tackle), DefTeam_Safety = max(safety),
+            td_team = max(td_team), WPA = max(wpa), DefWPA = max(DefWPA),
+            DefTeam_SoloTackle = max(solo_tackle),
             DefTeam_TFL = max(tackled_for_loss), DefTeam_MissedTackles = max(TeamMT_FullPlay),
             TeamTouchdown = max(touchdown), TeamRushTD = max(rush_touchdown),
             TeamReturnTD = max(return_touchdown), OffTeam_Fumble = max(fumble),
             DefTeam_Assist_Tackle = max(assist_tackle),
             DefTeam_Penalized_Tackle = max(TeamDef_Tkl_Pen), TeamDef_Tackle_Clean = max(TeamDef_Tackle_Clean),
-            TFL_player_id_1 = max(tackle_for_loss_1_player_id),
-            TFL_player_name_1 = max(tackle_for_loss_1_player_name),
-            TFL_player_id_2 = max(tackle_for_loss_2_player_id),
-            TFL_player_name_2 = max(tackle_for_loss_2_player_name),
             penalty_team = max(penalty_team), penalty_type = max(penalty_type),
-            safety_player_name = max(safety_player_name), safety_player_id = max(safety_player_id),
             Temperature = max(Temperature), roof = max(roof),
             surface = max(surface), EPSuccess = max(success),
             first_down = max(first_down), out_of_bounds = max(out_of_bounds),
@@ -370,7 +435,17 @@ StatsByPlay_DesignedRuns <- DesignedRuns_Merged %>%
             PlayEPASuccess_TackleAttemptOnly = max(PlayEPASuccess_TackleAttemptOnly),
             PlayEPASuccess_TacklerOnly = max(PlayEPASuccess_TacklerOnly),
             PlayWPASuccess_TackleAttemptOnly = max(PlayWPASuccess_TackleAttemptOnly),
-            PlayWPASuccess_TacklerOnly = max(PlayWPASuccess_TacklerOnly))
+            PlayWPASuccess_TacklerOnly = max(PlayWPASuccess_TacklerOnly),
+            Surge_To_EndOfPlay_Frames = max(Surge_To_EndOfPlay_Frames),
+            Surge = ifelse(PlayerSideOfBall == "offense", NA, max(within_dist_ofBC)),
+            Surge_Prob_Logistic = ifelse(PlayerSideOfBall == "offense", NA,
+                                         ifelse(max(within_dist_ofBC) == 0, max(pred_within_dist_ofBC_logistic), max_pred_near_BC_FiveFramesEarly)),
+            Tackle_Prob_Logistic = ifelse(PlayerSideOfBall == "offense", NA,
+                                          ifelse(max(IndivTotTackles) == 0, max(pred_tackle_logistic), max_pred_tackle_FiveFramesEarly)))
+
+StatsByPlay_DesignedRuns <- StatsByPlay_DesignedRuns %>% 
+  mutate(Surges_OE_Logistic = Surge - Surge_Prob_Logistic,
+         Tackles_OE_Logistic = Indiv_MadeTackle - Tackle_Prob_Logistic)
 
 # Mutate a variable for missing a tackle on a play that still was successful for defense
 # Recall EPSuccess and WPSuccess are from offense's point of view (so defense wants them to be 0)
@@ -390,10 +465,12 @@ StatsByPlay_DesignedRuns <- StatsByPlay_DesignedRuns %>%
 StatsByPlay_DesignedRuns_NearDefender = StatsByPlay_DesignedRuns %>%
   filter(Run_NearDefender > 0)
 NearbyBoxDefender_Stats_DesignedRuns <- StatsByPlay_DesignedRuns_NearDefender %>%
-  group_by(nflId, displayName) %>%
+  group_by(nflId, displayName) %>% filter(PlayerSideOfBall == "defense") %>%
   summarize(Plays = n(), TackleAttempts = sum(Indiv_TackleAttempt, na.rm = TRUE),
             SoloTkl_PerPlay = sum(IndivSoloTackle, na.rm = TRUE) / Plays,
+            SoloTackles = sum(IndivSoloTackle, na.rm = TRUE),
             TotalTkl_PerPlay = sum(IndivTotTackles, na.rm = TRUE) / Plays,
+            TotalTackles = sum(IndivTotTackles, na.rm = TRUE),
             MissedTackleRate = sum(Indiv_MissedTackle, na.rm = TRUE) / sum(Indiv_TackleAttempt, na.rm = TRUE),
             AvgTotalEPA_TackleAttemptsOnly = mean(PlayEPA_TackleAttemptOnly, na.rm = TRUE),
             AvgTotalEPA_TacklesOnly = mean(PlayEPA_TacklerOnly, na.rm = TRUE),
@@ -404,6 +481,77 @@ NearbyBoxDefender_Stats_DesignedRuns <- StatsByPlay_DesignedRuns_NearDefender %>
             WPASuccessRate_TackleAttemptsOnly = mean(PlayWPASuccess_TackleAttemptOnly, na.rm = TRUE),
             WPASuccessRate_TacklesOnly = mean(PlayWPASuccess_TacklerOnly, na.rm = TRUE),
             MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
-            MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE)) %>%
+            MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE),
+            Surges = sum(Surge, na.rm = TRUE),
+            Surges_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE),
+            SurgeRate = sum(Surge, na.rm = TRUE) / Plays,
+            SurgeRate_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE) / Plays,
+            Avg_Surge_To_EndOfPlay_Frames = mean(Surge_To_EndOfPlay_Frames, na.rm = TRUE),
+            Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
+            TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
+  filter(Plays >= 5) %>% # insert your own number here
+  
+# Leaderboard for who has highest surge rate on rushes within one gap of them
+SurgeRate_NearbyRuns_Leaders <- NearbyBoxDefender_Stats_DesignedRuns %>%
+arrange(desc(SurgeRate)) %>%
+select(1:4, "SurgeRate", "SurgeRate_OverExpected", "Surges", "TotalTackles", "TotalTkl_PerPlay")
+
+StatsByPlay_DesignedRuns_NearDefender_PrimIDL <- StatsByPlay_DesignedRuns_NearDefender %>%
+  filter(Primary_BoxPosition == "IDL")
+Nearby_Stats_DesignedRuns_PrimIDL <- StatsByPlay_DesignedRuns_NearDefender_PrimIDL %>%
+  group_by(nflId, displayName) %>%
+  summarize(Plays = n(), TackleAttempts = sum(Indiv_TackleAttempt, na.rm = TRUE),
+            SoloTkl_PerPlay = sum(IndivSoloTackle, na.rm = TRUE) / Plays,
+            SoloTackles = sum(IndivSoloTackle, na.rm = TRUE),
+            TotalTkl_PerPlay = sum(IndivTotTackles, na.rm = TRUE) / Plays,
+            TotalTackles = sum(IndivTotTackles, na.rm = TRUE),
+            MissedTackleRate = sum(Indiv_MissedTackle, na.rm = TRUE) / sum(Indiv_TackleAttempt, na.rm = TRUE),
+            AvgTotalEPA_TackleAttemptsOnly = mean(PlayEPA_TackleAttemptOnly, na.rm = TRUE),
+            AvgTotalEPA_TacklesOnly = mean(PlayEPA_TacklerOnly, na.rm = TRUE),
+            AvgDefWPA_TackleAttemptsOnly = mean(PlayDefWPA_TackleAttemptOnly, na.rm = TRUE),
+            AvgDefWPA_TacklesOnly = mean(PlayDefWPA_TacklerOnly, na.rm = TRUE),
+            EPASuccessRate_TackleAttemptsOnly = mean(PlayEPASuccess_TackleAttemptOnly, na.rm = TRUE),
+            EPASuccessRate_TacklesOnly = mean(PlayEPASuccess_TacklerOnly, na.rm = TRUE),
+            WPASuccessRate_TackleAttemptsOnly = mean(PlayWPASuccess_TackleAttemptOnly, na.rm = TRUE),
+            WPASuccessRate_TacklesOnly = mean(PlayWPASuccess_TacklerOnly, na.rm = TRUE),
+            MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
+            MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE),
+            Surges = sum(Surge, na.rm = TRUE),
+            Surges_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE),
+            SurgeRate = sum(Surge, na.rm = TRUE) / Plays,
+            SurgeRate_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE) / Plays,
+            Avg_Surge_To_EndOfPlay_Frames = mean(Surge_To_EndOfPlay_Frames, na.rm = TRUE),
+            Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
+            TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
+  filter(Plays >= 5) %>% # insert your own number here
+  arrange(desc(TotalTkl_PerPlay))
+
+StatsByPlay_DesignedRuns_NearDefender_IDLOnPlay <- StatsByPlay_DesignedRuns_NearDefender %>%
+  filter(Play_BoxPosition == "IDL")
+Nearby_Stats_DesignedRuns_IDLOnPlay <- StatsByPlay_DesignedRuns_NearDefender_IDLOnPlay %>%
+  group_by(nflId, displayName)
+  summarize(Plays = n(), TackleAttempts = sum(Indiv_TackleAttempt, na.rm = TRUE),
+            SoloTkl_PerPlay = sum(IndivSoloTackle, na.rm = TRUE) / Plays,
+            SoloTackles = sum(IndivSoloTackle, na.rm = TRUE),
+            TotalTkl_PerPlay = sum(IndivTotTackles, na.rm = TRUE) / Plays,
+            TotalTackles = sum(IndivTotTackles, na.rm = TRUE),
+            MissedTackleRate = sum(Indiv_MissedTackle, na.rm = TRUE) / sum(Indiv_TackleAttempt, na.rm = TRUE),
+            AvgTotalEPA_TackleAttemptsOnly = mean(PlayEPA_TackleAttemptOnly, na.rm = TRUE),
+            AvgTotalEPA_TacklesOnly = mean(PlayEPA_TacklerOnly, na.rm = TRUE),
+            AvgDefWPA_TackleAttemptsOnly = mean(PlayDefWPA_TackleAttemptOnly, na.rm = TRUE),
+            AvgDefWPA_TacklesOnly = mean(PlayDefWPA_TacklerOnly, na.rm = TRUE),
+            EPASuccessRate_TackleAttemptsOnly = mean(PlayEPASuccess_TackleAttemptOnly, na.rm = TRUE),
+            EPASuccessRate_TacklesOnly = mean(PlayEPASuccess_TacklerOnly, na.rm = TRUE),
+            WPASuccessRate_TackleAttemptsOnly = mean(PlayWPASuccess_TackleAttemptOnly, na.rm = TRUE),
+            WPASuccessRate_TacklesOnly = mean(PlayWPASuccess_TacklerOnly, na.rm = TRUE),
+            MissedTackles_DefEPASuccess = sum(IndivMT_DefEPSuccess, na.rm = TRUE),
+            MissedTackles_DefWPASuccess = sum(IndivMT_DefWPSuccess, na.rm = TRUE),
+            Surges = sum(Surge, na.rm = TRUE),
+            Surges_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE),
+            SurgeRate = sum(Surge, na.rm = TRUE) / Plays,
+            SurgeRate_OverExpected = sum(Surges_OE_Logistic, na.rm = TRUE) / Plays,
+            Avg_Surge_To_EndOfPlay_Frames = mean(Surge_To_EndOfPlay_Frames, na.rm = TRUE),
+            Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
+            TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
   filter(Plays >= 5) %>% # insert your own number here
   arrange(desc(TotalTkl_PerPlay))
