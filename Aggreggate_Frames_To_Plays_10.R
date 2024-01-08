@@ -132,6 +132,158 @@ SurgeRateOE_AllPlays_Leaders <- IndivStats_final_merged_data %>%
   select(1:4, "SurgeRate_OverExpected", "Surges", "SurgeRate", "TotalTackles") %>%
   mutate(TacklesToSurge_Ratio = TotalTackles / Surges)
 
+# Use tab_options() w/ gt package for fancy table for surge rate and surge rate OE
+class(SurgeRate_AllPlays_Leaders) <- "data.frame"
+SurgeRate_FancyTable <- SurgeRate_AllPlays_Leaders %>%
+  select(c("displayName", "Plays", "Surges", "SurgeRate")) %>%
+  head(20) %>%
+  mutate(Rank = row_number(desc(SurgeRate))) %>%
+  select("Rank", 1:4)
+
+SurgeRate_FancyTable <- SurgeRate_FancyTable |>
+  # filter(officialPosition %in% c("OLB", "DE")) |> 
+  # mutate(rank = row_number()) |> 
+  # select(1:4, "SurgeRate", "SurgeRate_OverExpected", "Surges", "TotalTackles") |> 
+  head(20) |> 
+  gt() |>
+  tab_options(
+    table.border.top.color = "white",
+    row.striping.include_table_body = FALSE
+  ) |>
+  opt_table_font(
+    font = list(
+      google_font("Chivo"),
+      default_fonts()
+    )
+  ) |>
+  fmt_number(
+    columns = c(SurgeRate),
+    decimals = 2,
+  ) |>
+  data_color(
+    columns = c(SurgeRate),
+    colors = scales::col_numeric(
+    palette = c("#FEE0D2", "#67000D"),
+    domain = NULL
+    )
+  ) |> 
+  cols_label(
+    Rank = md("**Rank**"), # the md is what makes the headers show up as bold
+    displayName = md("**Player**"),
+    # team = md("**Team**"),
+    # officialPosition = md("**Position**"),
+    Plays = md("**Snaps**"),
+    Surges = md("**Surges**"),
+    SurgeRate = html('<span style="text-decoration:overline; font-weight:bold">Surge Rate</span>')
+  ) |> 
+  cols_align(
+    align = "center",
+    columns = Plays:SurgeRate
+  ) |> 
+  tab_header(md("**Top 20 Players in Surge Rate**"),
+             md("(Minimum XXX Defensive Snaps; Weeks 1-9, 2022)")) |> 
+  tab_style(style = cell_borders(sides = "top"),
+            locations = cells_title("title")) |> 
+  tab_options(
+    table.border.top.style = "a"
+  ) |> 
+  tab_footnote(
+    footnote = "Surge Rate: Surges / Snaps Played",
+    locations = cells_column_labels(
+      columns = SurgeRate
+    )
+  )
+
+gtsave(SurgeRate_FancyTable, "SurgeRate_FancyTable.png")
+
+class(SurgeRateOE_AllPlays_Leaders) <- "data.frame"
+SurgeRateOE_FancyTable <- SurgeRateOE_AllPlays_Leaders %>%
+  select(c("displayName", "Plays", "Surges", "SurgeRate", "SurgeRate_OverExpected")) %>%
+  head(20) %>%
+  mutate(Rank = row_number(desc(SurgeRate_OverExpected))) %>%
+  select("Rank", 1:5)
+
+SurgeRateOE_FancyTable <- SurgeRateOE_FancyTable |>
+  # filter(officialPosition %in% c("OLB", "DE")) |> 
+  # mutate(rank = row_number()) |> 
+  # select(1:4, "SurgeRate", "SurgeRate_OverExpected", "Surges", "TotalTackles") |> 
+  head(20) |> 
+  gt() |>
+  tab_options(
+    table.border.top.color = "white",
+    row.striping.include_table_body = FALSE
+  ) |>
+  opt_table_font(
+    font = list(
+      google_font("Chivo"),
+      default_fonts()
+    )
+  ) |>
+  fmt_number(
+    columns = c(SurgeRate_OverExpected),
+    decimals = 2,
+  ) |>
+  data_color(
+    columns = c(SurgeRate_OverExpected),
+    colors = scales::col_numeric(
+      palette = c("#FEE0D2", "#67000D"),
+      domain = NULL
+    )
+  ) |> 
+  cols_label(
+    Rank = md("**Rank**"), # the md is what makes the headers show up as bold
+    displayName = md("**Player**"),
+    # team = md("**Team**"),
+    # officialPosition = md("**Position**"),
+    Plays = md("**Snaps**"),
+    Surges = md("**Surges**"),
+    SurgeRate = md("**Surge Rate**"),
+    SurgeRate_OverExpected = html('<span style="text-decoration:overline; font-weight:bold">Surge Rate OE</span>')
+  ) |> 
+  cols_align(
+    align = "center",
+    columns = Plays:SurgeRate_OverExpected
+  ) |> 
+  tab_header(md("**Top 20 Players in Surge Rate Over Expected**"),
+             md("(Minimum XXX Defensive Snaps; Weeks 1-9, 2022)")) |> 
+  tab_style(style = cell_borders(sides = "top"),
+            locations = cells_title("title")) |> 
+  tab_options(
+    table.border.top.style = "a"
+  ) |> 
+  tab_footnote(
+    footnote = "Surge Rate Over Expected: Total Surges - Expected Surges",
+    locations = cells_column_labels(
+      columns = SurgeRate_OverExpected
+    )
+  )
+
+gtsave(SurgeRateOE_FancyTable, "SurgeRateOE_FancyTable.png")
+
+# combine tables
+library(magick)
+image_append(c(image_read("SurgeRate_FancyTable.png"), image_read("SurgeRateOE_FancyTable.png")))
+# Create function to combine two images
+image_append_combine <- function(images) {
+  combined_image <- image_append(images)
+  return(combined_image)
+}
+
+# Image file paths
+SurgeRate_FancyTable_path <- "~/Desktop/SurgeRate_FancyTable.png"
+SurgeRateOE_FancyTable_path <- "~/Desktop/SurgeRateOE_FancyTable.png"
+
+# Read images
+SurgeRate_FancyTable_Image <- image_read(SurgeRate_FancyTable_path)
+SurgeRateOE_FancyTable_Image <- image_read(SurgeRateOE_FancyTable_path)
+
+# Combine images using your function
+combined_SurgeRate_SurgeRateOE_image <- image_append_combine(c(SurgeRate_FancyTable_Image, SurgeRateOE_FancyTable_Image))
+
+# Save the combined image to your desktop
+combined_SurgeRate_SurgeRateOE_image_path <- "~/Desktop/combined_SurgeRate_SurgeRateOE_image.png"  # Change the filename or extension as needed
+image_write(combined_SurgeRate_SurgeRateOE_image, path = combined_SurgeRate_SurgeRateOE_image_path)
+
 # Leaderboard for highest tackle rate over expected
 TackleRateOE_AllPlays_Leaders <- IndivStats_final_merged_data %>%
   arrange(desc(TackleRate_OverExpected)) %>% select(1:4, "TackleRate_OverExpected", "TotalTackles", "Tackles_OverExpected", "TotalTkl_PerPlay")
