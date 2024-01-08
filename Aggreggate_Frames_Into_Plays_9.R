@@ -90,9 +90,8 @@ StatsByPlay_final_merged_data <- StatsByPlay_final_merged_data %>% mutate(IndivM
     ifelse(Indiv_MissedTackle > 0 & WPSuccess == 0, 1,
            ifelse(Indiv_MissedTackle > 0 & WPSuccess > 0, 0, NA)))
 
-# Example of seeing who has highest surge rate in general (no play type or position filters)
 IndivStats_final_merged_data <- StatsByPlay_final_merged_data %>%
-  group_by(nflId, displayName) %>%
+  group_by(nflId, displayName) %>% filter(PlayerSideOfBall == "defense") %>%
   summarize(Plays = n(), TackleAttempts = sum(Indiv_TackleAttempt, na.rm = TRUE),
             SoloTkl_PerPlay = sum(IndivSoloTackle, na.rm = TRUE) / Plays,
             TotalTkl_PerPlay = sum(IndivTotTackles, na.rm = TRUE) / Plays,
@@ -116,9 +115,16 @@ IndivStats_final_merged_data <- StatsByPlay_final_merged_data %>%
             Avg_Surge_To_EndOfPlay_Frames = mean(Surge_To_EndOfPlay_Frames, na.rm = TRUE),
             Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
             TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
-  filter(Plays >= 5) %>% # insert your own number here
+  filter(Plays >= 5) # insert your own number here
+  
+# Leaderboard for highest surge rate on all plays  
+SurgeRate_AllPlays_Leaders <- IndivStats_final_merged_data %>%
   arrange(desc(SurgeRate)) %>%
-  select(1:4, "SurgeRate", "SurgeRate_OverExpected", 5:26)
+  select(1:4, "SurgeRate", "SurgeRate_OverExpected", 6:26)
+
+# Leaderboard for most total surges
+TotSurges_AllPlays_Leaders <- IndivStats_final_merged_data %>%
+  arrange(desc(Surges)) %>% select(1:4, "Surges", "SurgeRate", "SurgeRate_OverExpected", 7:26)
 
 # Stats by play for completions
 StatsByPlay_Completions <- Completions_Merged %>% 
