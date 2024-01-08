@@ -17,7 +17,8 @@ calc_distance <- function(x, y, x_baseline = 0, y_baseline = 0) {
   sqrt((x-x_baseline)^2 + (y - y_baseline)^2)
 }
 
-# This is a Week 1 version of the full_merged_data DF created in the full_Wk1_modeling_code file, in CSV form
+# This is a Week 1 version of the full_merged_data DF created in the full_modeling_code GitHub file, in CSV form
+# This could easily be replicated with any given week
 full_dat <- data.table::fread("full_data_modeling_w1.csv")
 
 ## selecting fairly large subset of our data:
@@ -532,7 +533,8 @@ modeling_data$blocking_Score_new <- FixingBlockingScore(modeling_data)
 # return DF
 
 
-# Code for the Aaron Jones/Jonathan Allen Week 7 play
+# Code for the Aaron Jones/Jonathan Allen play
+# This would require you to load in Week 7 data rather than just Week 1
 handoff <- jones_run %>%
   filter(event=='handoff') %>%
   distinct(frameId) %>%
@@ -572,5 +574,117 @@ jones_run %>%
   geom_text(aes(x = 2.25, y = 0.85, label = 'First Contact')) +
   geom_text(aes(x = 7.4, y = 0.85, label = 'Tackle')) +
   labs(x = 'Time in Seconds')
+
+# Code for a Nick Chubb example
+# This would require loading in Week 3 data rather than just Week 1
+chubb_run <- modeling_data %>%
+  filter(gameId==2022092200 & playId==84)
+
+##Good code to check:
+View(chubb_run %>%
+       filter(club==defensiveTeam) %>%
+       arrange(displayName, frameId) %>%
+       select(frameId, club, displayName, Player_Role, event,  dist_to_ball_carrier, within_dist_ofBC, within_dist_ofBC_frames_ahead, within_lead1:within_lead5, within_dist_ofBC_frames_ahead2))
+
+plotly::ggplotly(
+  chubb_run %>%
+    filter(frameId >= unique(frameId[which(event=='handoff')]), frameId <= unique(frameId[which(event=='first_contact')])) %>%
+    # filter(frameId>=38, frameId<45) %>%
+    ggplot(aes(x = x, y = y, 
+               text = paste0('Ranger Prediction: ', pred,
+                             'Logistic Prediction: ', pred_logistic, '\n', 
+                             'Player Name: ', displayName, '\n',
+                             'Closest Opposing Player: ', closest_opp_player_name, '\n',
+                             'Closest Opposing Player Dist: ', round(min_dist_opp_player, 3), '\n',
+                             'Distance to Ball: ', round(dist_to_ball_carrier, 3), '\n',
+                             'Second Closest Opposing Player: ',  second_closest_opp_player_name, '\n',
+                             'Second Closest Opposing Player Dist: ', round(second_closest_dist_opp_player, 3), '\n',
+                             'Blocked Score: ', round(BlockedScore, 3), '\n',
+                             'Ball Carrier Direction: ', ball_carrier_direction, '\n', 
+                             'Cos Similarity: ', round(CosSimilarity_Dir_ToBC, 3), '\n'
+               )
+    )) +
+    #stat_voronoi(geom = "path") +
+    geom_point(aes(color = Player_Role)) +
+    geom_segment(aes(x = x, y = y, xend = X_proj_5,
+                     yend = Y_proj_5, color = Player_Role)) +
+    scale_color_manual(values = c("Ball Carrier" = "black", 
+                                  "Offense" = "red",
+                                  "Defense" = "blue",
+                                  "Football" = "brown")) +
+    theme_bw() +
+    labs(x = "X (High X = Where Offense Is Aiming)", y = "Y (High Y = Offense's Left)", 
+         title = "Frame-By-Frame Diagram of N. Chubb Rush (From Handoff to First Contact)") +
+    geom_hline(yintercept = 0, color = 'darkgreen', linetype = 'dashed') +
+    geom_hline(yintercept = 53.3, color = 'darkgreen', linetype = 'dashed') +
+    facet_wrap(~frameId) +
+    theme(plot.title = element_text(size = 10, hjust = 0.5))
+)
+
+plot(defenders_data$pred_logistic, defenders_data$pred)
+
+#ranger:
+MLmetrics::LogLoss(test_error$test_preds, test_error$true_outcome)
+#logistic:
+MLmetrics::LogLoss(test_error_logistic$test_prob, test_error_logistic$true_outcome)
+
+MLmetrics::LogLoss(train_error$train_prob, train_error$true_outcome)
+MLmetrics::LogLoss(train_error_logistic$train_prob, train_error_logistic$true_outcome)
+
+
+#d <- AmesHousing::make_ames()
+#
+# nt <- seq(1, 501, 10)
+# 
+# oob_mse <- vector("numeric", length(nt))
+# 
+# for(i in 1:length(nt)){
+#   rf <- ranger(within_dist_ofBC_frames_ahead2 ~ 
+#                  dist_to_ball_carrier + 
+#                  min_proj_dist_to_ball_carrier + 
+#                  NumberOfBlockers + BlockedScore,
+#                data = defenders_data, num.trees = nt[i], write.forest = FALSE)
+#   oob_mse[i] <- rf$prediction.error
+#   print(i)
+# }
+# 
+# 
+# plot(x = nt, y = oob_mse, col = "red", type = "l")
+# 
+# summary(mod2)
+# v<-as.vector(mod2$variable.importance$Importance)
+# w<-(as.vector((row.names(df))))
+# DF<-cbind(w,v)
+# DF<-as.data.frame(DF)
+#  DF
+
+##line charts
+library(viridis)
+chubb_run %>%
+  filter(dist_to_ball_carrier<=10 & club==defensiveTeam) %>%
+  mutate(time_in_secs = frameId*0.1) %>%
+  ggplot( aes(x=time_in_secs, y = pred, group=displayName, color=displayName)) +
+  geom_line() +
+  geom_point() +
+  scale_color_viridis(discrete = TRUE) +
+  ggtitle("Player's Probability of Being within 1 Yard of Ball Carrier \n
+          Five Frames into the Future, via Random Forest Model") +
+  #theme_ipsum() +
+  ylab("Probability") +
+  transition_reveal(time_in_secs)
+
+chubb_run %>%
+  filter(dist_to_ball_carrier <= 10 & club == defensiveTeam) %>%
+  mutate(time_in_secs = frameId*0.1) %>%
+  ggplot( aes(x=time_in_secs, y = pred_logistic, group=displayName, color=displayName)) +
+  geom_line() +
+  geom_point() +
+  scale_color_viridis(discrete = TRUE) +
+  ggtitle("Player's Probability of Being within 1 Yard of Ball Carrier \n
+          Five Frames into the Future, via Logistic Regression Model") +
+  #theme_ipsum() +
+  ylab("Probability") +
+  transition_reveal(time_in_secs)
+
 
 
