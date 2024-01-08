@@ -562,7 +562,7 @@ jones_run %>%
   geom_point() +
   scale_color_brewer() +
   ggtitle("Probability of Being Within 1 Yard of Ball Carrier \n
-          in the Next Half Second") +
+          in the Next Half-Second") +
   #theme_ipsum() +
   ylab("Probability") +
   transition_reveal(time_in_secs) +
