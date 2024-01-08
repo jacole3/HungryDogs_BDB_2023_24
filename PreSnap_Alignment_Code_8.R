@@ -36,6 +36,7 @@ TackleProb_FiveFramesEarly_DF <- TackleProb_FiveFramesEarly_DF %>%
 
 final_merged_data_sub <- final_merged_data_sub %>%
   left_join(TackleProb_FiveFramesEarly_DF, by = c("gameId", "playId", "nflId", "displayName", "frameId"))
+rm(Max_NearBC_FiveFramesEarly_DF, TackleProb_FiveFramesEarly_DF)
 
 # Now, merge final_merged_data_sub with final_merged_data again
 # I.e., the "sub" version was only needed during modeling, now that's done
