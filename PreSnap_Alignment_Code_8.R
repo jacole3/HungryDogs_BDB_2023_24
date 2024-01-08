@@ -1,4 +1,57 @@
-# Recall that "DesignedRuns_Merged" was originally created in the "Data Cleansing Code" GitHub document
+# All of this start off where we left off after full_Wk1_modeling_code
+
+# First, get each player's "maximum" probabilities, excluding the final five frames before play ended
+# Premise: if player X makes tackle on frame 40, tackle probability will inherently be high on frame 39
+# First, start with "surge" probability (i.e. getting near ball-carrier)
+final_merged_data_sub <- final_merged_data_sub %>% mutate(FrameNumber_FiveBeforeDefSurge =
+                                                            ifelse(FirstDefSurge_Frame - FirstFrame_WithBC >= 5, FirstDefSurge_Frame - 5, FirstFrame_WithBC))
+
+Max_NearBC_FiveFramesEarly_DF <- final_merged_data_sub %>% filter(frameId <= FrameNumber_FiveBeforeDefSurge) %>%
+  group_by(gameId, playId, nflId) %>%
+  mutate(NearBC_rank = rank(-pred_within_dist_ofBC_logistic, ties.method = "first")) %>%
+  ungroup()
+Max_NearBC_FiveFramesEarly_DF <- Max_NearBC_FiveFramesEarly_DF %>% 
+  select(c("gameId", "playId", "nflId", "displayName", "frameId", "pred_within_dist_ofBC_logistic", "NearBC_rank"))
+Max_NearBC_FiveFramesEarly_DF <- Max_NearBC_FiveFramesEarly_DF %>% filter(NearBC_rank == 1)
+Max_NearBC_FiveFramesEarly_DF <- Max_NearBC_FiveFramesEarly_DF %>%
+  rename(max_pred_near_BC_FiveFramesEarly = pred_within_dist_ofBC_logistic)
+Max_NearBC_FiveFramesEarly_DF <- Max_NearBC_FiveFramesEarly_DF %>%
+  select(-"NearBC_rank")
+
+final_merged_data_sub <- final_merged_data_sub %>%
+  left_join(Max_NearBC_FiveFramesEarly_DF, by = c("gameId", "playId", "nflId", "displayName", "frameId"))
+
+# This would be for tackle probability, if we use the logistic model there
+TackleProb_FiveFramesEarly_DF <- final_merged_data_sub %>% filter(frameId <= FrameNumber_FiveBeforeEndOfPlay) %>%
+  group_by(gameId, playId, nflId) %>%
+  mutate(PredTackle_rank = rank(-pred_tackle_logistic, ties.method = "first")) %>%
+  ungroup()
+TackleProb_FiveFramesEarly_DF <- TackleProb_FiveFramesEarly_DF %>% 
+  select(c("gameId", "playId", "nflId", "displayName", "frameId", "pred_tackle_logistic", "PredTackle_rank"))
+TackleProb_FiveFramesEarly_DF <- TackleProb_FiveFramesEarly_DF %>% filter(PredTackle_rank == 1)
+TackleProb_FiveFramesEarly_DF <- TackleProb_FiveFramesEarly_DF %>%
+  rename(max_pred_tackle_FiveFramesEarly = pred_tackle_logistic)
+TackleProb_FiveFramesEarly_DF <- TackleProb_FiveFramesEarly_DF %>%
+  select(-"PredTackle_rank")
+
+final_merged_data_sub <- final_merged_data_sub %>%
+  left_join(TackleProb_FiveFramesEarly_DF, by = c("gameId", "playId", "nflId", "displayName", "frameId"))
+
+# Now, merge final_merged_data_sub with final_merged_data again
+# I.e., the "sub" version was only needed during modeling, now that's done
+final_merged_data_sub <- final_merged_data_sub %>% 
+  select("gameId", "playId", "nflId", "displayName", "frameId",
+         "pred_within_dist_ofBC_logistic", "pred_tackle_logistic", 
+         "max_pred_near_BC_FiveFramesEarly", "max_pred_tackle_FiveFramesEarly")
+final_merged_data <- merge(x = final_merged_data, y = final_merged_data_sub,
+                           by = c("gameId", "playId", "nflId", "displayName", "frameId"), all.x = TRUE)
+rm(final_merged_data_sub)
+
+# Re-split the play types, now that we have the model predictions
+DesignedRuns_Merged <- final_merged_data %>% filter(pass == 0)
+Scrambles_Merged <- final_merged_data %>% filter(passResult == "R")
+# AllRushes_Merged <- MergedData_blockers %>% filter(pass == 0 | passResult == "R"); likely not necessary
+Completions_Merged <- MergedData_blockers %>% filter(passResult == "C")
 
 # Pre-snap alignment code has to be for designed runs separately
 # This is because we don't have "start of snap" data for the dropbacks
