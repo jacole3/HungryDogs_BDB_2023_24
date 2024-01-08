@@ -880,6 +880,7 @@ PrimPosition_Label <- PrimPosition_Label %>% select(nflId, displayName, Primary_
 DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = PrimPosition_Label,
                              by = c("nflId", "displayName"), all.x = TRUE)
 DesignedRuns_Merged <- DesignedRuns_Merged %>% select(-"BoxSnaps")
+rm(PrimPosition_Label)
 
 # Get rid of frames where ball-carrier doesn't have ball yet
 # For designed runs, we had to wait until after we defined all the gap alignments
