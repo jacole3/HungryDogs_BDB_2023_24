@@ -118,19 +118,24 @@ IndivStats_final_merged_data <- StatsByPlay_final_merged_data %>%
             Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
             TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
   filter(Plays >= 5) # insert your own number here
-
+ 
 # Leaderboard for highest surge rate on all plays  
 SurgeRate_AllPlays_Leaders <- IndivStats_final_merged_data %>%
   arrange(desc(SurgeRate)) %>%
-  select(1:4, "SurgeRate", "SurgeRate_OverExpected", "Surges", "TotalTackles")
+  select(1:4, "SurgeRate", "SurgeRate_OverExpected", "Surges", "TotalTackles") %>%
+  mutate(TacklesPerSurge = TotalTackles / Surges)
 
 # Leaderboard for most total surges
 TotSurges_AllPlays_Leaders <- IndivStats_final_merged_data %>%
-  arrange(desc(Surges)) %>% select(1:4, "Surges", "SurgeRate", "SurgeRate_OverExpected", "TotalTackles")
+  arrange(desc(Surges)) %>% 
+  select(1:4, "Surges", "SurgeRate", "SurgeRate_OverExpected", "TotalTackles") %>%
+  mutate(TacklesPerSurge = TotalTackles / Surges)
 
 # Leaderboard for highest surge rate over expected
 SurgeRateOE_AllPlays_Leaders <- IndivStats_final_merged_data %>%
-  arrange(desc(SurgeRate_OverExpected)) %>% select(1:4, "SurgeRate_OverExpected", "Surges", "SurgeRate", "TotalTackles")
+  arrange(desc(SurgeRate_OverExpected)) %>% 
+  select(1:4, "SurgeRate_OverExpected", "Surges", "SurgeRate", "TotalTackles") %>%
+  mutate(TacklesPerSurge = TotalTackles / Surges)
 
 # Leaderboard for highest tackle rate over expected
 TackleRateOE_AllPlays_Leaders <- IndivStats_final_merged_data %>%
