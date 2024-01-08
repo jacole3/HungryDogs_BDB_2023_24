@@ -197,6 +197,7 @@ SurgeRate_FancyTable <- SurgeRate_FancyTable |>
 gtsave(SurgeRate_FancyTable, "SurgeRate_FancyTable.png")
 
 class(SurgeRateOE_AllPlays_Leaders) <- "data.frame"
+options(digits = 3)
 SurgeRateOE_FancyTable <- SurgeRateOE_AllPlays_Leaders %>%
   select(c("displayName", "Plays", "Surges", "SurgeRate", "SurgeRate_OverExpected")) %>%
   head(20) %>%
