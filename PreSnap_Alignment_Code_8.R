@@ -1,4 +1,4 @@
-# All of this start off where we left off after the full_modeling_code file
+# All of this starts off where we left off after the "full_modeling_code" file, where we defined final_merged_data_sub
 
 # First, get each player's "maximum" probabilities, excluding the final five frames before play ended
 # Premise: if player X makes tackle on frame 40, tackle probability will inherently be high on frame 39
