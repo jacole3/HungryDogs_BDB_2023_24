@@ -1101,7 +1101,7 @@ final_merged_data_sub <- final_merged_data_sub %>%
 
 # Build logistic model for tackle probability too in case it's needed
 tackle_mod_logistic <- glm(Indiv_MadeTackle ~ Rel_Velocity_ToBC + dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
-                     TotDistFromBall_Rank_OVR + NumberOfBlockers + Rel_Momentum_ToBC, 
+                     TotDistFromBall_Rank_OVR + NumberOfBlockers + ball_carrier_momentum, 
                    data = final_merged_data_sub, family = 'binomial')
 summary(tackle_mod_logistic)
 final_merged_data_sub$pred_tackle_logistic <- predict(tackle_mod_logistic, final_merged_data_sub, type = 'response')
