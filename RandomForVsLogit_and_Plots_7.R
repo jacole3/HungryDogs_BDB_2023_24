@@ -199,7 +199,7 @@ test_plays <- unique_plays[-train_indices]
 ## first filtering to only inlude defenders and players within 10 yards of the ball carrier
 defenders_data <- modeling_data %>%
   filter(club!=possessionTeam) %>%
-  filter(!is.infinite(BlockedScore), dist_to_ball_carrier<=10)
+  filter(!is.infinite(BlockedScore), dist_to_ball_carrier <= 10)
 
 ## Train/test data:
 train_data <- defenders_data %>%
@@ -212,7 +212,7 @@ ranger_model <- ranger(within_dist_ofBC_frames_ahead ~
                  dist_to_ball_carrier + 
                  min_proj_dist_to_ball_carrier + 
                  NumberOfBlockers + BlockedScore,
-            data = train_data, num.tree=500, importance = "impurity")
+            data = train_data, num.trees = 500, importance = "impurity")
 
 pred.train <- predict(ranger_model, train_data, type = "response") 
 pred.test <- predict(ranger_model,test_data, type = "response") 
@@ -240,7 +240,7 @@ plot(1-ranger.test.roc$specificities, ranger.test.roc$sensitivities, col="red", 
 #rpart.plot(mod2)
 
 
-defenders_data$pred <- predict(ranger_model,data =  defenders_data)$predictions
+defenders_data$pred <- predict(ranger_model,data = defenders_data)$predictions
 
 ## Sample Logistic Regression
 logistic_mod <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
@@ -532,6 +532,45 @@ modeling_data$blocking_Score_new <- FixingBlockingScore(modeling_data)
 # return DF
 
 
+# Code for the Aaron Jones/Jonathan Allen Week 7 play
+handoff <- jones_run %>%
+  filter(event=='handoff') %>%
+  distinct(frameId) %>%
+  pull()
 
+first_contact <- jones_run %>%
+  filter(event=='first_contact') %>%
+  distinct(frameId) %>%
+  pull()
+
+tackle <- jones_run %>%
+  filter(event=='tackle') %>%
+  distinct(frameId) %>%
+  pull()
+ 
+##line charts
+library(viridis)
+jones_run %>%
+  filter(dist_to_ball_carrier<=10 & club==defensiveTeam) %>%
+  mutate(time_in_secs = frameId*0.1,
+         name_num = paste0(displayName, ' - ', jerseyNumber)) %>%
+  rename(`Player Name/Number` = name_num) %>%
+  ggplot( aes(x=time_in_secs, y=pred_logistic, group=displayName, color=`Player Name/Number`)) +
+  geom_line() +
+  geom_point() +
+  scale_color_brewer() +
+  ggtitle("Probability of Being Within 1 Yard of Ball Carrier \n
+          in the Next Half Second") +
+  #theme_ipsum() +
+  ylab("Probability") +
+  transition_reveal(time_in_secs) +
+  theme_bw() +
+  geom_vline(aes(xintercept = handoff*0.1), linetype='dashed', color = 'dodgerblue') +
+  geom_vline(aes(xintercept = first_contact*0.1), linetype='dashed', color = 'green') +
+  geom_vline(aes(xintercept = tackle*0.1), linetype='dashed', color = 'red') +
+  geom_text(aes(x = 1, y = 0.85, label = 'Handoff'))+
+  geom_text(aes(x = 2.25, y = 0.85, label = 'First Contact')) +
+  geom_text(aes(x = 7.4, y = 0.85, label = 'Tackle')) +
+  labs(x = 'Time in Seconds')
 
 
