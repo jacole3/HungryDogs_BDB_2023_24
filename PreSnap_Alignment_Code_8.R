@@ -48,6 +48,22 @@ final_merged_data <- merge(x = final_merged_data, y = final_merged_data_sub,
                            by = c("gameId", "playId", "nflId", "displayName", "frameId"), all.x = TRUE)
 rm(final_merged_data_sub)
 
+# But, we can still remove some columns from final_merged_data to make the pre-snap alignment code go smoothly
+colnames(final_merged_data)
+final_merged_data <- final_merged_data %>%
+  select(-c("roof", "surface", "wind", "Ball_DistFromGoalLine", "Ball_DistFromSideline",
+            "BallNearGoalLine", "BallNearSideline", "Season_MaxSpeed", "Temperature", 
+            "offenseFormation", "Y_AbsDistFromBall_Rank_BySide",
+            "X_AbsDistFromBall_Rank_BySide", "Y_NetDistFromBall_Rank_BySide",
+            "X_NetDistFromBall_Rank_BySide", "Y_AbsDistFromBall_Rank_OVR",
+            "X_AbsDistFromBall_Rank_OVR", "Y_NetDistFromBall_Rank_OVR", 
+            "X_NetDistFromBall_Rank_OVR",  "X_proj_1", "X_proj_2", "X_proj_3", "X_proj_4",                         
+            "X_proj_5", "Y_proj_1", "Y_proj_2", "Y_proj_3", "Y_proj_4", "Y_proj_5",                         
+            "ball_carrier_X_proj_1", "ball_carrier_X_proj_2", "ball_carrier_X_proj_3", 
+            "ball_carrier_X_proj_4", "ball_carrier_X_proj_5", "ball_carrier_Y_proj_1",            
+            "ball_carrier_Y_proj_2", "ball_carrier_Y_proj_3", "ball_carrier_Y_proj_4",
+            "ball_carrier_Y_proj_5", "In_BallCarrier_Radius"))
+
 # Re-split the play types, now that we have the model predictions
 DesignedRuns_Merged <- final_merged_data %>% filter(pass == 0)
 Scrambles_Merged <- final_merged_data %>% filter(passResult == "R")
