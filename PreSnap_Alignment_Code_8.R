@@ -57,12 +57,30 @@ final_merged_data <- final_merged_data %>%
             "X_AbsDistFromBall_Rank_BySide", "Y_NetDistFromBall_Rank_BySide",
             "X_NetDistFromBall_Rank_BySide", "Y_AbsDistFromBall_Rank_OVR",
             "X_AbsDistFromBall_Rank_OVR", "Y_NetDistFromBall_Rank_OVR", 
-            "X_NetDistFromBall_Rank_OVR",  "X_proj_1", "X_proj_2", "X_proj_3", "X_proj_4",                         
+            "X_NetDistFromBall_Rank_OVR", "TeamTackle_FiveFramesAhead",       
+            "IndivSoloTackle_FiveFramesAhead", "IndivAssist_FiveFramesAhead",      
+            "IndivTotTackles_FiveFramesAhead", "TeamTackle_Within0.5Sec",          
+            "IndivSoloTackle_Within0.5Sec", "IndivAssist_Within0.5Sec",         
+            "IndivTotTackles_Within0.5Sec", "TeamTackle_CurrentFrame",          
+            "IndivSoloTackle_CurrentFrame", "IndivAssist_CurrentFrame",         
+            "IndivTotTackles_CurrentFrame", "X_ball_carrier", "Y_ball_carrier",                  
+            "dist_to_ball_carrier", "ball_carrier_speed", "ball_carrier_acc", 
+            "ball_carrier_dist_ran", "ball_carrier_orient", "ball_carrier_direction",           
+            "ball_carrier_weight", "ball_carrier_height", "BC_Season_MaxSpeed", "ball_carrier_momentum",            
+            "Rel_Speed_ToBC", "Rel_Acc_ToBC", "Rel_Weight_ToBC", "Rel_Height_ToBC",                  
+            "Rel_SeasonMaxSpeed_ToBC", "Momentum","Rel_Momentum_ToBC", "CosSimilarity_Orient_ToBC",        
+            "CosSimilarity_Dir_ToBC", "Rel_Velocity_ToBC", "X_proj_1", "X_proj_2", "X_proj_3", "X_proj_4",                         
             "X_proj_5", "Y_proj_1", "Y_proj_2", "Y_proj_3", "Y_proj_4", "Y_proj_5",                         
             "ball_carrier_X_proj_1", "ball_carrier_X_proj_2", "ball_carrier_X_proj_3", 
             "ball_carrier_X_proj_4", "ball_carrier_X_proj_5", "ball_carrier_Y_proj_1",            
             "ball_carrier_Y_proj_2", "ball_carrier_Y_proj_3", "ball_carrier_Y_proj_4",
-            "ball_carrier_Y_proj_5", "In_BallCarrier_Radius"))
+            "ball_carrier_Y_proj_5", "In_BallCarrier_Radius", "NumberOfBlockers",
+            "BlockedScore", "TeamDefSurge_InFrame", "FirstDefSurge_Frame",
+            "min_proj_dist_to_ball_carrier", "min_dist_opp_player", "num_opp_players_same_dist",
+            "min_dist_opp_index", "second_closest_dist_opp_player", 
+            "second_closest_opp_index", "closest_opp_player_name", "closest_opp_player_nflID",  
+            "second_closest_opp_player_name", "second_closest_opp_player_nflID",  
+            "dir_of_closest_opp_player", "dir_of_second_closest_opp_player"))
 
 # Re-split the play types, now that we have the model predictions
 DesignedRuns_Merged <- final_merged_data %>% filter(pass == 0)
