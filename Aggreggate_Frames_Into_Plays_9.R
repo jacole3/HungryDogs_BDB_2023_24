@@ -186,9 +186,9 @@ LowestTimeToEnd_OnSurges_Leaders <- IndivStats_DefenderHasSurge %>%
   rename(Surges = Plays)
 
 # Leaderboard for most tackles per surge
-TacklesPerSurgeLeaders <- IndivStats_DefenderHasSurge %>%
+TacklesPerSurge_Leaders <- IndivStats_DefenderHasSurge %>%
   mutate(TacklesPerSurge = TotalTackles / Plays) %>%
-  arrange(TacklesPerSurge) %>%
+  arrange(desc(TacklesPerSurge)) %>%
   select(1:4, "TacklesPerSurge", "Avg_Surge_To_EndOfPlay_Frames", "AvgTotalEPA", "TotalTackles") %>%
   rename(Surges = Plays)
 
