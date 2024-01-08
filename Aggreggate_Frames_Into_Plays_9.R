@@ -175,12 +175,21 @@ IndivStats_DefenderHasSurge <-  StatsByPlay_DefenderHasSurge %>%
 LowestEPA_OnSurges_Leaders <- IndivStats_DefenderHasSurge %>%
   arrange(AvgTotalEPA) %>%
   select(1:4, "AvgTotalEPA", "Avg_Surge_To_EndOfPlay_Frames", "TotalTackles") %>%
+  mutate(TacklesPerSurge = TotalTackles / Plays) %>%
   rename(Surges = Plays)
 
 # Leaderboard for lowest time remaining to end of snap when the given defensive player has a surge
 LowestTimeToEnd_OnSurges_Leaders <- IndivStats_DefenderHasSurge %>%
   arrange(Avg_Surge_To_EndOfPlay_Frames) %>%
   select(1:4, "Avg_Surge_To_EndOfPlay_Frames", "AvgTotalEPA", "TotalTackles") %>%
+  mutate(TacklesPerSurge = TotalTackles / Plays) %>%
+  rename(Surges = Plays)
+
+# Leaderboard for most tackles per surge
+TacklesPerSurgeLeaders <- IndivStats_DefenderHasSurge %>%
+  mutate(TacklesPerSurge = TotalTackles / Plays) %>%
+  arrange(TacklesPerSurge) %>%
+  select(1:4, "TacklesPerSurge", "Avg_Surge_To_EndOfPlay_Frames", "AvgTotalEPA", "TotalTackles") %>%
   rename(Surges = Plays)
 
 # Stats by play for completions
