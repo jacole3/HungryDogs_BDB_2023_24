@@ -1670,7 +1670,7 @@ final_merged_data_sub$pred_within_dist_ofBC_46 <- predict(mod46, final_merged_da
 final_merged_data_sub <- final_merged_data_sub %>%
   mutate(pred_near_BC_error_46 = within_dist_ofBC_frames_ahead - pred_within_dist_ofBC_46)
 
-# See the RandomFor_vs_Logit GitHub file for testing of ranger() model
+# See the RandomForvsLogit GitHub file for testing of ranger() model
 
 # Use for loops to get SD, mean error, RMSE for our models
 # Number of columns
