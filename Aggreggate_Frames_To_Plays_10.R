@@ -181,7 +181,7 @@ SurgeRate_FancyTable <- SurgeRate_FancyTable |>
     columns = Plays:SurgeRate
   ) |> 
   tab_header(md("**Top 20 Players in Surge Rate**"),
-             md("(Minimum XXX Defensive Snaps; Weeks 1-9, 2022)")) |> 
+             md("(Minimum XXX Defensive Snaps; Weeks 1-9, 2022)")) |> # don't forget to adjust your minimum
   tab_style(style = cell_borders(sides = "top"),
             locations = cells_title("title")) |> 
   tab_options(
@@ -245,7 +245,7 @@ SurgeRateOE_FancyTable <- SurgeRateOE_FancyTable |>
     columns = Plays:SurgeRate_OverExpected
   ) |> 
   tab_header(md("**Top 20 Players in Surge Rate Over Expected**"),
-             md("(Minimum XXX Defensive Snaps; Weeks 1-9, 2022)")) |> 
+             md("(Minimum XXX Defensive Snaps; Weeks 1-9, 2022)")) |> # don't forget to adjust your minimum
   tab_style(style = cell_borders(sides = "top"),
             locations = cells_title("title")) |> 
   tab_options(
