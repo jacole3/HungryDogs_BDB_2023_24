@@ -691,17 +691,17 @@ StatsByPlay_Scrambles <- StatsByPlay_Scrambles %>% mutate(IndivMT_DefWPSuccess =
 StatsByPlay_DesignedRuns <- DesignedRuns_Merged %>% 
   group_by(gameId, playId, nflId, displayName) %>%
   summarize(Frames = n(), down = max(down), distance = max(ydstogo), Team = max(club),
-            PlayerSideOfBall = PlayerSideOfBall[1], HomeTeam = max(homeTeamAbbr), AwayTeam = max(visitorTeamAbbr),
+            PlayerSideOfBall = PlayerSideOfBall[1], # HomeTeam = max(homeTeamAbbr), AwayTeam = max(visitorTeamAbbr),
             BallCarrierID = max(ballCarrierId), BallCarrierName = max(ballCarrierDisplayName),
             IsBallCarrier = max(IsBallCarrier), Description = max(playDescription), 
-            PosTeam = max(possessionTeam), DefTeam = max(defensiveTeam),
+            # PosTeam = max(possessionTeam), DefTeam = max(defensiveTeam),
             PenaltyYards = max(penaltyYards),
             PrePenaltyYardage = max(prePenaltyPlayResult), NetYardage = max(playResult),
             YdsBeforeContact = max(YdsBeforeContact), YdsAfterContact = max(YdsAfterContact),
             TeamDefendersInBox = max(defendersInTheBox),
             EPA = max(expectedPointsAdded),
             posteam_type = max(posteam_type), yardline_100 = max(yardline_100),
-            sp = max(sp), goal_to_go = max(goal_to_go), 
+            goal_to_go = max(goal_to_go), # sp = max(sp), 
             run_location = max(run_location), run_gap = max(run_gap),
             td_team = max(td_team), WPA = max(wpa), DefWPA = max(DefWPA),
             DefTeam_SoloTackle = max(solo_tackle),
@@ -711,8 +711,8 @@ StatsByPlay_DesignedRuns <- DesignedRuns_Merged %>%
             DefTeam_Assist_Tackle = max(assist_tackle),
             DefTeam_Penalized_Tackle = max(TeamDef_Tkl_Pen), TeamDef_Tackle_Clean = max(TeamDef_Tackle_Clean),
             penalty_team = max(penalty_team), penalty_type = max(penalty_type),
-            Temperature = max(Temperature), roof = max(roof),
-            surface = max(surface), EPSuccess = max(success),
+            # Temperature = max(Temperature), roof = max(roof),
+            EPSuccess = max(success), # surface = max(surface), 
             first_down = max(first_down), out_of_bounds = max(out_of_bounds),
             IndivSoloTackle = max(tackle), IndivAssist = max(assist),
             IndivTotTackles = max(IndivTotTackles), Indiv_MadeTackle = max(Indiv_MadeTackle),
@@ -728,11 +728,11 @@ StatsByPlay_DesignedRuns <- DesignedRuns_Merged %>%
             Initial_Y_DistFromBall = Y_DistFromBall[1], Initial_Tot_DistFromBall = TotDistFromBall[1],
             Initial_Y_DistFromMOF = Y_distFromMOF[1], Max_X_AbsDistFromBall = max(X_AbsDistFromBall),
             Max_Y_AbsDistFromBall = max(Y_AbsDistFromBall), Max_Tot_DistFromBall = max(TotDistFromBall),
-            height = max(height_inches), weight = max(weight),
+            weight = max(weight), # height = max(height_inches), 
             WPSuccess = max(WPSuccess), QBAlignment = max(QBAlignment), PosGroup = max(PosGroup),
-            Initial_TotDistFromBall_Rank_BySide = TotDistFromBall_Rank_BySideOfBall[1],
-            Initial_Y_AbsDistFromBall_Rank_BySide = Y_AbsDistFromBall_Rank_BySide[1],
-            Initial_X_AbsDistFromBall_Rank_BySide = X_AbsDistFromBall_Rank_BySide[1],
+            # Initial_TotDistFromBall_Rank_BySide = TotDistFromBall_Rank_BySideOfBall[1],
+            # Initial_Y_AbsDistFromBall_Rank_BySide = Y_AbsDistFromBall_Rank_BySide[1],
+            # Initial_X_AbsDistFromBall_Rank_BySide = X_AbsDistFromBall_Rank_BySide[1],
             position = max(position), AlignedPos_Box = AlignedPos_Box[1],
             num_left_tes = num_left_tes[1], num_right_tes = num_right_tes[1],
             num_total_tes = num_total_tes[1], IndivDefenderInBox = DefenderInBox[1],
@@ -801,6 +801,7 @@ NearbyBoxDefender_Stats_DesignedRuns <- StatsByPlay_DesignedRuns_NearDefender %>
             Tackles_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE),
             TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
   filter(Plays >= 5) %>% # insert your own number here
+  arrange(SurgeRate)
   
 # Leaderboard for who has highest surge rate on rushes within one gap of them
 SurgeRate_NearbyRuns_Leaders <- NearbyBoxDefender_Stats_DesignedRuns %>%
