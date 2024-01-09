@@ -81,7 +81,7 @@ final_merged_data <- final_merged_data %>%
             "second_closest_opp_index", "closest_opp_player_name", "closest_opp_player_nflID",  
             "second_closest_opp_player_name", "second_closest_opp_player_nflID",  
             "dir_of_closest_opp_player", "dir_of_second_closest_opp_player",
-            "homeTeamAbbr", "visitorTeamAbbr", "playDescription", "possessionTeam",
+            "homeTeamAbbr", "visitorTeamAbbr", "possessionTeam",
             "defensiveTeam", "sp", "foulName1", "foulName2", "foulNFLId1", "foulNFLId2",
             "td_prob", "safety_prob", "air_epa", "yac_epa", "comp_air_epa", "comp_yac_epa", "wp",                               
             "def_wp", "air_wpa", "yac_wpa", "comp_air_wpa", "comp_yac_wpa", "xyac_mean_yardage",
