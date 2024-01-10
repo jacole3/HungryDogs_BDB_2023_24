@@ -90,9 +90,9 @@ final_merged_data <- final_merged_data %>%
 
 # Re-split the play types, now that we have the model predictions
 DesignedRuns_Merged <- final_merged_data %>% filter(pass == 0)
-Scrambles_Merged <- final_merged_data %>% filter(passResult == "R")
-# AllRushes_Merged <- final_merged_data %>% filter(pass == 0 | passResult == "R"); likely not necessary
-Completions_Merged <- final_merged_data %>% filter(passResult == "C")
+# Scrambles_Merged <- final_merged_data %>% filter(passResult == "R")
+# AllRushes_Merged <- final_merged_data %>% filter(pass == 0 | passResult == "R")
+# Completions_Merged <- final_merged_data %>% filter(passResult == "C")
 
 # Pre-snap alignment code has to be for designed runs separately
 # This is because we don't have "start of snap" data for the dropbacks
