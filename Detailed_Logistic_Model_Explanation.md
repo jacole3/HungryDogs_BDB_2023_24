@@ -26,7 +26,7 @@ Interaction between Blocked Score and minimum projected distance from defender t
 
 The actual R code for the model was the following:
 
-mod_logistic <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
-                      TotDistFromBall_Rank_OVR + NumberOfBlockers + min_proj_dist_to_ball_carrier*BlockedScore, 
+mod_logistic <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier * min_proj_dist_to_ball_carrier +
+                      TotDistFromBall_Rank_OVR + NumberOfBlockers + min_proj_dist_to_ball_carrier * BlockedScore, 
                     data = final_merged_data_sub, family = 'binomial')
 summary(mod_logistic)
