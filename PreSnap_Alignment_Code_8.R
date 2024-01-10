@@ -48,7 +48,9 @@ final_merged_data <- merge(x = final_merged_data, y = final_merged_data_sub,
                            by = c("gameId", "playId", "nflId", "displayName", "frameId"), all.x = TRUE)
 rm(final_merged_data_sub)
 
-# But, we can still remove some columns from final_merged_data to make the pre-snap alignment code go smoothly
+# But, we can still remove some columns from final_merged_data
+# This is only really needed to make the pre-snap alignment code go smoothly for designed runs
+# DO NOT run this section if you plan to analyze completions or scrambles independently
 colnames(final_merged_data)
 final_merged_data <- final_merged_data %>%
   select(-c("roof", "surface", "wind", "Ball_DistFromGoalLine", "Ball_DistFromSideline",
@@ -86,7 +88,12 @@ final_merged_data <- final_merged_data %>%
             "td_prob", "safety_prob", "air_epa", "yac_epa", "comp_air_epa", "comp_yac_epa", "wp",                               
             "def_wp", "air_wpa", "yac_wpa", "comp_air_wpa", "comp_yac_wpa", "xyac_mean_yardage",
             "xyac_epa", "xyac_median_yardage", "xyac_success", "xyac_fd", "tackle_for_loss_1_player_id",
-            "tackle_for_loss_2_player_id", "tackle_for_loss_1_player_name", "tackle_for_loss_2_player_name"))
+            "tackle_for_loss_2_player_id", "tackle_for_loss_1_player_name", "tackle_for_loss_2_player_name",
+            "week", "penaltyYards", "prePenaltyPlayResult", "playNullifiedByPenalty",
+            "air_yards", "yards_after_catch", "return_touchdown", "penalty_team",
+            "penalty_type", "jerseyNumber", "weight", "height_inches",
+            "YACOE", "YAC_EPA_OE", "YAC_Success_OE", "YAC_FD_OE", "FrameNumber_EndOfPlay",
+            "FrameNumber_FiveBeforeEndOfPlay"))
 
 # Re-split the play types, now that we have the model predictions
 DesignedRuns_Merged <- final_merged_data %>% filter(pass == 0)
