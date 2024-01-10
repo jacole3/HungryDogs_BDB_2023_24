@@ -1,3 +1,5 @@
+Below is a more detailed explanation of the model that we discussed in our Kaggle Notebook (https://www.kaggle.com/code/colejacobson/surge-a-measurement-for-hidden-defensive-impact). 
+
 As an integral part of our overall logistic regression model, our group created a measure of blocking, which measured the degree to which each defender was blocked. Additional factors in the larger model included the defender’s distance to the ball, his relative velocity and orientation to the ball-carrier, and the defender’s projected distance from the ball-carrier throughout the next half-second. In more detail:
 
 To account for field congestion, we measured the number of potential blockers between a defender and the ball-carrier. We only considered defenders within 10 yards of the ball-carrier, and for each of those defenders, we drew a sector of a circle from the ball-carrier toward the defender. The ball-carrier represented the center of these circle sectors, and the sector angles totaled 60 degrees, with 30 degrees extending each way from the ball-carrier, as shown below. We arbitrarily chose 60 degrees as being the defender’s region of influence based on the eye test, which is one potential weakness of this approach. Additionally, we could’ve dynamically adjusted the sector angles based on the defender’s distance to the ball-carrier.
@@ -14,7 +16,7 @@ While accounting for players’ angle and speed, we also created a projected fut
 
 Lastly, we give each player within the 10-yard radius a ranking based off of his distance to the ball-carrier (e.g., if there is one defensive player and one offensive player between Defender X and the ball-carrier, Defender X’s rank in this regard would be 3).
 
-Using these features, our group used logistic regression to predict whether a player will be within a yard of the ball-carrier in the next half-second -- which we will refer to as a “Surge” from here on out. We ultimately settled on the following predictor variables:
+Using these features, our group used logistic regression to predict whether a player will be within a yard of the ball-carrier -- which we defined as a "Surge" in our project -- in the next half-second. We ultimately settled on the following predictor variables:
 
 Current distance from defender to ball-carrier
 Minimum projected distance from defender to ball-carrier over the next half-second
