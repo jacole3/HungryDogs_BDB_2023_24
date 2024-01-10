@@ -18,13 +18,7 @@ Lastly, we give each player within the 10-yard radius a ranking based off of his
 
 Using these features, our group used logistic regression to predict whether a player will be within a yard of the ball-carrier -- which we defined as a "Surge" in our project -- in the next half-second. We ultimately settled on the following predictor variables:
 
-Current distance from defender to ball-carrier
-Minimum projected distance from defender to ball-carrier over the next half-second
-An interaction between the current distance and minimum projected distance
-The defender’s rank, in terms of current distance from the ball, among all players
-Number of blockers
-Blocked Score 
-Interaction between Blocked Score and minimum projected distance from defender to ball-carrier'
+Current distance from defender to ball-carrier, minimum projected distance from defender to ball-carrier over the next half-second, an interaction between the current distance and minimum projected distance, the defender’s rank in terms of current distance from the ball among all players, number of blockers, Blocked Score , an interaction between Blocked Score and minimum projected distance from defender to ball-carrier
 
 The actual R code for the model was the following:
 
