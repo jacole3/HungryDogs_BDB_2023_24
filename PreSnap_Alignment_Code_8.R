@@ -844,6 +844,12 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(pre_snap_gaps, by = c("gameId", "playId", "nflId", "displayName"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
 rm(pre_snap_gaps)
+DesignedRuns_Merged <- DesignedRuns_Merged %>% 
+  select(-c("Is_LG", "nflId_LG", "xLG", "yLG", "Is_LT", "nflId_LT", "xLT", "yLT", "Is_RG",                            
+            "nflId_RG", "xRG", "yRG", "Is_RT", "nflId_RT", "xRT", "yRT", "nflId_TEL1", "xTEL1",                            
+            "yTEL1", "Is_TEL2", "nflId_TEL2", "xTEL2", "yTEL2", "Is_TEL3", "nflId_TEL3", "xTEL3",                            
+            "yTEL3", "Is_TER1", "nflId_TER1", "xTER1", "yTER1", "Is_TER2", "nflId_TER2", "xTER2",                            
+            "yTER2", "Is_TER3", "nflId_TER3", "xTER3", "yTER3"))
 
 # View(DesignedRuns_Merged %>% filter(frameId == 1, playId == 146))
 # This is a good example of "gap moving" on trap/power play w/ pulling tackle
