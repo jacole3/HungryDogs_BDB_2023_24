@@ -504,8 +504,8 @@ StatsByPlay_DesignedRuns <- DesignedRuns_Merged %>%
             BallCarrierID = max(ballCarrierId), BallCarrierName = max(ballCarrierDisplayName),
             IsBallCarrier = max(IsBallCarrier), Description = max(playDescription), 
             # PosTeam = max(possessionTeam), DefTeam = max(defensiveTeam),
-            PenaltyYards = max(penaltyYards),
-            PrePenaltyYardage = max(prePenaltyPlayResult), NetYardage = max(playResult),
+            # PenaltyYards = max(penaltyYards),
+            # PrePenaltyYardage = max(prePenaltyPlayResult), NetYardage = max(playResult),
             YdsBeforeContact = max(YdsBeforeContact), YdsAfterContact = max(YdsAfterContact),
             TeamDefendersInBox = max(defendersInTheBox),
             EPA = max(expectedPointsAdded),
@@ -516,10 +516,10 @@ StatsByPlay_DesignedRuns <- DesignedRuns_Merged %>%
             DefTeam_SoloTackle = max(solo_tackle),
             DefTeam_TFL = max(tackled_for_loss), DefTeam_MissedTackles = max(TeamMT_FullPlay),
             TeamTouchdown = max(touchdown), TeamRushTD = max(rush_touchdown),
-            TeamReturnTD = max(return_touchdown), OffTeam_Fumble = max(fumble),
+             OffTeam_Fumble = max(fumble), # TeamReturnTD = max(return_touchdown),
             DefTeam_Assist_Tackle = max(assist_tackle),
             DefTeam_Penalized_Tackle = max(TeamDef_Tkl_Pen), TeamDef_Tackle_Clean = max(TeamDef_Tackle_Clean),
-            penalty_team = max(penalty_team), penalty_type = max(penalty_type),
+            # penalty_team = max(penalty_team), penalty_type = max(penalty_type),
             # Temperature = max(Temperature), roof = max(roof),
             EPSuccess = max(success), # surface = max(surface), 
             first_down = max(first_down), out_of_bounds = max(out_of_bounds),
@@ -537,7 +537,7 @@ StatsByPlay_DesignedRuns <- DesignedRuns_Merged %>%
             Initial_Y_DistFromBall = Y_DistFromBall[1], Initial_Tot_DistFromBall = TotDistFromBall[1],
             Initial_Y_DistFromMOF = Y_distFromMOF[1], Max_X_AbsDistFromBall = max(X_AbsDistFromBall),
             Max_Y_AbsDistFromBall = max(Y_AbsDistFromBall), Max_Tot_DistFromBall = max(TotDistFromBall),
-            weight = max(weight), # height = max(height_inches), 
+            # weight = max(weight), height = max(height_inches), 
             WPSuccess = max(WPSuccess), QBAlignment = max(QBAlignment), PosGroup = max(PosGroup),
             # Initial_TotDistFromBall_Rank_BySide = TotDistFromBall_Rank_BySideOfBall[1],
             # Initial_Y_AbsDistFromBall_Rank_BySide = Y_AbsDistFromBall_Rank_BySide[1],
@@ -570,11 +570,11 @@ StatsByPlay_DesignedRuns <- StatsByPlay_DesignedRuns %>%
 # Mutate a variable for missing a tackle on a play that still was successful for defense
 # Recall EPSuccess and WPSuccess are from offense's point of view (so defense wants them to be 0)
 StatsByPlay_DesignedRuns <- StatsByPlay_DesignedRuns %>% mutate(IndivMT_DefEPSuccess =
-     ifelse(Indiv_MissedTackle > 0 & EPSuccess == 0, 1,
-           ifelse(Indiv_MissedTackle > 0 & EPSuccess > 0, 0, NA)))
+                                                                  ifelse(Indiv_MissedTackle > 0 & EPSuccess == 0, 1,
+                                                                         ifelse(Indiv_MissedTackle > 0 & EPSuccess > 0, 0, NA)))
 StatsByPlay_DesignedRuns <- StatsByPlay_DesignedRuns %>% mutate(IndivMT_DefWPSuccess =
-     ifelse(Indiv_MissedTackle > 0 & WPSuccess == 0, 1,
-           ifelse(Indiv_MissedTackle > 0 & WPSuccess > 0, 0, NA)))
+                                                                  ifelse(Indiv_MissedTackle > 0 & WPSuccess == 0, 1,
+                                                                         ifelse(Indiv_MissedTackle > 0 & WPSuccess > 0, 0, NA)))
 
 # Make code for "run was near defender's gap"
 StatsByPlay_DesignedRuns <- StatsByPlay_DesignedRuns %>%
@@ -611,11 +611,11 @@ NearbyBoxDefender_Stats_DesignedRuns <- StatsByPlay_DesignedRuns_NearDefender %>
             TackleRate_OverExpected = sum(Tackles_OE_Logistic, na.rm = TRUE) / Plays) %>%
   filter(Plays >= 5) %>% # insert your own number here
   arrange(SurgeRate)
-  
+
 # Leaderboard for who has highest surge rate on rushes within one gap of them
 SurgeRate_NearbyRuns_Leaders <- NearbyBoxDefender_Stats_DesignedRuns %>%
-arrange(desc(SurgeRate)) %>%
-select(1:4, "SurgeRate", "SurgeRate_OverExpected", "Surges", "TotalTackles", "TotalTkl_PerPlay")
+  arrange(desc(SurgeRate)) %>%
+  select(1:4, "SurgeRate", "SurgeRate_OverExpected", "Surges", "TotalTackles", "TotalTkl_PerPlay")
 
 # Use tab_options() w/ gt package for fancy table for highest surge rate on nearby runs
 class(SurgeRate_NearbyRuns_Leaders) <- "data.frame"
