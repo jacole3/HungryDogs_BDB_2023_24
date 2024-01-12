@@ -249,7 +249,7 @@ DesignedRuns_LG_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
          event %in% c("ball_snap", "snap_direct"), y > yCenter, y <= 1.5 + yCenter, x >= xCenter - 1) %>%
   mutate(Is_LG = TRUE) %>%
-  select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_LG)
+  select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_LG)
 
 # Use group_by to see if any play has multiple players listed at same position
 LGNumbers_ByPlay <- DesignedRuns_LG_Identify_Snap %>% group_by(gameId, playId) %>% 
@@ -308,7 +308,7 @@ DesignedRuns_LT_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
          event %in% c("ball_snap", "snap_direct"), y > yLG, y <= 1.5 + yLG, x >= xCenter - 1) %>%
   mutate(Is_LT = TRUE) %>%
-  select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_LT)
+  select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_LT)
 
 # Use group_by to see if any play has multiple players listed at same position
 LTNumbers_ByPlay <- DesignedRuns_LT_Identify_Snap %>% group_by(gameId, playId) %>% 
@@ -367,7 +367,7 @@ DesignedRuns_RG_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
          event %in% c("ball_snap", "snap_direct"), y < yCenter, y >= yCenter - 1.5, x >= xCenter - 1) %>%
   mutate(Is_RG = TRUE) %>%
-  select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_RG)
+  select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_RG)
 
 # Use group_by to see if any play has multiple players listed at same position
 RGNumbers_ByPlay <- DesignedRuns_RG_Identify_Snap %>% group_by(gameId, playId) %>% 
@@ -426,7 +426,7 @@ DesignedRuns_RT_Identify_Snap <- DesignedRuns_Merged %>%
   filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
          event %in% c("ball_snap", "snap_direct"), y < yRG, y >= yRG - 1.5, x >= xCenter - 1) %>%
   mutate(Is_RT = TRUE) %>%
-  select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_RT)
+  select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_RT)
 
 # Use group_by to see if any play has multiple players listed at same position
 RTNumbers_ByPlay <- DesignedRuns_RT_Identify_Snap %>% group_by(gameId, playId) %>% 
