@@ -938,6 +938,7 @@ pre_snap_gaps <- DesignedRuns_Merged %>%
 pre_snap_gaps <- pre_snap_gaps %>% 
   select(gameId, playId, nflId, displayName, pre_snap_gap) %>% 
   filter(nflId != "NA")
+table(pre_snap_gaps$pre_snap_gap)
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   left_join(pre_snap_gaps, by = c("gameId", "playId", "nflId", "displayName"))
