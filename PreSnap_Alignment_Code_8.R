@@ -455,7 +455,7 @@ TEL1_Multiples <- TEL1_coordinates %>%
   summarize(n = n()) %>% arrange(desc(n))
 
 # Also can check if any NAs exist in TEL1_coordinates that would screw things up
-View(TEL1_coordinates %>% filter(is.na(gameId) | is.na(playId) | is.na(nflId_TEL1) | is.na(x) | is.na(y) | is.na(frameId)))
+View(TEL1_coordinates %>% filter(is.na(gameId) | is.na(playId) | is.na(nflId_TEL1) | is.na(xTEL1) | is.na(yTEL1) | is.na(frameId)))
 
 rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Snap)
 
