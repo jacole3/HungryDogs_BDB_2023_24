@@ -447,6 +447,16 @@ TEL1_coordinates <- DesignedRuns_Merged %>%
 
 DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = TEL1_coordinates, 
               by = c("playId", "gameId", "frameId"), all.x = TRUE) 
+
+# This is if the above merge() didn't work
+# Do a quick confirmation that there are no frames with multiple people listed as TEL1
+TEL1_Multiples <- TEL1_coordinates %>%
+  group_by(gameId, playId, frameId) %>%
+  summarize(n = n()) %>% arrange(desc(n))
+
+# Also can check if any NAs exist in TEL1_coordinates that would screw things up
+View(TEL1_coordinates %>% filter(is.na(gameId) | is.na(playId) | is.na(nflId_TEL1) | is.na(x) | is.na(y) | is.na(frameId)))
+
 rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Snap)
 
 # Run a final check to see if any play has multiple players listed at same position
