@@ -578,7 +578,7 @@ DesignedRuns_TER1_Identify_Snap <- DesignedRuns_TER1_Identify_Snap %>%
   mutate(Y_Rank_Among_TER1 = rank(-y, ties.method = "first")) %>% 
   ungroup()
 
-# Now, for the few "double" cases, make the player with the higher y not be TER1
+# Now, for the few "double" cases, make the player with the smaller y not be TER1
 DesignedRuns_TER1_Identify_Snap <- DesignedRuns_TER1_Identify_Snap %>% 
   mutate(Is_TER1 = ifelse(Y_Rank_Among_TER1 == 1, TRUE, FALSE))
 # Then get rid of the players that are no longer considered TER1
@@ -631,7 +631,7 @@ DesignedRuns_TER2_Identify_Snap <- DesignedRuns_TER2_Identify_Snap %>%
   mutate(Y_Rank_Among_TER2 = rank(-y, ties.method = "first")) %>% 
   ungroup()
 
-# Now, for the few "double" cases, make the player with the higher y not be TER2
+# Now, for the few "double" cases, make the player with the smaller y not be TER2
 DesignedRuns_TER2_Identify_Snap <- DesignedRuns_TER2_Identify_Snap %>% 
   mutate(Is_TER2 = ifelse(Y_Rank_Among_TER2 == 1, TRUE, FALSE))
 # Then get rid of the players that are no longer considered TER2
@@ -684,7 +684,7 @@ DesignedRuns_TER3_Identify_Snap <- DesignedRuns_TER3_Identify_Snap %>%
   mutate(Y_Rank_Among_TER3 = rank(-y, ties.method = "first")) %>% 
   ungroup()
 
-# Now, for the few "double" cases, make the player with the higher y not be TER3
+# Now, for the few "double" cases, make the player with the smaller y not be TER3
 DesignedRuns_TER3_Identify_Snap <- DesignedRuns_TER3_Identify_Snap %>% 
   mutate(Is_TER3 = ifelse(Y_Rank_Among_TER3 == 1, TRUE, FALSE))
 # Then get rid of the players that are no longer considered TER3
