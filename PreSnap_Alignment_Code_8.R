@@ -445,8 +445,8 @@ TEL1_coordinates <- DesignedRuns_Merged %>%
   rename(xTEL1 = x,
          yTEL1 = y)
 
-DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  left_join(TEL1_coordinates, by = c("playId", "gameId", "frameId")) 
+DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = TEL1_coordinates, 
+              by = c("playId", "gameId", "frameId"), all.x = TRUE) 
 rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Snap)
 
 # Run a final check to see if any play has multiple players listed at same position
