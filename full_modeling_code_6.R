@@ -691,7 +691,7 @@ MergedData <- MergedData %>%
 
 MergedData <- MergedData %>% 
   mutate(Rel_Speed_ToBC = s - ball_carrier_speed, Rel_Acc_ToBC = a - ball_carrier_acc,
-         Rel_Weight_ToBC = weight - ball_carrier_weight, Rel_Height_ToBC = height_inches - ball_carrier_height,
+         Rel_Weight_ToBC = weight - ball_carrier_weight, # Rel_Height_ToBC = height_inches - ball_carrier_height,
          Rel_Orient_ToBC = o - ball_carrier_orient, Rel_Dir_ToBC = dir - ball_carrier_direction,
          Rel_SeasonMaxSpeed_ToBC = Season_MaxSpeed - BC_Season_MaxSpeed, Momentum = s * weight,
          Rel_Momentum_ToBC = Momentum - ball_carrier_momentum)
