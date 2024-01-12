@@ -575,7 +575,7 @@ TER1Numbers_ByPlay <- DesignedRuns_TER1_Identify_Snap %>% group_by(gameId, playI
 DesignedRuns_TER1_Identify_Snap <- DesignedRuns_TER1_Identify_Snap %>% 
   group_by(gameId, playId) %>% 
   filter(Is_TER1 == TRUE) %>%
-  mutate(Y_Rank_Among_TER1 = rank(y, ties.method = "first")) %>% 
+  mutate(Y_Rank_Among_TER1 = rank(-y, ties.method = "first")) %>% 
   ungroup()
 
 # Now, for the few "double" cases, make the player with the higher y not be TER1
@@ -628,7 +628,7 @@ TER2Numbers_ByPlay <- DesignedRuns_TER2_Identify_Snap %>% group_by(gameId, playI
 DesignedRuns_TER2_Identify_Snap <- DesignedRuns_TER2_Identify_Snap %>% 
   group_by(gameId, playId) %>% 
   filter(Is_TER2 == TRUE) %>%
-  mutate(Y_Rank_Among_TER2 = rank(y, ties.method = "first")) %>% 
+  mutate(Y_Rank_Among_TER2 = rank(-y, ties.method = "first")) %>% 
   ungroup()
 
 # Now, for the few "double" cases, make the player with the higher y not be TER2
@@ -681,7 +681,7 @@ TER3Numbers_ByPlay <- DesignedRuns_TER3_Identify_Snap %>% group_by(gameId, playI
 DesignedRuns_TER3_Identify_Snap <- DesignedRuns_TER3_Identify_Snap %>% 
   group_by(gameId, playId) %>% 
   filter(Is_TER3 == TRUE) %>%
-  mutate(Y_Rank_Among_TER3 = rank(y, ties.method = "first")) %>% 
+  mutate(Y_Rank_Among_TER3 = rank(-y, ties.method = "first")) %>% 
   ungroup()
 
 # Now, for the few "double" cases, make the player with the higher y not be TER3
