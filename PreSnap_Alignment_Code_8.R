@@ -910,9 +910,11 @@ pre_snap_gaps <- DesignedRuns_Merged %>%
   mutate(pre_snap_gap =
            case_when(y >= yCenter & y <= yLG ~ "L-A",
                      y >= yLG & y <= yLT ~ "L-B",
+                     y >= yLG & is.na(yLT) ~ "L-B",
                      num_left_tes == 0 & y >= yLT ~ "L-C",
                      y < yCenter & y >= yRG ~ "R-A",
                      y <= yRG & y >= yRT ~ "R-B",
+                     y <= yRG & is.na(yRT) ~ "R-B",
                      num_right_tes == 0 & y <= yRT ~ "R-C",
                      num_left_tes == 1 & y >= yLT & y <= yTEL1 ~ "L-C",
                      num_left_tes == 1 & y >= yTEL1 ~ "L-D",
