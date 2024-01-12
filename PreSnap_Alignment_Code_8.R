@@ -251,6 +251,26 @@ DesignedRuns_LG_Identify_Snap <- DesignedRuns_Merged %>%
   mutate(Is_LG = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_LG)
 
+# Use group_by to see if any play has multiple players listed at same position
+LGNumbers_ByPlay <- DesignedRuns_LG_Identify_Snap %>% group_by(gameId, playId) %>% 
+  filter(Is_LG == TRUE) %>% summarize(n = n()) %>% arrange(desc(n))
+
+DesignedRuns_LG_Identify_Snap <- DesignedRuns_LG_Identify_Snap %>% 
+  group_by(gameId, playId) %>% 
+  filter(Is_LG == TRUE) %>%
+  mutate(Y_Rank_Among_LG = rank(y, ties.method = "first")) %>% 
+  ungroup()
+
+# Now, if there are any "double" cases, make the player with the higher y not be LG
+DesignedRuns_LG_Identify_Snap <- DesignedRuns_LG_Identify_Snap %>% 
+  mutate(Is_LG = ifelse(Y_Rank_Among_LG == 1, TRUE, FALSE))
+# Then get rid of the players that are no longer considered LG
+DesignedRuns_LG_Identify_Snap <- DesignedRuns_LG_Identify_Snap %>% 
+  filter(Is_LG == TRUE)
+# And now get rid of unnecessary columns before the left_join
+DesignedRuns_LG_Identify_Snap <- DesignedRuns_LG_Identify_Snap %>%
+  select(-c("y", "Y_Rank_Among_LG"))
+
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_LG_Identify_Snap, 
                                                          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
@@ -290,6 +310,26 @@ DesignedRuns_LT_Identify_Snap <- DesignedRuns_Merged %>%
   mutate(Is_LT = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_LT)
 
+# Use group_by to see if any play has multiple players listed at same position
+LTNumbers_ByPlay <- DesignedRuns_LT_Identify_Snap %>% group_by(gameId, playId) %>% 
+  filter(Is_LT == TRUE) %>% summarize(n = n()) %>% arrange(desc(n))
+
+DesignedRuns_LT_Identify_Snap <- DesignedRuns_LT_Identify_Snap %>% 
+  group_by(gameId, playId) %>% 
+  filter(Is_LT == TRUE) %>%
+  mutate(Y_Rank_Among_LT = rank(y, ties.method = "first")) %>% 
+  ungroup()
+
+# Now, if there are any "double" cases, make the player with the higher y not be LT
+DesignedRuns_LT_Identify_Snap <- DesignedRuns_LT_Identify_Snap %>% 
+  mutate(Is_LT = ifelse(Y_Rank_Among_LT == 1, TRUE, FALSE))
+# Then get rid of the players that are no longer considered LT
+DesignedRuns_LT_Identify_Snap <- DesignedRuns_LT_Identify_Snap %>% 
+  filter(Is_LT == TRUE)
+# And now get rid of unnecessary columns before the left_join
+DesignedRuns_LT_Identify_Snap <- DesignedRuns_LT_Identify_Snap %>%
+  select(-c("y", "Y_Rank_Among_LT"))
+
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_LT_Identify_Snap, 
                                                          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
@@ -297,7 +337,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   mutate(Is_LT = ifelse(!is.na(Is_LT), TRUE, FALSE))
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos_Box =
-     ifelse(Is_LT == TRUE, "LT", AlignedPos_Box))
+                                                        ifelse(Is_LT == TRUE, "LT", AlignedPos_Box))
 
 # Update the distance from LT column
 LT_coordinates <- DesignedRuns_Merged %>%
@@ -329,6 +369,26 @@ DesignedRuns_RG_Identify_Snap <- DesignedRuns_Merged %>%
   mutate(Is_RG = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_RG)
 
+# Use group_by to see if any play has multiple players listed at same position
+RGNumbers_ByPlay <- DesignedRuns_RG_Identify_Snap %>% group_by(gameId, playId) %>% 
+  filter(Is_RG == TRUE) %>% summarize(n = n()) %>% arrange(desc(n))
+
+DesignedRuns_RG_Identify_Snap <- DesignedRuns_RG_Identify_Snap %>% 
+  group_by(gameId, playId) %>% 
+  filter(Is_RG == TRUE) %>%
+  mutate(Y_Rank_Among_RG = rank(-y, ties.method = "first")) %>% 
+  ungroup()
+
+# Now, if there are any "double" cases, make the player with the smaller y not be RG
+DesignedRuns_RG_Identify_Snap <- DesignedRuns_RG_Identify_Snap %>% 
+  mutate(Is_RG = ifelse(Y_Rank_Among_RG == 1, TRUE, FALSE))
+# Then get rid of the players that are no longer considered RG
+DesignedRuns_RG_Identify_Snap <- DesignedRuns_RG_Identify_Snap %>% 
+  filter(Is_RG == TRUE)
+# And now get rid of unnecessary columns before the left_join
+DesignedRuns_RG_Identify_Snap <- DesignedRuns_RG_Identify_Snap %>%
+  select(-c("y", "Y_Rank_Among_RG"))
+
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_RG_Identify_Snap, 
                                                          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
@@ -336,7 +396,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   mutate(Is_RG = ifelse(!is.na(Is_RG), TRUE, FALSE))
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos_Box =
-         ifelse(Is_RG == TRUE, "RG", AlignedPos_Box))
+                                                        ifelse(Is_RG == TRUE, "RG", AlignedPos_Box))
 
 # Update the distance from RG column
 RG_coordinates <- DesignedRuns_Merged %>%
@@ -368,6 +428,26 @@ DesignedRuns_RT_Identify_Snap <- DesignedRuns_Merged %>%
   mutate(Is_RT = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, Is_RT)
 
+# Use group_by to see if any play has multiple players listed at same position
+RTNumbers_ByPlay <- DesignedRuns_RT_Identify_Snap %>% group_by(gameId, playId) %>% 
+  filter(Is_RT == TRUE) %>% summarize(n = n()) %>% arrange(desc(n))
+
+DesignedRuns_RT_Identify_Snap <- DesignedRuns_RT_Identify_Snap %>% 
+  group_by(gameId, playId) %>% 
+  filter(Is_RT == TRUE) %>%
+  mutate(Y_Rank_Among_RT = rank(-y, ties.method = "first")) %>% 
+  ungroup()
+
+# Now, if there are any "double" cases, make the player with the smaller y not be RT
+DesignedRuns_RT_Identify_Snap <- DesignedRuns_RT_Identify_Snap %>% 
+  mutate(Is_RT = ifelse(Y_Rank_Among_RT == 1, TRUE, FALSE))
+# Then get rid of the players that are no longer considered RT
+DesignedRuns_RT_Identify_Snap <- DesignedRuns_RT_Identify_Snap %>% 
+  filter(Is_RT == TRUE)
+# And now get rid of unnecessary columns before the left_join
+DesignedRuns_RT_Identify_Snap <- DesignedRuns_RT_Identify_Snap %>%
+  select(-c("y", "Y_Rank_Among_RT"))
+
 DesignedRuns_Merged <- DesignedRuns_Merged %>% left_join(DesignedRuns_RT_Identify_Snap, 
                                                          by = c("gameId", "playId", "nflId", "displayName", "PlayerSideOfBall"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
@@ -375,7 +455,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
   mutate(Is_RT = ifelse(!is.na(Is_RT), TRUE, FALSE))
 
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(AlignedPos_Box =
-        ifelse(Is_RT == TRUE, "RT", AlignedPos_Box))
+                                                        ifelse(Is_RT == TRUE, "RT", AlignedPos_Box))
 
 # Update the distance from RT column
 RT_coordinates <- DesignedRuns_Merged %>%
