@@ -246,8 +246,20 @@ table(DesignedRuns_Merged$AlignedPos_Box)
 
 # Define remaining LG/LT/RG/RT below, incorporating is.na() when needed
 # E.G. LG would have is.na for AlignedPos_Box, and y barely higher than C's y, etc.
+
+# Start by diagnosing any plays that don't currently have a LG
+left_guards <- DesignedRuns_Merged %>% 
+  filter(event %in% c("ball_snap", "snap_direct"),
+         AlignedPos_Box %in% "LG") %>% 
+  group_by(gameId, playId) %>% 
+  summarize(num_left_guards = n())
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% 
+  left_join(left_guards, by = c("gameId","playId"))
+rm(left_guards)
+
 DesignedRuns_LG_Identify_Snap <- DesignedRuns_Merged %>%
-  filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
+  filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box), (is.na(num_left_guards) | num_left_guards == 0), 
          event %in% c("ball_snap", "snap_direct"), y > yCenter, y <= 1.5 + yCenter, x >= xCenter - 1) %>%
   mutate(Is_LG = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_LG)
@@ -300,13 +312,23 @@ table(DesignedRuns_Merged$AlignedPos_Box)
 
 # And get rid of the new "extra" columns
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  select(-c("nflId_LG.x", "xLG.x", "yLG.x"))
+  select(-c("nflId_LG.x", "xLG.x", "yLG.x", "num_left_guards"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   rename(nflId_LG = `nflId_LG.y`, xLG = `xLG.y`, yLG = `yLG.y`)
 
 # Repeat the process for LT
+left_tackles <- DesignedRuns_Merged %>% 
+  filter(event %in% c("ball_snap", "snap_direct"),
+         AlignedPos_Box %in% "LT") %>% 
+  group_by(gameId, playId) %>% 
+  summarize(num_left_tackles = n())
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% 
+  left_join(left_tackles, by = c("gameId","playId"))
+rm(left_tackles)
+
 DesignedRuns_LT_Identify_Snap <- DesignedRuns_Merged %>%
-  filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
+  filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box), (is.na(num_left_tackles) | num_left_tackles == 0),
          event %in% c("ball_snap", "snap_direct"), y > yLG, y <= 1.5 + yLG, x >= xCenter - 1) %>%
   mutate(Is_LT = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_LT)
@@ -359,13 +381,23 @@ table(DesignedRuns_Merged$AlignedPos_Box)
 
 # And get rid of the new "extra" columns
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  select(-c("nflId_LT.x", "xLT.x", "yLT.x"))
+  select(-c("nflId_LT.x", "xLT.x", "yLT.x", "num_left_tackles"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   rename(nflId_LT = `nflId_LT.y`, xLT = `xLT.y`, yLT = `yLT.y`)
 
 # Repeat the process for RG
+right_guards <- DesignedRuns_Merged %>% 
+  filter(event %in% c("ball_snap", "snap_direct"),
+         AlignedPos_Box %in% "RG") %>% 
+  group_by(gameId, playId) %>% 
+  summarize(num_right_guards = n())
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% 
+  left_join(right_guards, by = c("gameId","playId"))
+rm(right_guards)
+
 DesignedRuns_RG_Identify_Snap <- DesignedRuns_Merged %>%
-  filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
+  filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box), (is.na(num_right_guards) | num_right_guards == 0),
          event %in% c("ball_snap", "snap_direct"), y < yCenter, y >= yCenter - 1.5, x >= xCenter - 1) %>%
   mutate(Is_RG = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_RG)
@@ -418,13 +450,23 @@ table(DesignedRuns_Merged$AlignedPos_Box)
 
 # And get rid of the new "extra" columns
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  select(-c("nflId_RG.x", "xRG.x", "yRG.x"))
+  select(-c("nflId_RG.x", "xRG.x", "yRG.x", "num_right_guards"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   rename(nflId_RG = `nflId_RG.y`, xRG = `xRG.y`, yRG = `yRG.y`)
 
 # Repeat the process for RT
+right_tackles <- DesignedRuns_Merged %>% 
+  filter(event %in% c("ball_snap", "snap_direct"),
+         AlignedPos_Box %in% "RT") %>% 
+  group_by(gameId, playId) %>% 
+  summarize(num_right_tackles = n())
+
+DesignedRuns_Merged <- DesignedRuns_Merged %>% 
+  left_join(right_tackles, by = c("gameId","playId"))
+rm(right_tackles)
+
 DesignedRuns_RT_Identify_Snap <- DesignedRuns_Merged %>%
-  filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box),
+  filter(PlayerSideOfBall == "offense", position != "QB", is.na(AlignedPos_Box), (is.na(num_right_tackles) | num_right_tackles == 0),
          event %in% c("ball_snap", "snap_direct"), y < yRG, y >= yRG - 1.5, x >= xCenter - 1) %>%
   mutate(Is_RT = TRUE) %>%
   select(gameId, playId, nflId, displayName, PlayerSideOfBall, y, Is_RT)
@@ -477,9 +519,10 @@ table(DesignedRuns_Merged$AlignedPos_Box)
 
 # And get rid of the new "extra" columns
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
-  select(-c("nflId_RT.x", "xRT.x", "yRT.x"))
+  select(-c("nflId_RT.x", "xRT.x", "yRT.x", "num_right_tackles"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>%
   rename(nflId_RT = `nflId_RT.y`, xRT = `xRT.y`, yRT = `yRT.y`)
+
 
 # Now define TEs using Y and X coordinates
 DesignedRuns_TEL1_Identify_Snap <- DesignedRuns_Merged %>%
@@ -526,10 +569,7 @@ TEL1_coordinates <- DesignedRuns_Merged %>%
   rename(xTEL1 = x,
          yTEL1 = y)
 
-DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = TEL1_coordinates, 
-              by = c("playId", "gameId", "frameId"), all.x = TRUE) 
-
-# This is if the above merge() didn't work
+# These are tests that might signal why the left_join didn't work
 # Do a quick confirmation that there are no frames with multiple people listed as TEL1
 TEL1_Multiples <- TEL1_coordinates %>%
   group_by(gameId, playId, frameId) %>%
@@ -538,6 +578,8 @@ TEL1_Multiples <- TEL1_coordinates %>%
 # Also can check if any NAs exist in TEL1_coordinates that would screw things up
 View(TEL1_coordinates %>% filter(is.na(gameId) | is.na(playId) | is.na(nflId_TEL1) | is.na(xTEL1) | is.na(yTEL1) | is.na(frameId)))
 
+DesignedRuns_Merged <- DesignedRuns_Merged %>%
+  left_join(TEL1_coordinates, by = c("playId", "gameId", "frameId")) 
 rm(TEL1_coordinates, DesignedRuns_TEL1_Identify_Snap)
 
 # Run a final check to see if any play has multiple players listed at same position
