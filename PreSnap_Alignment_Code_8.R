@@ -242,6 +242,7 @@ DesignedRuns_Merged <- DesignedRuns_Merged %>%
 
 # clean up environment
 rm(C_coordinates, LT_coordinates, LG_coordinates, RT_coordinates, RG_coordinates)
+table(DesignedRuns_Merged$AlignedPos_Box)
 
 # Define remaining LG/LT/RG/RT below, incorporating is.na() when needed
 # E.G. LG would have is.na for AlignedPos_Box, and y barely higher than C's y, etc.
