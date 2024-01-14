@@ -1087,6 +1087,16 @@ Frames_AtHandoff <- Frames_AtHandoff %>%
 Frames_AtHandoff <- Frames_AtHandoff %>% filter(Frame_Rank == 1)
 Frames_AtHandoff <- Frames_AtHandoff %>% select(-"Frame_Rank")
 
+# Do a quick confirmation that there are no plays left with multiple "frames at handoff"
+# None of these should have more than 22 (i.e. one "frame per handoff" per player)
+Frames_AtHandoff_Multiples <- Frames_AtHandoff %>%
+  group_by(gameId, playId) %>%
+  summarize(n = n()) %>% arrange(desc(n))
+rm(Frames_AtHandoff_Multiples)
+
+# Also can check if any NAs exist in Frames_AtHandoff that would screw things up
+# View(Frames_AtHandoff %>% filter(is.na(gameId) | is.na(playId) | is.na(nflId) | is.na(displayName) | is.na(FrameNumber_AtHandoff)))
+
 DesignedRuns_Merged <- merge(x = DesignedRuns_Merged, y = Frames_AtHandoff, 
                              by = c("playId", "gameId", "nflId", "displayName"))
 DesignedRuns_Merged <- DesignedRuns_Merged %>% arrange(gameId, playId, nflId, frameId)
