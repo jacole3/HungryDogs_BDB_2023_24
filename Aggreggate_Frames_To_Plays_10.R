@@ -253,7 +253,7 @@ SurgeRateOE_FancyTable <- SurgeRateOE_FancyTable |>
     table.border.top.style = "a"
   ) |> 
   tab_footnote(
-    footnote = "Surge Rate Over Expected: Total Surges - Expected Surges",
+    footnote = "Surge Rate Over Expected: Total Surges - Expected Surges Per Play",
     locations = cells_column_labels(
       columns = SurgeRate_OverExpected
     )
