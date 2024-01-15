@@ -1075,15 +1075,14 @@ rm(PrimPosition_Label)
 # We had to wait to do this until after we defined all the gap alignments
 # Recall that we already did this for dropbacks in Part 5
 Frames_AtHandoff <- DesignedRuns_Merged %>%
-  filter(event %in% c("run", "handoff", "lateral", "snap_direct")) %>%
+  filter(event %in% c("run", "handoff", "lateral")) %>%
   select(gameId, playId, nflId, displayName, frameId) %>%
   rename(FrameNumber_AtHandoff = frameId)
 
 # Account for plays that could have multiple of these events
-# In this case, we want the latest event to count, so rank with the minus sign
 Frames_AtHandoff <- Frames_AtHandoff %>%
   group_by(gameId, playId, nflId, displayName) %>%
-  mutate(Frame_Rank = rank(-FrameNumber_AtHandoff, ties.method = "first")) %>%
+  mutate(Frame_Rank = rank(FrameNumber_AtHandoff, ties.method = "first")) %>%
   ungroup() 
 Frames_AtHandoff <- Frames_AtHandoff %>% filter(Frame_Rank == 1)
 Frames_AtHandoff <- Frames_AtHandoff %>% select(-"Frame_Rank")
