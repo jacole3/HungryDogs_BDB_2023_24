@@ -1045,7 +1045,7 @@ class(DesignedRuns_Merged$DefAlign_Numeric) <- "numeric"
 
 # Also add a column for IDL vs. EDGE vs. off-ball LB
 DesignedRuns_Merged <- DesignedRuns_Merged %>% mutate(Box_IDLvsEDGE =
-  ifelse(DefenderInBox %in% "Box_OffBall", "OffBall_LB",
+  ifelse(DefenderInBox %in% "Box_OffBall", "Off-Ball LB",
       ifelse(DefenderInBox %in% "Box_LOS" & DefAlign_Numeric %in% 3:5, "IDL",
             ifelse(DefenderInBox %in% "Box_LOS" & DefAlign_Numeric %in% c(1, 2, 6, 7), "EDGE", NA))))
 
@@ -1056,13 +1056,13 @@ PrimPosition_Label <- DesignedRuns_Merged %>% filter(event %in% c("ball_snap", "
   summarize(Plays = n(), 
             IDLSnaps = sum(Box_IDLvsEDGE == "IDL", na.rm = TRUE), IDLSnap_Rate = IDLSnaps / Plays,
             EDGESnaps = sum(Box_IDLvsEDGE == "EDGE", na.rm = TRUE), EDGESnap_Rate = EDGESnaps / Plays,
-            OffBall_LBSnaps = sum(Box_IDLvsEDGE == "OffBall_LB", na.rm = TRUE), OffBall_LBSnap_Rate = OffBall_LBSnaps / Plays,
+            OffBall_LBSnaps = sum(Box_IDLvsEDGE == "Off-Ball LB", na.rm = TRUE), OffBall_LBSnap_Rate = OffBall_LBSnaps / Plays,
             BoxSnaps = IDLSnaps + EDGESnaps + OffBall_LBSnaps, BoxSnapRate = BoxSnaps / Plays)
 PrimPosition_Label <- PrimPosition_Label %>% filter(BoxSnapRate >= 0.5)
 PrimPosition_Label <- PrimPosition_Label %>% mutate(Primary_BoxPosition =
     ifelse(EDGESnaps >= OffBall_LBSnaps & EDGESnaps >= IDLSnaps, "EDGE",
            ifelse(IDLSnaps >= EDGESnaps & IDLSnaps >= OffBall_LBSnaps, "IDL",
-                  ifelse(OffBall_LBSnaps >= EDGESnaps & OffBall_LBSnaps >= IDLSnaps, "OffBall_LB", NA))))
+                  ifelse(OffBall_LBSnaps >= EDGESnaps & OffBall_LBSnaps >= IDLSnaps, "Off-Ball LB", NA))))
 # View(PrimPosition_Label %>% filter(is.na(Primary_BoxPosition))) # it's empty
 
 PrimPosition_Label <- PrimPosition_Label %>% select(nflId, displayName, Primary_BoxPosition, BoxSnaps)
