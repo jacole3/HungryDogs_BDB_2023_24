@@ -3,6 +3,7 @@ setwd("C:/Users/justi/OneDrive/Penn/BigDataBowl")
 library(Rfast)
 library(tidyverse)
 library(gganimate)
+library(ggforce)
 library(deldir)
 library(ggvoronoi)
 library(rpart)
@@ -685,6 +686,120 @@ chubb_run %>%
   #theme_ipsum() +
   ylab("Probability") +
   transition_reveal(time_in_secs)
+
+# Here's the code for the all-22 moving dots of the Aaron Jones rush
+#Sample plays and corresponding visualizations
+set.seed(1)
+
+# This would be replaced by whichever play you want to look into (Jones rush in our case)
+example_play <- modeling_data %>%
+  sample_n(1)
+
+example_game <- example_play$gameId
+example_play <- example_play$playId
+# games <- read_csv("games.csv")
+# players <- read_csv("players.csv")
+# plays <- read_csv("plays.csv")
+#
+# #merging games data to play
+# example_play <- inner_join(example_play,
+#                            games,
+#                            by = c("gameId" = "gameId")) #gets teams involved, using gameID as an index
+#
+# #merging tracking data to play
+# example_play <- inner_join(example_play,
+#                            modeling_data,
+#                            by = c("gameId" = "gameId",
+#                                   "playId" = "playId"))
+
+example_play <- modeling_data %>%
+  filter(gameId==example_game & playId==example_play)
+plot_title <- str_trim(gsub("\\s*\\([^\\)]+\\)","",as.character(example_play$playDescription[1])))
+
+xmin <- 0
+xmax <- 53.3
+hash.right <- 38.35
+hash.left <- 12
+hash.width <- 3.3
+
+# Specific boundaries for a given play
+ymin <- max(round(min(example_play$x, na.rm = TRUE) - 10, -1), 0)
+ymax <- min(round(max(example_play$x, na.rm = TRUE) + 10, -1), 120)
+
+#hash marks
+df.hash <- expand.grid(x = c(0, 23.36667, 29.96667, xmax), y = (10:110))
+df.hash <- df.hash %>% filter(!(floor(y %% 5) == 0))
+df.hash <- df.hash %>% filter(y < ymax, y > ymin)
+
+cols_fill <- c("#FB4F14", "#663300", "#A5ACAF")
+cols_col <- c("#000000", "#663300", "#000000")
+
+#plotting
+ggplot() +
+ 
+  #setting size and color parameters
+  scale_size_manual(values = c(6, 6, 6), guide = FALSE) +
+  scale_shape_manual(values = c(21, 21, 21), guide = FALSE) +
+  scale_fill_manual(values = c("red", 'blue', "black"), guide=T) +
+  guides(fill = guide_legend(override.aes=list(shape=21))) +
+  #scale_colour_manual(values = c("red", 'blue', "pink"), guide = FALSE) +
+ 
+  #adding hash marks
+  annotate("text", x = df.hash$x[df.hash$x < 55/2],
+           y = df.hash$y[df.hash$x < 55/2], label = "_", hjust = 0, vjust = -0.2) +
+  annotate("text", x = df.hash$x[df.hash$x > 55/2],
+           y = df.hash$y[df.hash$x > 55/2], label = "_", hjust = 1, vjust = -0.2) +
+ 
+  #adding yard lines
+  annotate("segment", x = xmin,
+           y = seq(max(10, ymin), min(ymax, 110), by = 5),
+           xend =  xmax,
+           yend = seq(max(10, ymin), min(ymax, 110), by = 5)) +
+ 
+  #adding field yardline text
+  annotate("text", x = rep(hash.left, 11), y = seq(10, 110, by = 10),
+           label = c("G   ", seq(10, 50, by = 10), rev(seq(10, 40, by = 10)), "   G"),
+           angle = 270, size = 4) +
+  annotate("text", x = rep((xmax - hash.left), 11), y = seq(10, 110, by = 10),
+           label = c("   G", seq(10, 50, by = 10), rev(seq(10, 40, by = 10)), "G   "),
+           angle = 90, size = 4) +
+ 
+  #adding field exterior
+  annotate("segment", x = c(xmin, xmin, xmax, xmax),
+           y = c(ymin, ymax, ymax, ymin),
+           xend = c(xmin, xmax, xmax, xmin),
+           yend = c(ymax, ymax, ymin, ymin), colour = "black") +
+ 
+  #adding players
+  geom_point(data = example_play, aes(x = (xmax-y),
+                                      y = x,
+                                      shape = club,
+                                      fill = Player_Role,
+                                      group = Player_Role,
+                                      size = club),
+             alpha = 0.7) +  
+  #ggforce::geom_circle(data = example_play, aes(x0=X_ball_carrier, y0=Y_ball_carrier, r=10)) +
+ 
+  #adding jersey numbers
+  geom_text(data = example_play, aes(x = (xmax-y), y = x, label = jerseyNumber), colour = "white",
+            vjust = 0.36, size = 3.5) +
+ 
+  #applying plot limits
+  ylim(ymin, ymax) +
+  coord_fixed() +
+ 
+  #applying theme
+  #theme_nothing() +
+  theme(plot.title = element_text()) +
+ 
+  #titling plot with play description
+  labs(title = plot_title,
+       fill = 'Player Role') +
+ 
+  #setting animation parameters
+  transition_time(frameId)  +
+  ease_aes('linear') +
+  NULL
 
 
 
