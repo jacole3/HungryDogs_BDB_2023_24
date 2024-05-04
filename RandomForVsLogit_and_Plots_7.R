@@ -198,7 +198,7 @@ train_plays <- unique_plays[train_indices]
 test_plays <- unique_plays[-train_indices]
 
 ## MODELING:
-## first filtering to only inlude defenders and players within 10 yards of the ball carrier
+## first filtering to only include defenders and players within 10 yards of the ball carrier
 defenders_data <- modeling_data %>%
   filter(club!=possessionTeam) %>%
   filter(!is.infinite(BlockedScore), dist_to_ball_carrier <= 10)
