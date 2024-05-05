@@ -75,7 +75,7 @@ test_data <- modeling_data %>%
 
 # Model to predict whether a defender gets within the one-yard radius in the next five frames
 # We tested dozens of models, including logistic regression and random forest
-# Other models we tested can be seen at the bottom of this file, along with the "RandomFor_vs_Logit" GitHub file
+# Other models we tested can be seen in the "RandomFor_vs_Logit" and "full_modeling"code GitHub files
 mod_logistic_train <- glm(within_dist_ofBC_frames_ahead ~ dist_to_ball_carrier*min_proj_dist_to_ball_carrier +
                             TotDistFromBall_Rank_OVR + NumberOfBlockers + min_proj_dist_to_ball_carrier*BlockedScore, 
                     data = train_data, family = 'binomial')
