@@ -94,7 +94,7 @@ test_error_logistic <- data.frame(true_outcome = test_data$within_dist_ofBC_fram
 test_error_logistic <- test_error_logistic %>%
   mutate(prediction = ifelse(test_prob >= 0.5, 1, 0),
          match = ifelse(prediction==true_outcome, 1, 0))
-mean(test_error_logistic$true_outcome != test_error_logistic$prediction) #training error
+mean(test_error_logistic$true_outcome != test_error_logistic$prediction) # test error logistic
 
 MLmetrics::LogLoss(test_error_logistic$test_prob, test_error_logistic$true_outcome)
 
