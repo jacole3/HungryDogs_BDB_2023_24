@@ -18,7 +18,7 @@ calc_distance <- function(x, y, x_baseline = 0, y_baseline = 0) {
   sqrt((x-x_baseline)^2 + (y - y_baseline)^2)
 }
 
-# This is a Week 1 version of the full_merged_data DF created in the full_modeling_code GitHub file, in CSV form
+# This is a Week 1 version of the final_merged_data DF created in the full_modeling_code GitHub file, in CSV form
 # This could easily be replicated with any given week
 full_dat <- data.table::fread("full_data_modeling_w1.csv")
 
